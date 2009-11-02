@@ -45,6 +45,15 @@ module Reddy
       @predicate.to_s == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
     end
 
+    def eql? (other)
+      other.is_a?(self.class) &&
+      other.subject == self.subject &&
+      other.predicate == self.predicate &&
+      other.object == self.object
+    end
+
+    alias_method :==, :eql?
+
     protected
 
     def self.coerce_subject(subject)

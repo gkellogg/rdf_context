@@ -1,3 +1,4 @@
+gem 'treetop', '= 1.3.0'
 require 'treetop'
 
 Treetop.load(File.join(File.dirname(__FILE__), "n3_grammar"))

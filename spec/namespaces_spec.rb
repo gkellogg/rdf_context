@@ -1,4 +1,4 @@
-require 'lib/reddy'
+require File.join(File.dirname(__FILE__), 'spec_helper')
 
 describe "Namespaces" do
   it "should use method_missing to create URIRefs on the fly" do

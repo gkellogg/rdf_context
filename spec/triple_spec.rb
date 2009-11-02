@@ -1,4 +1,4 @@
-require 'lib/reddy'
+require File.join(File.dirname(__FILE__), 'spec_helper')
 
 describe "Triples" do
   it "should have a subject" do
@@ -104,5 +104,32 @@ describe "Triples" do
       Triple.coerce_object(ref).should == ref
     end
     
+  end
+  
+  describe "equivalence" do
+    before(:all) do
+      @test_cases = [
+        Triple.new(URIRef.new("http://foo"),URIRef.new("http://bar"),URIRef.new("http://baz")),
+        Triple.new(URIRef.new("http://foo"),URIRef.new("http://bar"),Literal.untyped("baz")),
+        Triple.new(URIRef.new("http://foo"),"http://bar",Literal.untyped("baz")),
+        Triple.new(BNode.new("foo"),URIRef.new("http://bar"),Literal.untyped("baz")),
+        Triple.new(BNode.new,URIRef.new("http://bar"),Literal.untyped("baz")),
+      ]
+    end
+    it "should be equal to itself" do
+      @test_cases.each {|triple| triple.should == triple}
+    end
+
+    it "should not be equal to something else" do
+      t = Triple.new(URIRef.new("http://fab"),URIRef.new("http://bar"),URIRef.new("http://baz")),
+      @test_cases.each {|triple| triple.should_not == t}
+    end
+
+    it "should be equal to equivalent" do
+      @test_cases.each do |triple|
+        t = Triple.new(triple.subject.to_s, triple.predicate.to_s, triple.object)
+        triple.should == t
+      end
+    end
   end
 end

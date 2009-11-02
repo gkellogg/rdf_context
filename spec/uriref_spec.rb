@@ -1,6 +1,6 @@
+require File.join(File.dirname(__FILE__), 'spec_helper')
 require 'webrick'
 include WEBrick
-require 'lib/reddy'
 #require 'lib/uriref'
 
 describe "URI References" do

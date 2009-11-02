@@ -130,7 +130,7 @@ module Reddy
             @graph.add_triple(rsubject, URIRef.new("http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate"), predicate)
             @graph.add_triple(rsubject, URIRef.new("http://www.w3.org/1999/02/22-rdf-syntax-ns#object"), object)
           else
-            raise
+            raise Reddy::ParserException
           end
         end
         
@@ -147,7 +147,7 @@ module Reddy
         raise Reddy::AboutEachException
       end
       if el.attributes.get_attribute_ns(@@syntax_base, "bagID")
-        raise "Bad BagID" unless el.attributes.get_attribute_ns(@@syntax_base, "bagID").value =~ /^[a-zA-Z_][a-zA-Z0-9]*$/
+        raise Reddy::ParserException.new("Bad BagID") unless el.attributes.get_attribute_ns(@@syntax_base, "bagID").value =~ /^[a-zA-Z_][a-zA-Z0-9]*$/
       end
     end
     
@@ -162,7 +162,7 @@ module Reddy
         if id_check?(id.value)
           return url_helper("#" + id.value, "", el.base_uri)
         else
-          raise
+          raise Reddy::ParserException
         end
       elsif el.attributes.get_attribute_ns(@@syntax_base, "nodeID")
         return BNode.new(el.attributes.get_attribute_ns(@@syntax_base, "nodeID").value)
@@ -174,11 +174,11 @@ module Reddy
         uri = url_helper(att.namespace + att.name).to_s
         value = att.to_s
         if uri == "http://www.w3.org/1999/02/22-rdf-syntax-ns#bagID"
-          raise
+          raise Reddy::ParserException
           if name =~ /^[a-zA-Z_][a-zA-Z0-9]*$/
             # TODO: do something intelligent with the bagID
           else
-            raise
+            raise Reddy::ParserException
           end
         end
         

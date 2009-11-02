@@ -1,4 +1,4 @@
-require 'lib/reddy'
+require File.join(File.dirname(__FILE__), 'spec_helper')
 
 # Specification: http://www.w3.org/TR/rdfa-syntax/
 # docs:
@@ -24,5 +24,28 @@ describe "RDFa parser" do
     
     parser = RdfaParser.new(sampledoc, uri = "http://www.w3.org/2006/07/SWD/RDFa/testsuite/xhtml1-testcases/0001.xhtml")
     parser.graph.size.should == 1
+  end
+
+  # W3C Test suite from http://www.w3.org/2006/07/SWD/RDFa/testsuite/
+  describe "w3c xhtml1 testcases" do
+    require 'rdfa_helper'
+    include RdfaHelper
+    
+    def self.test_cases
+      RdfaHelper::TestCase.test_cases
+    end
+
+    test_cases.each do |t|
+      specify "test #{t.name}: #{t.title}" do
+        rdfa_string = File.read(t.informationResourceInput)
+        rdfa_parser = RdfaParser.new(rdfa_string, t.about.uri.to_s)
+
+        nt_string = t.informationResourceResults ? File.read(t.informationResourceResults) : ""
+        # Triples are valid N3 documents
+        nt_parser = N3Parser.new(nt_string)
+
+        rdfa_parser.graph.should be_equivalent_graph(nt_parser.graph, t.information)
+      end
+    end
   end
 end

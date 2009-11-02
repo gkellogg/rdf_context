@@ -1,4 +1,4 @@
-%w[rubygems rake rake/clean fileutils newgem rubigen].each { |f| require f }
+%w[rubygems rake rake/clean fileutils newgem rubigen hoe].each { |f| require f }
 require 'spec/rake/spectask'
 require File.dirname(__FILE__) + '/lib/reddy'
 
@@ -10,7 +10,7 @@ $hoe = Hoe.new('reddy', Reddy::VERSION) do |p|
   p.rubyforge_name       = p.name # TODO this is default value
   p.extra_deps		 = [
       ['addressable', '>= 2.0.0'],
-      ['treetop', '>= 1.2.4'],
+      ['treetop', '= 1.3.0'],
       ['libxml-ruby', '>= 0.8.3'],
       ['whatlanguage', '>= 1.0.0']
   ]

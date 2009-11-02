@@ -1,4 +1,4 @@
-require 'lib/reddy'
+require File.join(File.dirname(__FILE__), 'spec_helper')
 
 describe "Literals" do
   it "accept a language tag" do

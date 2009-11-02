@@ -3,9 +3,6 @@ require 'addressable/uri'
 require 'net/http'
 
 module Reddy
-  class UriRelativeException < StandardError
-  end
-
   class URIRef
     attr_accessor :uri
     def initialize (string)

@@ -1,5 +1,4 @@
-require 'lib/reddy'
-require 'ruby-debug'
+require File.join(File.dirname(__FILE__), 'spec_helper')
 include Reddy
 
 # w3c test suite: http://www.w3.org/TR/rdf-testcases/
@@ -14,7 +13,7 @@ EOF
     graph.graph.size.should == 0
   end
   
-  it "should trigger parsing on XMl documents with multiple RDF nodes" do
+  it "should trigger parsing on XML documents with multiple RDF nodes" do
     sampledoc = <<-EOF;
 <?xml version="1.0" ?>
 <GenericXML xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:ex="http://example.org/">
@@ -346,7 +345,7 @@ EOF
   #   pending
   # end
   # 
-  it "detect bad bagIDs" do
+  it "should detect bad bagIDs" do
     sampledoc = <<-EOF;
 <?xml version="1.0" ?>
     <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
@@ -359,33 +358,74 @@ EOF
     end.should raise_error
   end
 
- describe "parsing rdf files" do
-   def test_file(filepath, uri = nil)
-     n3_string = File.read(filepath)
-     parser = RdfXmlParser.new(n3_string, uri)
-     ntriples = parser.graph.to_ntriples
-     ntriples.gsub!(/_:bn\d+/, '_:node1')
-     ntriples = ntriples.split("\n").sort.join("\n")
-     
-     nt_string = File.read(filepath.sub('.rdf', '.nt'))
-     nt_string = nt_string.split("\n").sort.join("\n")
-     
-     ntriples.should == nt_string
-   end
-   
-   before(:all) do
-     @rdf_dir = File.join(File.dirname(__FILE__), '..', 'test', 'rdf_tests')
-   end
-    
+  describe "parsing rdf files" do
+    def test_file(filepath, uri = nil)
+      n3_string = File.read(filepath)
+      parser = RdfXmlParser.new(n3_string, uri)
+      ntriples = parser.graph.to_ntriples
+      ntriples.gsub!(/_:bn\d+/, '_:node1')
+      ntriples = ntriples.split("\n").sort.join("\n")
+
+      nt_string = File.read(filepath.sub('.rdf', '.nt'))
+      nt_string = nt_string.split("\n").sort.join("\n")
+
+      ntriples.should == nt_string
+    end
+
+    before(:all) do
+      @rdf_dir = File.join(File.dirname(__FILE__), '..', 'test', 'rdf_tests')
+    end
+
     it "should parse Coldplay's BBC Music profile" do
       gid = 'cc197bad-dc9c-440d-a5b5-d52ba2e14234'
       file = File.join(@rdf_dir, "#{gid}.rdf")
       test_file(file, "http://www.bbc.co.uk/music/artists/#{gid}")
     end
-    
+
     # it "should parse xml literal test" do
     #   file = File.join(@rdf_dir, "xml-literal-mixed.rdf")
     #   test_file(file)
     # end
+
+    # W3C Test suite from http://www.w3.org/2000/10/rdf-tests/rdfcore/
+    describe "w3c rdfcore tests" do
+      require 'rdfcore_helper'
+      include RdfCoreHelper
+      
+      def self.positive_tests
+        RdfCoreHelper::TestCase.positive_parser_tests
+      end
+
+      def self.negative_tests
+        RdfCoreHelper::TestCase.negative_parser_tests
+      end
+      
+      # Negative parser tests should raise errors.
+      describe "positive parser tests" do
+        positive_tests.each do |t|
+          specify "test #{t.about.uri.to_s}" do
+            rdf_string = File.read(t.input_document)
+            rdf_parser = RdfXmlParser.new(rdf_string, t.about.uri.to_s)
+
+            nt_string = t.output_document ? File.read(t.output_document) : ""
+            # Triples are valid N3 documents
+            nt_parser = N3Parser.new(nt_string)
+
+            verbose_output = ""
+            rdf_parser.graph.should be_equivalent_graph(nt_parser.graph, t.information)
+          end
+        end
+      end
+      
+      describe "negative parser tests" do
+        negative_tests.each do |t|
+          specify "test #{t.about.uri.to_s}" do
+            rdf_string = File.read(t.input_document)
+            lambda { RdfXmlParser.new(rdf_string, t.about.uri.to_s) }.should raise_error(Reddy::ParserException)
+          end
+        end
+      end
+    end
   end
 end
+

@@ -1,4 +1,4 @@
-require 'lib/reddy'
+require File.join(File.dirname(__FILE__), 'spec_helper')
 
 describe "Graphs" do
   it "should allow you to add one or more triples" do
@@ -135,4 +135,18 @@ describe "Graphs" do
     f.get_by_type("http://xmlns.com/foaf/0.1/Person")[0].to_s.should == "http://example.org/joe"
     f.get_by_type("http://xmlns.com/foaf/0.1/Person")[1].to_s.should == "http://example.org/jane"
   end
+
+  describe "graph equivalence" do
+    it "should be true for empty graphs" do
+      Graph.new.should be_equivalent_graph(Graph.new)
+    end
+
+    it "should be false for different graphs" do
+      f = Graph.new
+      person = URIRef.new("http://xmlns.com/foaf/0.1/Person")
+      f.add_triple(URIRef.new("http://example.org/joe"), URIRef.new("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"), URIRef.new("http://xmlns.com/foaf/0.1/Person"))
+      f.should_not be_equivalent_graph(Graph.new)
+    end
+  end
+  
 end
