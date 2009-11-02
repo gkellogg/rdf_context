@@ -1,12 +1,17 @@
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
-describe "Namespaces" do
-  it "should use method_missing to create URIRefs on the fly" do
-    foaf = Namespace.new("http://xmlns.com/foaf/0.1/", "foaf")
-    foaf.knows.to_s.should == "http://xmlns.com/foaf/0.1/knows"
+describe "Namespace" do
+  subject { Namespace.new("http://xmlns.com/foaf/0.1/", "foaf") }
+
+  describe "method_missing" do
+    it "should create URIRef" do
+      subject.knows.to_s.should == "http://xmlns.com/foaf/0.1/knows"
+    end
     
-    foaf_frag = Namespace.new("http://xmlns.com/foaf/0.1/", "foaf", true)
-    foaf_frag.knows.to_s.should == "http://xmlns.com/foaf/0.1/#knows"
+    it "should create URIRef for frag" do
+      foaf_frag = Namespace.new("http://xmlns.com/foaf/0.1/", "foaf", true)
+      foaf_frag.knows.to_s.should == "http://xmlns.com/foaf/0.1/#knows"
+    end
   end
   
   it "should have a URI" do
@@ -16,9 +21,8 @@ describe "Namespaces" do
   end
   
   it "should have equality with URIRefs" do
-      foaf = Namespace.new("http://xmlns.com/foaf/0.1/", "foaf")
       foaf_name = URIRef.new("http://xmlns.com/foaf/0.1/name")
-      foaf.name.should == foaf_name
+      subject.name.should == foaf_name
   end
   
   it "should have an XML and N3-friendly prefix" do
@@ -30,15 +34,28 @@ describe "Namespaces" do
   it "should be able to attach to the graph for substitution" do
     # rdflib does this using graph.bind('prefix', namespace)
     g = Graph.new
-    foaf = Namespace.new("http://xmlns.com/foaf/0.1/", "foaf")
-    foaf.bind(g)
-    g.nsbinding["foaf"].should == foaf
+    subject.bind(g)
+    should == g.nsbinding["foaf"]
   end
   
   it "should not allow you to attach to non-graphs" do
     lambda do
-      foaf = Namespace.new("http://xmlns.com/foaf/0.1/", "foaf")
-      foaf.bind("cheese")
+      subject.bind("cheese")
     end.should raise_error
+  end
+  
+  it "should construct URI" do
+    subject.foo.class.should == URIRef
+    subject.foo.should == "http://xmlns.com/foaf/0.1/foo"
+  end
+  
+  it "should construct URI with +" do
+    (subject + "foo").class.should == URIRef
+    (subject + "foo").should == "http://xmlns.com/foaf/0.1/foo"
+  end
+  
+  it "will cause method conflict" do
+    (subject + "class").should == "http://xmlns.com/foaf/0.1/class"
+    subject.class.should ==  Namespace
   end
 end

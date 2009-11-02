@@ -1,4 +1,5 @@
 module Reddy
+  # From Reddy
   class Namespace
     attr_accessor :short, :uri, :fragment
  
@@ -16,15 +17,18 @@ module Reddy
     # @return [Namespace] The newly created namespace.
     #
     # @raise [Error] Checks validity of the desired shortname and raises if it is incorrect.
+    # [gk] nil is a valid shortname to specify the default namespace
     # @author Tom Morris, Pius Uzamere
 
-    def initialize(uri, short, fragment = false)
-      @uri = uri
+    def initialize(uri, short, fragment = nil)
+      @uri = URIRef.new(uri) unless uri.is_a?(URIRef)
       @fragment = fragment
+      @fragment = uri.to_s.match(/\#$/) ? true : false if fragment.nil?
+      short = nil if short.to_s.empty?
       if shortname_valid?(short)
         @short = short
       else
-        raise
+        raise ParserException, "Invalid shortname '#{short}'"
       end
     end
 
@@ -46,24 +50,38 @@ module Reddy
     # @author Tom Morris, Pius Uzamere
 
     def method_missing(methodname, *args)
-      unless fragment
-        URIRef.new(@uri + methodname.to_s)
-      else
-        URIRef.new(@uri + '#' + methodname.to_s)
-      end
+      self + methodname
+    end
+
+    # Construct a URIRef from a namespace as in method_missing, but without method collision issues
+    def +(suffix)
+      URIRef.new((fragment ? "##{suffix}" : suffix.to_s), @uri)
     end
 
     def bind(graph)
       if graph.class == Graph
         graph.bind(self)
       else
-        raise
+        raise GraphException, "Can't bind namespace to graph of type #{graph.class}"
       end
     end
 
+    # Output xmlns attribute name
+    def xmlns_attr
+      short.nil? ? "xmlns" : "xmlns:#{short}"
+    end
+    
+    def xmlns_hash
+      {xmlns_attr => @uri.to_s}
+    end
+    
+    def inspect
+      "Namespace[abbr='#{short}',uri='#{uri}']"
+    end
+    
     private
     def shortname_valid?(shortname)
-      if shortname =~ /[a-zA-Z_][a-zA-Z0-9_]+/
+      if shortname =~ /[a-zA-Z_][a-zA-Z0-9_]+/ || shortname.nil?
         return true
       else
         return false

@@ -1,31 +1,28 @@
-%w[rubygems rake rake/clean fileutils newgem rubigen hoe].each { |f| require f }
-require 'spec/rake/spectask'
-require File.dirname(__FILE__) + '/lib/reddy'
-
-# Generate all the Rake tasks
-# Run 'rake -T' to see list of generated tasks (from gem root directory)
-$hoe = Hoe.new('reddy', Reddy::VERSION) do |p|
-  p.developer('Tom Morris', 'tom@tommorris.org')
-  p.changes              = p.paragraphs_of("History.txt", 0..1).join("\n\n")
-  p.rubyforge_name       = p.name # TODO this is default value
-  p.extra_deps		 = [
-      ['addressable', '>= 2.0.0'],
-      ['treetop', '= 1.3.0'],
-      ['libxml-ruby', '>= 0.8.3'],
-      ['whatlanguage', '>= 1.0.0']
-  ]
-  p.extra_dev_deps = [
-      ['newgem', ">= #{::Newgem::VERSION}"]
-  ]
-  
-  p.clean_globs |= %w[**/.DS_Store .git tmp *.log]
-  path = (p.rubyforge_name == p.name) ? p.rubyforge_name : "\#{p.rubyforge_name}/\#{p.name}"
-  p.remote_rdoc_dir = File.join(path.gsub(/^#{p.rubyforge_name}\/?/,''), 'rdoc')
-  p.rsync_args = '-av --delete --ignore-errors'
+require 'rubygems'
+begin
+  gem 'jeweler'
+  require 'jeweler'
+  Jeweler::Tasks.new do |gemspec|
+    gemspec.name = "reddy"
+    gemspec.summary = "RDFa parser written in pure Ruby."
+    gemspec.description = " Yields each triple, or generate in-memory graph"
+    gemspec.email = "gregg@kellogg-assoc.com"
+    gemspec.homepage = "http://github.com/tommorris/reddy"
+    gemspec.authors = ["Tom Morris", "Gregg Kellogg"]
+    gemspec.add_dependency('addressable', '>= 2.0.0')
+    gemspec.add_dependency('treetop',  '= 1.3.0')
+    gemspec.add_dependency('libxml-ruby',  '>= 0.8.3')
+    gemspec.add_dependency('whatlanguage', '>= 1.0.0')
+    gemspec.add_dependency('nokogiri', '>= 1.3.3')
+    gemspec.add_dependency('builder', '>= 2.1.2')
+    gemspec.add_development_dependency('rspec')
+    gemspec.add_development_dependency('activesupport', '>= 2.3.0')
+    gemspec.extra_rdoc_files     = %w(README.rdoc History.txt)
+  end
+  Jeweler::GemcutterTasks.new
+rescue LoadError
+  puts "Jeweler not available. Install it with: sudo gem install technicalpickles-jeweler -s http://gems.github.com"
 end
-
-require 'newgem/tasks' # load /tasks/*.rake
-Dir['tasks/**/*.rake'].each { |t| load t }
 
 # TODO - want other tests/tasks run by default? Add them to the list
 #task :default => [:spec, :features]
@@ -36,8 +33,10 @@ task :push do
   sh "growlnotify -m \"Updates pushed\" \"Git\""
 end
 
-task :spec do
-  sh "spec --colour spec"
+require 'spec/rake/spectask'
+Spec::Rake::SpecTask.new(:spec) do |spec|
+  spec.libs << 'lib' << 'spec'
+  spec.spec_files = FileList['spec/**/*_spec.rb']
 end
 
 desc "Turns spec results into HTML and publish to web (Tom only!)"
@@ -54,14 +53,33 @@ task :spec_local do
 end
 
 desc "Run specs through RCov"
-Spec::Rake::SpecTask.new('coverage') do |t|
-  t.spec_files = FileList['spec']
-  t.rcov = true
-  t.rcov_opts = ['--exclude', 'spec,test,\/Library\/Ruby\/Gems\/1.8\/gems']
+Spec::Rake::SpecTask.new(:rcov) do |spec|
+  spec.libs << 'lib' << 'spec'
+  spec.pattern = 'spec/**/*_spec.rb'
+  spec.rcov = true
 end
 
 desc "Runs specs on JRuby"
 task :jspec do
   sh "jruby -S `whereis spec` --colour spec"
 end
+
+task :spec => :check_dependencies
+
+task :default => :spec
+
+require 'rake/rdoctask'
+Rake::RDocTask.new do |rdoc|
+  if File.exist?('VERSION')
+    version = File.read('VERSION')
+  else
+    version = RdfaParser::VERSION
+  end
+
+  rdoc.rdoc_dir = 'rdoc'
+  rdoc.title = "rdfa_parser #{version}"
+  rdoc.rdoc_files.include('README*', "History.txt")
+  rdoc.rdoc_files.include('lib/**/*.rb')
+end
+
 # vim: syntax=Ruby

@@ -1,3 +1,0 @@
-<http://ajax.googleapis.com/ajax/libs/jquery/1.2.6/jquery.min.js> <http://cmx.org/spec/cmxterms#script> "" .
-<http://www.w3.org/2006/07/SWD/RDFa/testsuite/xhtml1-testcases/9999.xhtml> <http://cmx.org/spec/cmxterms#script> "foo"^^<http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral> .
-<http://www.w3.org/2006/07/SWD/RDFa/testsuite/xhtml1-testcases/9999.xhtml> <http://www.w3.org/1999/xhtml/vocab#stylesheet> <http://www.w3.org/stylesheets/cmx.css?1249860775> .

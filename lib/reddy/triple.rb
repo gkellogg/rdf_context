@@ -1,14 +1,6 @@
 module Reddy
+  # Triple from Reddy, to aid it merger
   class Triple
-    class InvalidPredicate < StandardError
-    end
-
-    class InvalidSubject < StandardError
-    end
-
-    class InvalidObject < StandardError
-    end
-
     attr_accessor :subject, :object, :predicate
 
     ##
@@ -36,7 +28,9 @@ module Reddy
     def to_ntriples
       @subject.to_ntriples + " " + @predicate.to_ntriples + " " + @object.to_ntriples + " ."
     end
-
+    
+    def to_s; self.to_ntriples; end
+    
     def inspect
       [@subject, @predicate, @object].inspect
     end
@@ -82,7 +76,7 @@ module Reddy
       else
         raise InvalidPredicate, "Predicate should be a URI"
       end
-    rescue Reddy::UriRelativeException => e
+    rescue UriRelativeException => e
       raise InvalidPredicate, "Couldn't make a URIRef: #{e.message}"
     end
 
@@ -91,9 +85,11 @@ module Reddy
       when Addressable::URI
         URIRef.new(object.to_s)
       when String, Integer, Float
-        Literal.untyped(object)
-    #  when URIRef, BNode, Literal, TypedLiteral
-    #    Literal.build_from(object)
+        if object.to_s =~ /\S+\/\/\S+/ # does it smell like a URI?
+          URIRef.new(object.to_s)
+        else
+          Literal.new(object, nil, nil)
+        end
       when URIRef, BNode, Literal
         object
       else

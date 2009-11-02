@@ -1,12 +1,6 @@
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
 describe "Triples" do
-  it "should have a subject" do
-    f = Triple.new(BNode.new, URIRef.new('http://xmlns.com/foaf/0.1/knows'), BNode.new)
-    f.subject.class.should == BNode
-    # puts f.to_ntriples
-  end
-
   it "should require that the subject is a URIRef or BNode" do
    lambda do
      Triple.new(Literal.new("foo"), URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new)
@@ -25,16 +19,32 @@ describe "Triples" do
     end.should raise_error
   end
 
-  it "should emit an NTriple" do
-    s = URIRef.new("http://tommorris.org/foaf#me")
-    p = URIRef.new("http://xmlns.com/foaf/0.1/name")
-    o = Literal.untyped("Tom Morris")
-    f = Triple.new(s,p,o)
+  describe "with BNodes" do
+    subject { Triple.new(BNode.new, URIRef.new('http://xmlns.com/foaf/0.1/knows'), BNode.new) }
 
-    f.to_ntriples.should == "<http://tommorris.org/foaf#me> <http://xmlns.com/foaf/0.1/name> \"Tom Morris\" ."
+    it "should have a subject" do
+      subject.subject.class.should == BNode
+    end
+    
+    it "should emit an NTriple" do
+      subject.to_ntriples.should == "#{subject.subject.to_n3} <http://xmlns.com/foaf/0.1/knows> #{subject.object.to_n3} ."
+    end
   end
 
-  describe "#coerce_subject" do
+  describe "with URIRefs" do
+    subject {
+      s = URIRef.new("http://tommorris.org/foaf#me")
+      p = URIRef.new("http://xmlns.com/foaf/0.1/name")
+      o = Literal.untyped("Tom Morris")
+      Triple.new(s,p,o)
+    }
+
+    it "should emit an NTriple" do
+      subject.to_ntriples.should == "<http://tommorris.org/foaf#me> <http://xmlns.com/foaf/0.1/name> \"Tom Morris\" ."
+    end
+  end
+
+  describe "with coerced subject" do
     it "should accept a URIRef" do
       ref = URIRef.new('http://localhost/')
       Triple.coerce_subject(ref).should == ref
@@ -60,11 +70,11 @@ describe "Triples" do
     it "should raise an InvalidSubject exception with any other class argument" do
       lambda do
         Triple.coerce_subject(Object.new)
-      end.should raise_error(Reddy::Triple::InvalidSubject)
+      end.should raise_error(Triple::InvalidSubject)
     end
   end
 
-  describe "#coerce_predicate" do
+  describe "with coerced predicate" do
     it "should make a string into a URI ref" do
       Triple.coerce_predicate("http://localhost/").should == URIRef.new('http://localhost/')
     end
@@ -77,11 +87,11 @@ describe "Triples" do
     it "should barf on an illegal uri string" do
       lambda do
         Triple.coerce_predicate("I'm just a soul whose intention is good")
-      end.should raise_error(Reddy::Triple::InvalidPredicate)
+      end.should raise_error(Triple::InvalidPredicate)
     end
   end
 
-  describe "#coerce_object" do
+  describe "with coerced object" do
     it "should leave URIRefs alone" do
       ref = URIRef.new("http://localhost/")
       Triple.coerce_object(ref).should == ref

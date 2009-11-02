@@ -1,3 +1,6 @@
+=== 0.1.1 / 2009-11-01
+* Changes from rdfa_parser project.
+
 === 0.1.0 / 2008-12-02
 
 * First public alpha. RDF/XML parsing works but is not fully spec or test compliant. There is much work to be done.

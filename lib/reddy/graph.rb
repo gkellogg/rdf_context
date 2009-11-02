@@ -1,6 +1,5 @@
-require 'open-uri'
-
 module Reddy
+  # A simple graph to hold triples (from Reddy)
   class Graph
     attr_accessor :triples, :nsbinding
 
@@ -8,7 +7,7 @@ module Reddy
       @triples = []
       @nsbinding = {}
     end
-    
+
     def self.load (uri)
       RdfXmlParser.new(open(uri)).graph
     end
@@ -19,6 +18,10 @@ module Reddy
 
     def each
       @triples.each { |value| yield value }
+    end
+    
+    def subjects
+      @triples.map {|t| t.subject}.uniq
     end
     
     def [] (item)
@@ -50,10 +53,10 @@ module Reddy
     #
     # @raise [Error] Checks parameter types and raises if they are incorrect.
     # @author Tom Morris
-
     def add_triple(s, p, o)
       @triples += [ Triple.new(s, p, o) ]
     end
+
 
     ## 
     # Adds an extant triple to a graph
@@ -67,13 +70,11 @@ module Reddy
     # @return [Array] An array of the triples (leaky abstraction? consider returning the graph instead)
     #
     # @author Tom Morris
-
-
     def << (triple)
   #    self.add_triple(s, p, o)
       @triples += [ triple ]
     end
-
+    
     ## 
     # Exports the graph to RDF in N-Triples form.
     #
@@ -90,7 +91,49 @@ module Reddy
         t.to_ntriples
       end * "\n" + "\n"
     end
+    
+    # Output graph using to_ntriples
+    def to_s; self.to_ntriples; end
 
+    # Dump model to RDF/XML
+    def to_rdfxml
+      replace_text = {}
+      rdfxml = ""
+      xml = builder = Builder::XmlMarkup.new(:target => rdfxml, :indent => 2)
+
+      extended_bindings = nsbinding.merge(
+        "rdf"   => RDF_NS,
+        "rdfs"  => RDFS_NS,
+        "xhv"   => XHV_NS,
+        "xml"   => XML_NS
+      )
+      rdf_attrs = extended_bindings.values.inject({}) { |hash, ns| hash.merge(ns.xmlns_attr => ns.uri.to_s)}
+      uri_bindings = extended_bindings.values.inject({}) { |hash, ns| hash.merge(ns.uri.to_s => ns.short)}
+      xml.instruct!
+      xml.rdf(:RDF, rdf_attrs) do
+        # Add statements for each subject
+        subjects.each do |s|
+          xml.rdf(:Description, (s.is_a?(BNode) ? "rdf:nodeID" : "rdf:about") => s) do
+            each_with_subject(s) do |triple|
+              xml_args = triple.object.xml_args
+              if triple.object.is_a?(Literal) && triple.object.xmlliteral?
+                replace_text["__replace_with_#{triple.object.object_id}__"] = xml_args[0]
+                xml_args[0] = "__replace_with_#{triple.object.object_id}__"
+              end
+              xml.tag!(triple.predicate.to_qname(uri_bindings), *xml_args)
+            end
+          end
+        end
+      end
+
+      # Perform literal substitutions
+      replace_text.each_pair do |match, value|
+        rdfxml.sub!(match, value)
+      end
+      
+      rdfxml
+    end
+    
     ## 
     # Creates a new namespace given a URI and the short name and binds it to the graph.
     #
@@ -115,7 +158,7 @@ module Reddy
       if namespace.class == Namespace
         @nsbinding["#{namespace.short}"] = namespace
       else
-        raise
+        raise GraphException, "Can't bind #{namespace.inspect} as namespace"
       end
     end
 
@@ -171,12 +214,9 @@ module Reddy
           self << t
         }
       else
-        raise "join requires you provide a graph object"
+        raise GraphException, "join requires you provide a graph object"
       end
     end
-  #  alias :add, :add_triple
-    #  alias (=+, add_triple)
-    private
 
   end
 end

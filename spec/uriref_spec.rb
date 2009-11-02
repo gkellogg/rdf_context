@@ -38,7 +38,11 @@ describe "URI References" do
     nonetest.short_name.should == false
   end
   
-  it "produce a valid URI character sequence (per RFC 2396 §2.1) representing an absolute URI with optional fragment identifier" do
+  it "should append fragment to uri" do
+    URIRef.new("foo", "http://example.org").should == "http://example.org/foo"
+  end
+  
+  it "should produce a valid URI character sequence (per RFC 2396 §2.1) representing an absolute URI with optional fragment identifier" do
     pending "TODO: figure out a series of tests for RFC 2396 §2.1 adherence"
   end
   
@@ -67,6 +71,23 @@ describe "URI References" do
     uri2.to_s.should == "http://example.org/foo#bar"
   end
 
+  it "should create QName from URI with namespace" do
+    uri = URIRef.new("http://example.org/foo#bar")
+    uri.to_qname("http://example.org/foo#" => "ex").should == "ex:bar"
+    
+    uri = URIRef.new("http://xmlns.com/foaf/0.1/knows")
+    uri.to_qname("http://xmlns.com/foaf/0.1/" => "foaf").should == "foaf:knows"
+  end
+  
+  it "should create resource hash for RDF/XML" do
+    uri = URIRef.new("http://example.org/foo#bar")
+    uri.xml_args.should == [{"rdf:resource" => uri.to_s}]
+  end
+  
+  it "should be equivalent to string" do
+    URIRef.new("http://example.org/foo#bar").should == "http://example.org/foo#bar"
+  end
+  
 #   TEST turned off until parser is working.  
 #   it "should allow the programmer to Follow His Nose" do
 #     a = URIRef.new("http://127.0.0.1:3001/test")
