@@ -1,0 +1,3 @@
+[submodule "spec/rdfa-test-suite"]
+	path = spec/rdfa-test-suite
+	url = git://github.com/msporny/rdfa-test-suite.git
