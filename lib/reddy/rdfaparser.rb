@@ -328,7 +328,7 @@ module Reddy
         elsif children_node_types != [Nokogiri::XML::Text] and (type == nil or type_resource.to_s == XML_LITERAL.to_s)
           # XML Literal
           add_debug(element, "XML Literal: #{element.inner_html}")
-          current_object_literal = Literal.typed(element.inner_html, XML_LITERAL, :language => language, :namespaces => uri_mappings)
+          current_object_literal = Literal.typed(element.children, XML_LITERAL, :language => language, :namespaces => uri_mappings)
           recurse = false
         end
       
@@ -389,7 +389,9 @@ module Reddy
         if curie.include?(":")
           resource_array << curie_to_resource_or_bnode(curie, uri_mappings, base)
         elsif with_link_types
-          link_type_curie = curie_to_resource_or_bnode(":#{value}", XH_MAPPING, base) if LINK_TYPES.include?(value.to_s)
+          # Reserved words are all mapped to lower case
+          curie = curie.to_s.downcase
+          link_type_curie = curie_to_resource_or_bnode(":#{curie}", XH_MAPPING, base) if LINK_TYPES.include?(curie)
           resource_array << link_type_curie if link_type_curie
         end
       end

@@ -61,7 +61,8 @@ module RdfCoreHelper
       @@negative_entailment_tests = []
 
       manifest = File.read(File.join(RDFCORE_DIR, "Manifest.rdf"))
-      graph = RdfXmlParser.new(manifest).graph
+#      graph = RdfXmlParser.new(manifest).graph
+      graph = Graph.new
       
       # Group by subject
       test_hash = graph.triples.inject({}) do |hash, st|

@@ -63,6 +63,7 @@ describe "N3 parser" do
         parser = Reddy::N3Parser.new([statement].flatten.first)
         parser.graph.should_not be_nil
         parser.graph.size.should == 1
+        puts parser.graph.to_ntriples
         parser.graph[0].to_ntriples.should == [statement].flatten.last.gsub(/\s+/, " ").strip
       end
     end

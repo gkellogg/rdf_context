@@ -243,16 +243,27 @@ module Reddy
 
       # Map namespaces from context to each top-level element found within snippet
       def encode_contents(contents, options)
-        ns_hash = options[:namespaces].values.inject({}) {|h, ns| h.merge(ns.xmlns_hash)}
-        ns_strs = []
-        ns_hash.each_pair {|a, u| ns_strs << "#{a}=\"#{u}\""}
-        
-        # Add inherited namespaces to created root element so that they're inherited to sub-elements
-        contents = Nokogiri::XML::Document.parse("<foo #{ns_strs.join(" ")}>#{contents}</foo>").root
+        if contents.is_a?(String)
+          ns_hash = options[:namespaces].values.inject({}) {|h, ns| h.merge(ns.xmlns_hash)}
+          ns_strs = []
+          ns_hash.each_pair {|a, u| ns_strs << "#{a}=\"#{u}\""}
 
-        @contents = contents.children.map do |c|
+          # Add inherited namespaces to created root element so that they're inherited to sub-elements
+          contents = Nokogiri::XML::Document.parse("<foo #{ns_strs.join(" ")}>#{contents}</foo>").root.children
+        end
+
+        # Add already mapped namespaces and language
+        @contents = contents.map do |c|
           if c.is_a?(Nokogiri::XML::Element)
-            ns_hash.each_pair { |a, u| c[a] = u unless c.namespaces[a]}
+            # Gather namespaces from self and decendant nodes
+            c.traverse do |n|
+              ns = n.namespace
+              next unless ns
+              prefix = ns.prefix ? "xmlns:#{ns.prefix}" : "xmlns"
+              c[prefix] = ns.href unless c.namespaces[prefix]
+            end
+            
+            # Add lanuage
             if options[:language] && c["lang"].to_s.empty?
               c["xml:lang"] = options[:language]
             end

@@ -126,10 +126,14 @@ module Reddy
         end
       end
 
+      # Evaluate text_value to remove redundant escapes
+      puts string.elements[1].text_value
+      text_value = eval('"' + string.elements[1].text_value + '"')
+
       if (encoding.nil?)
-        Literal.untyped(string.elements[1].text_value, language)
+        Literal.untyped(text_value, language)
       else
-        Literal.typed(string.elements[1].text_value, encoding)
+        Literal.typed(text_value, encoding)
       end      
     end
     

@@ -84,12 +84,14 @@ module Reddy
       case object
       when Addressable::URI
         URIRef.new(object.to_s)
-      when String, Integer, Float
+      when String
         if object.to_s =~ /\S+\/\/\S+/ # does it smell like a URI?
           URIRef.new(object.to_s)
         else
-          Literal.new(object, nil, nil)
+          Literal.untyped(object)
         end
+      when Integer, Float
+        Literal.build_from(object)
       when URIRef, BNode, Literal
         object
       else
