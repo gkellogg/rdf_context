@@ -38,6 +38,7 @@ module Reddy
     end
 
     def namespace(uri, short)
+      uri = @uri if uri == '#'
       short = '__local__' if short == ''
       @graph.namespace(uri, short)
     end
@@ -114,11 +115,13 @@ module Reddy
       end
     end
     
+    require 'activesupport'
     def process_literal(object)
       encoding, language = nil, nil
       string, type = object.elements
-      
+
       unless type.elements.nil?
+        #puts type.elements.inspect
         if (type.elements[0].text_value=='@')
           language = type.elements[1].text_value
         else
@@ -127,14 +130,8 @@ module Reddy
       end
 
       # Evaluate text_value to remove redundant escapes
-      puts string.elements[1].text_value
-      text_value = eval('"' + string.elements[1].text_value + '"')
-
-      if (encoding.nil?)
-        Literal.untyped(text_value, language)
-      else
-        Literal.typed(text_value, encoding)
-      end      
+      #puts string.elements[1].text_value.dump
+      Literal.n3_encoded(string.elements[1].text_value, language, encoding)
     end
     
     def build_uri(prefix, localname)

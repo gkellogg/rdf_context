@@ -21,8 +21,8 @@ describe "Namespace" do
   end
   
   it "should have equality with URIRefs" do
-      foaf_name = URIRef.new("http://xmlns.com/foaf/0.1/name")
-      subject.name.should == foaf_name
+    foaf_name = URIRef.new("http://xmlns.com/foaf/0.1/name")
+    subject.name.should == foaf_name
   end
   
   it "should have an XML and N3-friendly prefix" do
@@ -57,5 +57,9 @@ describe "Namespace" do
   it "will cause method conflict" do
     (subject + "class").should == "http://xmlns.com/foaf/0.1/class"
     subject.class.should ==  Namespace
+  end
+  
+  it "should be be equivalent" do
+    Namespace.new("http://a", "aa").should == Namespace.new("http://a", "aa")
   end
 end

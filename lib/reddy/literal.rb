@@ -72,7 +72,7 @@ module Reddy
       # XMLLiteral and String values are encoding using C-style strings with
       # non-printable ASCII characters escaped.
       def format_as_n3(content, lang)
-        content = c_style(content.to_s)
+        content = escape(content.to_s)
         quoted_content = should_quote? ? "\"#{content}\"" : content
         "#{quoted_content}^^<#{value}>#{lang ? "@#{lang}" : ""}"
       end
@@ -140,10 +140,19 @@ module Reddy
         '/'   =>  '/',
       } # :nodoc:
 
-      # Convert a UTF8 encoded Ruby string _string_ to a C-style string, encoded with
+      # Convert a UTF8 encoded Ruby string _string_ to an escaped string, encoded with
       # UTF16 big endian characters as \U????, and return it.
+      #
+      # \\:: Backslash
+      # \':: Single quote
+      # \":: Double quot
+      # \n:: ASCII Linefeed
+      # \r:: ASCII Carriage Return
+      # \t:: ASCCII Horizontal Tab
+      # \uhhhh:: character in BMP with Unicode value U+hhhh
+      # \U00hhhhhh:: character in plane 1-16 with Unicode value U+hhhhhh
       if String.method_defined?(:force_encoding)
-        def c_style(string) # :nodoc:
+        def escape(string) # :nodoc:
           string << '' # XXX workaround: avoid buffer sharing
           string.force_encoding(Encoding::ASCII_8BIT)
           string.gsub!(/["\\\/\x0-\x1f]/) { MAP[$&] }
@@ -163,7 +172,7 @@ module Reddy
           string
         end
       else
-        def c_style(string) # :nodoc:
+        def escape(string) # :nodoc:
           string = string.gsub(/["\\\/\x0-\x1f]/) { MAP[$&] }
           string.gsub!(/(
                           (?:
@@ -178,7 +187,12 @@ module Reddy
                           s.gsub!(/.{4}/n, '\\\\u\&')
                         }
           string
-       end
+        end
+      end
+      
+      # Reverse operation of escape
+      def unescape(string)
+        string.gsub(/\\([\\\'\"nrt]|u\h{4}|U00\h[6])/) {MAP.invert[$&]}
       end
     end
     
@@ -188,7 +202,7 @@ module Reddy
       end
 
       def format_as_n3(content, lang)
-        "\"#{c_style(content)}\"" + (lang ? "@#{lang}" : "")
+        "\"#{escape(content)}\"" + (lang ? "@#{lang}" : "")
         # Perform translation on value if it's typed
       end
 
@@ -229,7 +243,7 @@ module Reddy
       end
       
       def format_as_n3(content, lang)
-        "\"#{c_style(content)}\"^^<#{value}>"
+        "\"#{escape(content)}\"^^<#{value}>"
       end
 
       def format_as_trix(content, lang)
@@ -316,6 +330,16 @@ module Reddy
       options = {:namespaces => {}}.merge(options)
 
       @contents = @encoding.encode_contents(contents, options)
+    end
+    
+    def self.n3_encoded(contents, language, encoding = nil)
+      encoding = encoding.nil? ? Encoding.the_null_encoding : Encoding.coerce(encoding)
+      options = {}
+      options[:language] = language if language
+      #puts "encoded: #{contents.dump}"
+      contents = encoding.unescape(contents)
+      #puts "unencoded: #{contents.dump}"
+      new(contents, encoding, options)
     end
     
     def self.untyped(contents, language = nil)

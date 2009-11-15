@@ -261,6 +261,21 @@ describe "Literals: " do
     end
   end
   
+  describe "an n3 literal" do
+    {
+      "simple literal"  => ["simple literal", nil, nil],
+      "backslash:\\" => ["backslash:\\\\", nil, nil],
+      "dquote:\"" => ["dquote:\\\"", nil, nil],
+      "newline:\n" => ["newline:\\n", nil, nil],
+      "return:\r" => ["return:\\r", nil, nil],
+      "tab:\t" => ["tab:\\t", nil, nil],
+    }.each_pair do |name, args|
+      specify "test #{name}" do
+        Literal.n3_encoded(*args).contents.should == name
+      end
+    end
+  end
+  
 #  it "build_from_language" do
 #    english = Literal.build_from_language("Have a nice day")
 #    english.encoding.should == "en"

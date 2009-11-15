@@ -10,20 +10,33 @@ Reddy is an RDF library for Ruby.
 
 * RDF/XML parser is beginning to parse tests.
 * N3 parser
-* Working on an RDFa parser - for now, please use a web service (etc.) to process
-* No serializer except N-Triples
+* Fully compliant RDFa 1.0 parser
+* N-Triples and RDF/XML serializer
+* RDFa tests use SPARQL for most tests due to Rasqal limitataions. Other tests compare directly against N-triples
+
 
 == SYNOPSIS:
 
 A simple RDF library for Ruby has been necessary for some time.
 
+Basic usage:
+
+require 'reddy'
+parser = Reddy::RdfaParser.new(stream, base_uri)
+parser.parse do |triple|
+  puts triple.to_ntriple
+end
 == REQUIREMENTS:
 
 * Addressable
 * Treetop
 * Whatlanguage
 * libxml-ruby
+* nokogiri
 * facets
+
+=== For testing
+* Redland/Rasqal
 
 == INSTALL:
 
@@ -34,6 +47,7 @@ A simple RDF library for Ruby has been necessary for some time.
 (The MIT License)
 
 Copyright (c) 2008 Tom Morris and contributors
+Copyright (c) 2009 Gregg Kellogg (RDFa Parser)
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the

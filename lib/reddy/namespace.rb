@@ -66,6 +66,11 @@ module Reddy
       end
     end
 
+    def eql?(other)
+      @short == other.short && @uri == other.uri && @fragment == other.fragment
+    end
+    alias_method :==, :eql?
+
     # Output xmlns attribute name
     def xmlns_attr
       short.nil? ? "xmlns" : "xmlns:#{short}"
