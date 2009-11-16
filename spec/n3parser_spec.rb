@@ -35,7 +35,7 @@ describe "N3 parser" do
       "spaces and tabs throughout" => " 	 <http://example.org/resource3> 	 <http://example.org/property>	 <http://example.org/resource2> 	.	 ",
       "line ending with CR NL" => "<http://example.org/resource4> <http://example.org/property> <http://example.org/resource2> .\r\n",
       "literal escapes (1)" => '<http://example.org/resource7> <http://example.org/property> "simple literal" .',
-      #"literal escapes (2)" => '<http://example.org/resource8> <http://example.org/property> "backslash:\\" .',
+      "literal escapes (2)" => '<http://example.org/resource8> <http://example.org/property> "backslash:\\\\" .',
       "literal escapes (3)" => '<http://example.org/resource9> <http://example.org/property> "dquote:\"" .',
       "literal escapes (4)" => '<http://example.org/resource10> <http://example.org/property> "newline:\n" .',
       "literal escapes (5)" => '<http://example.org/resource11> <http://example.org/property> "return:\r" .',
@@ -118,10 +118,9 @@ describe "N3 parser" do
   end
   
   it "should create typed literals" do
-    # n3doc = "<http://example.org/joe> <http://xmlns.com/foaf/0.1/name> \"Joe\"^^<http://www.w3.org/2001/XMLSchema#string> ."
-    # parser = N3Parser.new(n3doc)
-    # parser.graph[0].object.classs.should == Reddy::Literal
-    pending
+    n3doc = "<http://example.org/joe> <http://xmlns.com/foaf/0.1/name> \"Joe\"^^<http://www.w3.org/2001/XMLSchema#string> ."
+    parser = N3Parser.new(n3doc)
+    parser.graph[0].object.class.should == Reddy::Literal
   end
   
   it "should map <#> to document uri" do
@@ -130,6 +129,25 @@ describe "N3 parser" do
     parser.graph.nsbinding.should == {"__local__", Namespace.new("http://the.document.itself", "__local__")}
   end
 
+  it "should parse testcase" do
+    sampledoc = <<-EOF;
+<http://www.w3.org/2000/10/rdf-tests/rdfcore/xmlbase/Manifest.rdf#test001> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/10/rdf-tests/rdfcore/testSchema#PositiveParserTest> .
+<http://www.w3.org/2000/10/rdf-tests/rdfcore/xmlbase/Manifest.rdf#test001> <http://www.w3.org/2000/10/rdf-tests/rdfcore/testSchema#approval> <http://lists.w3.org/Archives/Public/w3c-rdfcore-wg/2002Mar/0235.html> .
+<http://www.w3.org/2000/10/rdf-tests/rdfcore/xmlbase/Manifest.rdf#test001> <http://www.w3.org/2000/10/rdf-tests/rdfcore/testSchema#inputDocument> <http://www.w3.org/2000/10/rdf-tests/rdfcore/xmlbase/test001.rdf> .
+<http://www.w3.org/2000/10/rdf-tests/rdfcore/xmlbase/Manifest.rdf#test001> <http://www.w3.org/2000/10/rdf-tests/rdfcore/testSchema#issue> <http://www.w3.org/2000/03/rdf-tracking/#rdfms-xml-base> .
+<http://www.w3.org/2000/10/rdf-tests/rdfcore/xmlbase/Manifest.rdf#test001> <http://www.w3.org/2000/10/rdf-tests/rdfcore/testSchema#outputDocument> <http://www.w3.org/2000/10/rdf-tests/rdfcore/xmlbase/test001.nt> .
+<http://www.w3.org/2000/10/rdf-tests/rdfcore/xmlbase/Manifest.rdf#test001> <http://www.w3.org/2000/10/rdf-tests/rdfcore/testSchema#status> "APPROVED" .
+<http://www.w3.org/2000/10/rdf-tests/rdfcore/xmlbase/test001.nt> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/10/rdf-tests/rdfcore/testSchema#NT-Document> .
+<http://www.w3.org/2000/10/rdf-tests/rdfcore/xmlbase/test001.rdf> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/10/rdf-tests/rdfcore/testSchema#RDF-XML-Document> .
+EOF
+    parser = N3Parser.new(sampledoc, "http://www.w3.org/2000/10/rdf-tests/rdfcore/amp-in-url/Manifest.rdf")
+    ntriples = parser.graph.to_ntriples
+    ntriples = sort_ntriples(ntriples)
+
+    nt_string = sort_ntriples(sampledoc)
+    ntriples.should == nt_string    
+  end
+  
   def test_file(filepath)
     n3_string = File.read(filepath)
     parser = N3Parser.new(n3_string, "file:#{filepath}")

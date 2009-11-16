@@ -1,4 +1,3 @@
-gem 'treetop', '= 1.3.0'
 require 'treetop'
 
 Treetop.load(File.join(File.dirname(__FILE__), "n3_grammar"))
@@ -23,9 +22,8 @@ module Reddy
         process_directives(document)
         process_statements(document)
       else
-        parser.terminal_failures.each do |tf|
-          puts "Expected #{tf.expected_string.inspect} (#{tf.index})- '#{n3_str[tf.index,10].inspect}'"
-        end
+        reason = parser.failure_reason
+        raise ParserException.new(reason)
       end
     end
 
@@ -34,7 +32,7 @@ module Reddy
     def process_directives(document)
       directives = document.elements.find_all { |e| e.elements.first.respond_to? :directive }
       directives.map! { |d| d.elements.first }
-      directives.each { |d| namespace(d.uri_ref2.uri.text_value, d.nprefix.text_value) }
+      directives.each { |d| namespace(d.uri_ref.uri.text_value, d.nprefix.text_value) }
     end
 
     def namespace(uri, short)
@@ -115,7 +113,6 @@ module Reddy
       end
     end
     
-    require 'activesupport'
     def process_literal(object)
       encoding, language = nil, nil
       string, type = object.elements
