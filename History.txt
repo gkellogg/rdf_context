@@ -1,6 +1,10 @@
 === 0.1.4
+* Update N3 treetop parser to version 1.4.0 (no digits in parser rule names).
 * Fix N3 literal handling (still has bug with escaped double quote).
 * Handle N3 <#> prefix.
+* Don't output lang for typed literals in n3 format
+* Rewrite of RDF/XML parser based on spec; passes existing tests.
+* Update rdfcore tests based on rdfa test harness.
 
 === 0.1.3
 * Added rdfa-test-suite as sub-module and refactored RDFa tests to use them.

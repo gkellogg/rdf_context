@@ -1,12 +1,12 @@
 #$:.unshift(File.dirname(__FILE__)) unless $:.include?(File.dirname(__FILE__)) || $:.include?(File.expand_path(File.dirname(__FILE__)))
 
 $:.unshift(File.dirname('reddy'))
-Dir.glob(File.join(File.dirname(__FILE__), 'reddy/**.rb')).each { |f| require f }
 
 begin
   require 'nokogiri'
   require 'addressable/uri'
   require 'builder'
+  require 'treetop'
 rescue LoadError
   require 'rubygems' unless ENV['NO_RUBYGEMS']
   gem 'nokogiri'
@@ -14,7 +14,10 @@ rescue LoadError
   require 'nokogiri'
   require 'addressable/uri'
   require 'builder'
+  require 'treetop'
 end
+
+Dir.glob(File.join(File.dirname(__FILE__), 'reddy/**.rb')).each { |f| require f }
 
 module Reddy
   VERSION = File.read(File.join(File.dirname(__FILE__), "..", "VERSION")).chop  # Version in parent directory

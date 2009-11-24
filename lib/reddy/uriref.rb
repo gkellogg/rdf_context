@@ -26,7 +26,7 @@ module Reddy
       
       # Unique URI through class hash to ensure that URIRefs can be easily compared
       @@uri_hash ||= {}
-      @@uri_hash[@uri.to_s] ||= @uri
+      @@uri_hash[@uri.to_s] ||= @uri.freeze
       @uri = @@uri_hash[@uri.to_s]
     end
     
@@ -81,7 +81,7 @@ module Reddy
     def test_string (string)
       string.to_s.each_byte do |b|
         if b >= 0 and b <= 31
-          raise ParserException, "URI must not contain control characters"
+          raise ParserException, "URI '#{string}' must not contain control characters"
         end
       end
     end

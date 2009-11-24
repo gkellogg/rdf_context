@@ -74,7 +74,7 @@ module Reddy
       def format_as_n3(content, lang)
         content = escape(content.to_s)
         quoted_content = should_quote? ? "\"#{content}\"" : content
-        "#{quoted_content}^^<#{value}>#{lang ? "@#{lang}" : ""}"
+        "#{quoted_content}^^<#{value}>"
       end
 
       def format_as_trix(content, lang)
@@ -257,6 +257,7 @@ module Reddy
 
       # Map namespaces from context to each top-level element found within snippet
       def encode_contents(contents, options)
+        puts "encode_contents: '#{contents}'"
         if contents.is_a?(String)
           ns_hash = options[:namespaces].values.inject({}) {|h, ns| h.merge(ns.xmlns_hash)}
           ns_strs = []
@@ -268,6 +269,7 @@ module Reddy
 
         # Add already mapped namespaces and language
         @contents = contents.map do |c|
+          c = Nokogiri::XML.parse(c.copy(true).to_s) if c.is_a?(LibXML::XML::Node)
           if c.is_a?(Nokogiri::XML::Element)
             # Gather namespaces from self and decendant nodes
             c.traverse do |n|

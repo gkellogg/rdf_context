@@ -57,7 +57,7 @@ module Reddy
       when URIRef, BNode
         subject
       when String
-        if subject =~ /\S+\/\/\S+/ # does it smell like a URI?
+        if subject =~ /^\w+:\/\/\S+/ # does it smell like a URI?
           URIRef.new subject
         else
           BNode.new subject
@@ -85,7 +85,7 @@ module Reddy
       when Addressable::URI
         URIRef.new(object.to_s)
       when String
-        if object.to_s =~ /\S+\/\/\S+/ # does it smell like a URI?
+        if object.to_s =~ /^\w+:\/\/\S+/ # does it smell like a URI?
           URIRef.new(object.to_s)
         else
           Literal.untyped(object)

@@ -3,24 +3,30 @@ require 'matchers'
 module RdfCoreHelper
   # Class representing test cases in format http://www.w3.org/2000/10/rdf-tests/rdfcore/testSchema#
   class TestCase
-    RDFCORE_DIR = File.join(File.dirname(__FILE__), 'rdfcore')
+    include Matchers
+    
+    TEST_DIR = File.join(File.dirname(__FILE__), 'rdfcore')
+    NT_DIR = File.join(File.dirname(__FILE__), 'rdfa-triples')
+    BASE_MANIFEST_URL = "http://rdfa.digitalbazaar.com/test-suite/"
+    BASE_TEST_CASE_URL = "#{BASE_MANIFEST_URL}test-cases/"
     
     attr_accessor :about
     attr_accessor :approval
-    attr_accessor :conclusion_document
+    attr_accessor :conclusionDocument
     attr_accessor :data
     attr_accessor :description
     attr_accessor :discussion
     attr_accessor :document
     attr_accessor :entailmentRules
-    attr_accessor :input_document
+    attr_accessor :inputDocument
     attr_accessor :issue
     attr_accessor :name
-    attr_accessor :output_document
-    attr_accessor :premise_document
+    attr_accessor :outputDocument
+    attr_accessor :premiseDocument
     attr_accessor :rdf_type
     attr_accessor :status
     attr_accessor :warning
+    attr_accessor :parser
     
     @@test_cases = []
     
@@ -32,24 +38,56 @@ module RdfCoreHelper
         
         if statement.is_type?
           self.rdf_type = statement.object.short_name
-        elsif statement.predicate.short_name == "inputDocument"
-          self.input_document = statement.object.to_s.sub!(/^.*rdfcore/, RDFCORE_DIR)
-        elsif statement.predicate.short_name == "outputDocument"
-          self.output_document = statement.object.to_s.sub!(/^.*rdfcore/, RDFCORE_DIR)
-        elsif statement.predicate.short_name == "premiseDocument"
-          self.premise_document = statement.object.to_s.sub!(/^.*rdfcore/, RDFCORE_DIR)
-        elsif statement.predicate.short_name == "conclusionDocument"
-          self.conclusion_document = statement.object.to_s.sub!(/^.*rdfcore/, RDFCORE_DIR)
-        elsif statement.predicate.short_name == "document"
-          self.document = statement.object.to_s.sub!(/^.*rdfcore/, RDFCORE_DIR)
+        elsif statement.predicate.short_name =~ /Document\Z/i
+          puts "#{statement.predicate.short_name}: #{statement.object.inspect}"
+          self.send("#{statement.predicate.short_name}=", statement.object.to_s.sub(/^.*rdfcore/, TEST_DIR))
         elsif self.respond_to?("#{statement.predicate.short_name}=")
           self.send("#{statement.predicate.short_name}=", statement.object.to_s)
         end
       end
     end
     
-    def information
-      %w(description discussion issue warning).map {|a| v = self.send(a); "#{a}: #{v}" if v}.compact.join("\n")
+    def inspect
+      "[Test Case " + %w(
+        about
+        name
+        inputDocument
+        outputDocument
+        issue
+        status
+        approval
+        description
+        discussion
+        issue
+        warning
+      ).map {|a| v = self.send(a); "#{a}='#{v}'" if v}.compact.join(", ") +
+      "]"
+    end
+    
+    # Read in file, and apply modifications reference either .html or .xhtml
+    def input
+      body = File.read(inputDocument)
+    end
+
+    def output
+      body = File.read(outputDocument)
+    end
+
+    # Run test case, yields input for parser to create triples
+    def run_test
+      rdf_string = input
+
+      # Run
+      @parser = RdfXmlParser.new
+      yield(rdf_string, @parser)
+
+      query_string = output
+      
+      @parser.graph.should be_equivalent_graph(output, self)
+    end
+
+    def trace
+      @parser.debug.join("\n")
     end
     
     def self.parse_test_cases
@@ -60,9 +98,15 @@ module RdfCoreHelper
       @@positive_entailment_tests = []
       @@negative_entailment_tests = []
 
-      manifest = File.read(File.join(RDFCORE_DIR, "Manifest.rdf"))
-#      graph = RdfXmlParser.new(manifest).graph
-      graph = Graph.new
+      manifest = File.read(File.join(TEST_DIR, "Manifest.rdf"))
+      parser = RdfXmlParser.new
+      begin
+        parser.parse(manifest)
+      rescue
+        puts "Parse error: #{$!}\n\t#{parser.debug.join("\t\n")}\n\n"
+        raise
+      end
+      graph = parser.graph
       
       # Group by subject
       test_hash = graph.triples.inject({}) do |hash, st|

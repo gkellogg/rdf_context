@@ -31,7 +31,7 @@ grammar N3Grammer
 	end
 	
 	rule node
-		uri_ref2 / anonnode / 'this'
+		uri_ref / anonnode / 'this'
 	end
 	
 	rule anonnode
@@ -55,12 +55,12 @@ grammar N3Grammer
 	end
 
 	rule directive
-		'@prefix' space+ nprefix:nprefix? ':' space+ uri_ref2:uri_ref2 {
+		'@prefix' space+ nprefix:nprefix? ':' space+ uri_ref:uri_ref {
 			def directive; true; end
 		}
 	end
 	
-	rule uri_ref2
+	rule uri_ref
 		qname / "<" uri:URI_Reference ">"
 	end
 	
@@ -73,7 +73,7 @@ grammar N3Grammer
 	end
 	
 	rule literal
-  	(string1 / string2) ("^^<" uri:URI_Reference ">" / "@" language )?
+  	(string_single / string_multi) ("^^<" uri:URI_Reference ">" / "@" language )?
 	end
 	
 	rule language
@@ -113,20 +113,30 @@ grammar N3Grammer
 	end
 
   # " constant-value-with-escaping "
-	rule string1
-		'""' !["] / '"' string1_char+ '"'
+	rule string_single
+		'""' !["] / '"' string_single_char+ '"'
 	end
 
-	rule string1_char
-		!["] .
+	rule string_single_char
+    !["\n\r] (
+      ("\\"
+        [\\\"nrt]
+      / ( "u" hexdigit hexdigit hexdigit hexdigit )
+      / ( "U" "00" hexdigit hexdigit hexdigit hexdigit hexdigit hexdigit)
+      )
+    / .)
 	end
 
-  # """ constant value with escaping including single or double occurences of quotes and/or newlines """	
-	rule string2
-		'"""' string2_char* '"""'
+  rule hexdigit
+    [0-9a-fA-F]
+  end
+  
+  # """ constant value with escaping including single or double occurrences of quotes and/or newlines """	
+	rule string_multi
+		'"""' string_multi_char* '"""'
 	end
 
-	rule string2_char
+	rule string_multi_char
 		!'"""' . # something like this; need to think about it some more	
 	end
 		

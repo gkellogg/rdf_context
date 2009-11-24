@@ -10,7 +10,7 @@ begin
     gemspec.homepage = "http://github.com/tommorris/reddy"
     gemspec.authors = ["Tom Morris", "Gregg Kellogg"]
     gemspec.add_dependency('addressable', '>= 2.0.0')
-    gemspec.add_dependency('treetop',  '= 1.3.0')
+    gemspec.add_dependency('treetop',  '>= 1.4.0')
     gemspec.add_dependency('libxml-ruby',  '>= 0.8.3')
     gemspec.add_dependency('whatlanguage', '>= 1.0.0')
     gemspec.add_dependency('nokogiri', '>= 1.3.3')

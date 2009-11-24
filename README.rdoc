@@ -42,6 +42,24 @@ end
 
 * (sudo gem install reddy)
 
+== TODO:
+* Testing
+  * Integrate ntriples tests in spec/ntriples/test.nt
+  * Turtle tests from http://www.w3.org/2000/10/swap/test/n3/turtle-manifest.n3 (if can find .ttl and .out files)
+  * N3-RDF tests from http://www.w3.org/2000/10/swap/test/n3/n3-rdf.tests
+  * N3-Full tests from http://www.w3.org/2000/10/swap/test/n3/n3-full.tests
+  * Complete RDF-Core tests from rdf/xml (http://www.w3.org/TR/2004/REC-rdf-testcases-20040210/)
+  * N3 grammar tests?
+* Graphs
+  * Pluggable storage modules
+  * Contexts
+  * n3 serialization
+  * Graph operations from Redland
+* SPARQL
+* Ruby objects
+  * ActiveRDF-like class support
+  * Integrate with RDFObjects (http://github.com/rsinger/RDFObjects)
+
 == LICENSE:
 
 (The MIT License)

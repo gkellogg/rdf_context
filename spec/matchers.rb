@@ -1,11 +1,23 @@
 module Matchers
   class BeEquivalentGraph
     def initialize(expected, info)
-      @expected = expected
+      @expected = case expected
+      when Graph then expected
+      when Array then N3Parser.new(expected.join("\n"), info.about).graph
+      when String then N3Parser.new(expected, info.about).graph
+      when N3Parser then expected.graph
+      else nil
+      end
       @info = info
     end
     def matches?(actual)
-      @actual = actual
+      @actual = case actual
+      when Graph then actual
+      when Array then N3Parser.new(actual.join("\n"), @info.about).graph
+      when String then N3Parser.new(actual, @info.about).graph
+      when N3Parser then actual.graph
+      else nil
+      end
       @last_line = 0
       @sorted_actual = @actual.triples.sort_by{|t| t.to_ntriples}
       @sorted_expected = @expected.triples.sort_by{|t| t.to_ntriples}

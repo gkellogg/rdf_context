@@ -22,7 +22,7 @@ module RdfaHelper
     attr_accessor :suite
     attr_accessor :specificationReference
     attr_accessor :expectedResults
-    attr_accessor :rdfa_parser
+    attr_accessor :parser
     
     @@test_cases = []
     @@suite = ""
@@ -144,8 +144,8 @@ module RdfaHelper
       rdfa_string = input
       
       # Run
-      @rdfa_parser = RdfaParser::RdfaParser.new
-      yield(rdfa_string, rdfa_parser)
+      @parser = RdfaParser::RdfaParser.new
+      yield(rdfa_string, @parser)
 
       query_string = results
 
@@ -153,18 +153,17 @@ module RdfaHelper
       
       if (query_string.match(/UNION|OPTIONAL/) || title.match(/XML/)) && triples
         # Check triples, as Rasql doesn't implement UNION
-        parser = NTriplesParser.new(triples, tcpath)
-        @rdfa_parser.graph.should be_equivalent_graph(parser.graph, self)
+        @parser.graph.should be_equivalent_graph(triples, self)
       else
         # Run SPARQL query
-        @rdfa_parser.graph.should pass_query(query_string, self)
+        @parser.graph.should pass_query(query_string, self)
       end
 
-      @rdfa_parser.graph.to_rdfxml.should be_valid_xml
+      @parser.graph.to_rdfxml.should be_valid_xml
     end
     
     def trace
-      rdfa_parser.debug.join("\n")
+      @parser.debug.join("\n")
     end
     
     def self.test_cases(suite)
