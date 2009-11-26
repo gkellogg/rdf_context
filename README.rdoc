@@ -1,6 +1,9 @@
 = reddy
 
-* http://github.com/tommorris/reddy
+A set of compliant RDF parsers:
+* N3-rdf
+* RDF/XML
+* RDFa
 
 == DESCRIPTION:
 
@@ -8,12 +11,11 @@ Reddy is an RDF library for Ruby.
 
 == FEATURES/PROBLEMS:
 
-* RDF/XML parser is beginning to parse tests.
-* N3 parser
-* Fully compliant RDFa 1.0 parser
+* RDF/XML parser passes all positive W3C tests.
+* N3-rdf parser
+* Fully compliant XML/RDFa 1.0 parser.
 * N-Triples and RDF/XML serializer
-* RDFa tests use SPARQL for most tests due to Rasqal limitataions. Other tests compare directly against N-triples
-
+* RDFa tests use SPARQL for most tests due to Rasqal limitations. Other tests compare directly against N-triples
 
 == SYNOPSIS:
 
@@ -50,6 +52,7 @@ end
   * N3-Full tests from http://www.w3.org/2000/10/swap/test/n3/n3-full.tests
   * Complete RDF-Core tests from rdf/xml (http://www.w3.org/TR/2004/REC-rdf-testcases-20040210/)
   * N3 grammar tests?
+  * RDFa updates for new tests and non XHTML representations.
 * Graphs
   * Pluggable storage modules
   * Contexts
@@ -65,7 +68,7 @@ end
 (The MIT License)
 
 Copyright (c) 2008 Tom Morris and contributors
-Copyright (c) 2009 Gregg Kellogg (RDFa Parser)
+Copyright (c) 2009 Gregg Kellogg
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
@@ -88,7 +91,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 == FEEDBACK
 
-* tom@tommorris.org
-* github.com/tommorris/reddy
+* tom@tommorris.org or gregg@kellogg-assoc.com
+* github.com/tommorris/reddy or github.com/gkellogg/reddy
 * tommorris.lighthouseapp.com for bug reports
 * public-rdf-ruby mailing list on w3.org
