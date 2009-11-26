@@ -11,4 +11,4 @@
 # $Id: test002.nt,v 1.1 2002/03/08 12:21:41 dajobe Exp $
 #
 #####################################################################
-_:j0 <http://example.org/value> <http://example.org/dir/relFile> .
+_:a <http://example.org/value> <http://example.org/dir/relFile> .

@@ -5,13 +5,17 @@ include Reddy
 
 describe "RDF/XML Parser" do
   before(:each) { @parser = RdfXmlParser.new }
-  it "should recognise and do nothing for an RDF-less document" do
+  it "should recognise and create single triple for empty non-RDF root" do
     sampledoc = <<-EOF;
 <?xml version="1.0" ?>
 <NotRDF />
 EOF
     graph = @parser.parse(sampledoc, "http://example.com")
-    graph.size.should == 0
+    graph.size.should == 1
+    statement = graph[0]
+    statement.subject.class.should == BNode
+    statement.predicate.to_s.should == RDF_TYPE.to_s
+    statement.object.to_s.should == XML_NS.uri.to_s + "NotRDF"
   end
   
   it "should trigger parsing on XML documents with multiple RDF nodes" do
@@ -91,7 +95,7 @@ xmlns:ex="http://www.example.org/" xml:lang="en" xml:base="http://www.example.or
     
     lambda do
       graph = @parser.parse(sampledoc, "http://example.com")
-    end.should raise_error(AboutEachException)
+    end.should raise_error(InvalidPredicate, /Obsolete attribute .*aboutEach/)
   end
   
   it "should raise an error if rdf:aboutEachPrefix is used, as per the negative parser test rdfms-abouteach-error002 (rdf:aboutEachPrefix attribute)" do
@@ -114,7 +118,7 @@ xmlns:ex="http://www.example.org/" xml:lang="en" xml:base="http://www.example.or
     
     lambda do
       graph = @parser.parse(sampledoc, "http://example.com")
-    end.should raise_error(AboutEachException)
+    end.should raise_error(InvalidPredicate, /Obsolete attribute .*aboutEachPrefix/)
   end
   
   it "should fail if given a non-ID as an ID (as per rdfcore-rdfms-rdf-id-error001)" do
@@ -218,7 +222,7 @@ EOF
     
     lambda do
       graph = @parser.parse(sampledoc, "http://example.com")
-    end.should raise_error(ParserException, "Bad BagID")
+    end.should raise_error(InvalidPredicate, /Obsolete attribute .*bagID/)
   end
 
   it "should parse testcase" do
@@ -295,38 +299,42 @@ EOF
     #   file = File.join(@rdf_dir, "xml-literal-mixed.rdf")
     #   test_file(file)
     # end
+  end
 
-    # W3C Test suite from http://www.w3.org/2000/10/rdf-tests/rdfcore/
-    describe "w3c rdfcore tests" do
-      require 'rdfcore_helper'
-      include RdfCoreHelper
-      
-      def self.positive_tests
-        [] # RdfCoreHelper::TestCase.positive_parser_tests
-      end
+  # W3C Test suite from http://www.w3.org/2000/10/rdf-tests/rdfcore/
+  describe "w3c rdfcore tests" do
+    require 'rdfcore_helper'
+    include RdfCoreHelper
+    
+    def self.positive_tests
+      RdfCoreHelper::TestCase.positive_parser_tests rescue []
+    end
 
-      def self.negative_tests
-        [] # RdfCoreHelper::TestCase.negative_parser_tests
-      end
-      
-      # Negative parser tests should raise errors.
-      describe "positive parser tests" do
-        positive_tests.each do |t|
-          next unless t.name =~ /0001/
-          #puts t.inspect
-          specify "test #{t.about.uri.to_s}" do
-            t.run_test do |rdf_string, parser|
-              parser.parse(rdf_string, t.about.uri.to_s)
-            end
+    def self.negative_tests
+      [] # RdfCoreHelper::TestCase.negative_parser_tests rescue []
+    end
+    
+    # Negative parser tests should raise errors.
+    describe "positive parser tests" do
+      positive_tests.each do |t|
+        #next unless t.about.uri.to_s =~ /rdfms-seq-representation/
+        #next unless t.name =~ /1/
+        #puts t.inspect
+        specify "test #{t.about.uri.to_s}" do
+          t.run_test do |rdf_string, parser|
+            # Special case BNode production for 'rdfms-syntax-incomplete'
+            BNode.reset("bn0") if t.about.uri.to_s =~ /rdfms-syntax-incomplete/
+            parser.parse(rdf_string, t.about.uri.to_s)
           end
         end
       end
-      
-      describe "negative parser tests" do
-        negative_tests.each do |t|
-          specify "test #{t.about.uri.to_s}" do
-            rdf_string = File.read(t.input_document)
-            lambda { @parser.parse(rdf_string, t.about.uri.to_s) }.should raise_error(Reddy::ParserException)
+    end
+    
+    describe "negative parser tests" do
+      negative_tests.each do |t|
+        specify "test #{t.about.uri.to_s}" do
+          t.run_test do |rdf_string, parser|
+            lambda { parser.parse(rdf_string, t.about.uri.to_s); puts parser.debug }.should raise_error(Reddy::ParserException)
           end
         end
       end

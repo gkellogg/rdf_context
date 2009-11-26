@@ -11,4 +11,4 @@
 # $Id$
 # 
 #####################################################################
-<http://random.ioctl.org/#bar> <http://random.ioctl.org/#someProperty> _:a1 .
+<http://random.ioctl.org/#bar> <http://random.ioctl.org/#someProperty> _:a .

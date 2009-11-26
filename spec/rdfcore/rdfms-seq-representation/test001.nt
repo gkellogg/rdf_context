@@ -11,9 +11,9 @@
 # $Id: test001.nt,v 1.2 2003/07/24 15:51:04 jcarroll Exp $
 #
 #####################################################################
-<http://example.org/eg#eric> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> _:a0 .
-_:a0 <http://example.org/eg#intersectionOf> _:a1 .
-_:a1 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://example.org/eg#Person> .
-_:a1 <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:a2 .
-_:a2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://example.org/eg#Male> .
-_:a2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+<http://example.org/eg#eric> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> _:a .
+_:a <http://example.org/eg#intersectionOf> _:b .
+_:b <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://example.org/eg#Person> .
+_:b <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:c .
+_:c <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://example.org/eg#Male> .
+_:c <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .

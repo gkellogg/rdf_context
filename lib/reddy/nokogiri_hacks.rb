@@ -2,6 +2,7 @@ require 'nokogiri'
 class Nokogiri::XML::Node
   # URI of namespace + node_name
   def uri
-    URIRef.new(self.namespace.href + self.node_name)
+    ns = self.namespace ? self.namespace.href : XML_NS.uri.to_s
+    URIRef.new(ns + self.node_name)
   end
 end

@@ -12,6 +12,18 @@ describe "Literals: " do
       other = Literal.build_from("foo")
       other.encoding.should == "http://www.w3.org/2001/XMLSchema#string"
     end
+    
+    describe "should handle specific cases" do
+      {
+        '"Gregg"' => Literal.untyped("Gregg"),
+        '"\u677E\u672C \u540E\u5B50"' => Literal.untyped("松本 后子"),
+        '"D\u00FCrst"' => Literal.untyped("Dürst")
+      }.each_pair do |encoded, literal|
+        it "should encode '#{literal.contents}'" do
+          literal.to_n3.should == encoded
+        end
+      end
+    end
 
     describe "encodings" do
       it "should return n3" do subject.to_n3.should == "\"tom\"" end
@@ -263,12 +275,14 @@ describe "Literals: " do
   
   describe "an n3 literal" do
     {
-      "simple literal"  => ["simple literal", nil, nil],
-      "backslash:\\" => ["backslash:\\\\", nil, nil],
-      "dquote:\"" => ["dquote:\\\"", nil, nil],
-      "newline:\n" => ["newline:\\n", nil, nil],
-      "return:\r" => ["return:\\r", nil, nil],
-      "tab:\t" => ["tab:\\t", nil, nil],
+      "Gregg" => ['Gregg', nil, nil],
+      "Dürst" => ['D\u00FCrst', nil, nil],
+      "simple literal"  => ['simple literal', nil, nil],
+      "backslash:\\" => ['backslash:\\\\', nil, nil],
+      "dquote:\"" => ['dquote:\\"', nil, nil],
+      "newline:\n" => ['newline:\\n', nil, nil],
+      "return:\r" => ['return:\\r', nil, nil],
+      "tab:\t" => ['tab:\\t', nil, nil],
     }.each_pair do |name, args|
       specify "test #{name}" do
         Literal.n3_encoded(*args).contents.should == name

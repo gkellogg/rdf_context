@@ -5,6 +5,9 @@
 * Don't output lang for typed literals in n3 format
 * Rewrite of RDF/XML parser based on spec; passes existing tests.
 * Update rdfcore tests based on rdfa test harness.
+* Move Literal string escape/unescape to string_hacks.
+* Fix literal n3_encoded parsing.
+* All positive RDF/XML parser tests pass.
 
 === 0.1.3
 * Added rdfa-test-suite as sub-module and refactored RDFa tests to use them.

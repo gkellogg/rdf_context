@@ -12,4 +12,4 @@
 # 
 #####################################################################
 <http://example.org/object#uriRef> <http://example.org/prop2> "val" .
-_:j88093 <http://example.org/prop1> <http://example.org/object#uriRef> .
+_:a <http://example.org/prop1> <http://example.org/object#uriRef> .

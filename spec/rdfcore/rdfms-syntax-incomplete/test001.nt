@@ -11,4 +11,4 @@
 # $Id: test001.nt,v 1.1 2002/07/30 09:46:05 jcarroll Exp $
 # 
 #####################################################################
-_:j0 <http://example.org/property> _:j0 .
+_:a <http://example.org/property> _:a .

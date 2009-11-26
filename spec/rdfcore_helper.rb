@@ -33,14 +33,18 @@ module RdfCoreHelper
     def initialize(triples)
       triples.each do |statement|
         next if statement.subject.is_a?(BNode)
-        self.about ||= statement.subject
-        self.name ||= statement.subject.short_name
+#        self.about ||= statement.subject
+#        self.name ||= statement.subject.short_name
         
         if statement.is_type?
           self.rdf_type = statement.object.short_name
         elsif statement.predicate.short_name =~ /Document\Z/i
-          puts "#{statement.predicate.short_name}: #{statement.object.inspect}"
+          #puts "#{statement.predicate.short_name}: #{statement.object.inspect}"
           self.send("#{statement.predicate.short_name}=", statement.object.to_s.sub(/^.*rdfcore/, TEST_DIR))
+          if statement.predicate.short_name == "inputDocument"
+            self.about ||= statement.object
+            self.name ||= statement.object.short_name
+          end
         elsif self.respond_to?("#{statement.predicate.short_name}=")
           self.send("#{statement.predicate.short_name}=", statement.object.to_s)
         end
@@ -101,10 +105,9 @@ module RdfCoreHelper
       manifest = File.read(File.join(TEST_DIR, "Manifest.rdf"))
       parser = RdfXmlParser.new
       begin
-        parser.parse(manifest)
+        parser.parse(manifest, "http://www.w3.org/2000/10/rdf-tests/rdfcore/Manifest.rdf")
       rescue
-        puts "Parse error: #{$!}\n\t#{parser.debug.join("\t\n")}\n\n"
-        raise
+        raise "Parse error: #{$!}\n\t#{parser.debug.join("\t\n")}\n\n"
       end
       graph = parser.graph
       

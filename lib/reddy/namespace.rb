@@ -86,7 +86,7 @@ module Reddy
     
     private
     def shortname_valid?(shortname)
-      if shortname =~ /\A[a-zA-Z_][a-zA-Z0-9_]+\Z/ || shortname.nil?
+      if shortname =~ /\A[a-zA-Z_][a-zA-Z0-9_]*\Z/ || shortname.nil?
         return true
       else
         return false

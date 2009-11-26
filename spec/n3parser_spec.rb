@@ -69,6 +69,27 @@ describe "N3 parser" do
     end
   end
   
+  describe "literal encodings" do
+    {
+      'Dürst' => '_:a <http://example.org/named> "D\u00FCrst" .',
+      'simple literal' => '<http://example.org/resource7> <http://example.org/property> "simple literal" .',
+      'backslash:\\' => '<http://example.org/resource8> <http://example.org/property> "backslash:\\\\" .',
+      'dquote:"' => '<http://example.org/resource9> <http://example.org/property> "dquote:\"" .',
+      "newline:\n" => '<http://example.org/resource10> <http://example.org/property> "newline:\n" .',
+      "return\r" => '<http://example.org/resource11> <http://example.org/property> "return\r" .',
+      "tab:\t" => '<http://example.org/resource12> <http://example.org/property> "tab:\t" .',
+      "é" => '<http://example.org/resource16> <http://example.org/property> "\u00E9" .',
+      "€" => '<http://example.org/resource17> <http://example.org/property> "\u20AC" .',
+    }.each_pair do |contents, triple|
+      specify "test #{contents}" do
+        parser = Reddy::N3Parser.new(triple)
+        parser.graph.should_not be_nil
+        parser.graph.size.should == 1
+        parser.graph[0].object.contents.should == contents
+      end
+    end
+  end
+  
   # n3p tests taken from http://inamidst.com/n3p/test/
   describe "parsing n3p test" do
    dir_name = File.join(File.dirname(__FILE__), '..', 'test', 'n3_tests', 'n3p', '*.n3')

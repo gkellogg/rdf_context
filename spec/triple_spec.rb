@@ -87,7 +87,7 @@ describe "Triples" do
     it "should barf on an illegal uri string" do
       lambda do
         Triple.coerce_predicate("I'm just a soul whose intention is good")
-      end.should raise_error(Triple::InvalidPredicate)
+      end.should raise_error(InvalidPredicate)
     end
   end
 

@@ -11,5 +11,5 @@
 # $Id: test004.nt,v 1.2 2001/10/10 13:10:05 barstow Exp $
 # 
 #####################################################################
-_:j0 <http://www.w3.org/1999/02/22-rdf-syntax-ns#_1> "some value" .
-_:j0 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Alt> .
+_:a <http://www.w3.org/1999/02/22-rdf-syntax-ns#_1> "some value" .
+_:a <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Alt> .

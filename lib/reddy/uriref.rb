@@ -18,7 +18,7 @@ module Reddy
         @uri = Addressable::URI.join(*args.map{|s| s.to_s}.reverse)
       end
       if @uri.relative?
-        raise UriRelativeException, "<" + @uri.to_s + "> is a relative URI"
+        raise ParserException, "<" + @uri.to_s + "> is a relative URI"
       end
       if !@uri.to_s.match(/^javascript/).nil?
         raise ParserException, "Javascript pseudo-URIs are not acceptable"

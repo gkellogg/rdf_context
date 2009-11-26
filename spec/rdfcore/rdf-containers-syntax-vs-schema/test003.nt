@@ -11,8 +11,8 @@
 # $Id$
 # 
 #####################################################################
-_:bar <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://foo/Bar> .
-_:bar <http://www.w3.org/1999/02/22-rdf-syntax-ns#_1> "1" .
-_:bar <http://www.w3.org/1999/02/22-rdf-syntax-ns#_2> "2" .
+_:a <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://foo/Bar> .
+_:a <http://www.w3.org/1999/02/22-rdf-syntax-ns#_1> "1" .
+_:a <http://www.w3.org/1999/02/22-rdf-syntax-ns#_2> "2" .
 
 

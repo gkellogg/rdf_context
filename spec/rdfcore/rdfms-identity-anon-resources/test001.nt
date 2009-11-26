@@ -11,4 +11,4 @@
 # $Id: test001.nt,v 1.2 2001/10/10 13:10:05 barstow Exp $
 # 
 #####################################################################
-_:j0 <http://example.org/property> "property value" .
+_:a <http://example.org/property> "property value" .

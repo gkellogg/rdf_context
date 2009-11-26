@@ -11,5 +11,5 @@
 # $Id: test0005.nt,v 1.2 2001/09/06 21:07:19 barstow Exp $
 # 
 #####################################################################
-<http://example.org/resource1/> <http://example.org/property> _:genid .
-_:genid <http://example.org/property2> "bar" .
+<http://example.org/resource1/> <http://example.org/property> _:a .
+_:a <http://example.org/property2> "bar" .

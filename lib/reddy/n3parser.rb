@@ -14,7 +14,7 @@ module Reddy
     #
     # @author Patrick Sinclair (metade)
     def initialize(n3_str, uri=nil)
-      @uri = Addressable::URI.parse(uri) unless uri.nil?
+      @uri = Addressable::URI.parse(uri.to_s) unless uri.nil?
       parser = N3GrammerParser.new
       document = parser.parse(n3_str)
       if document

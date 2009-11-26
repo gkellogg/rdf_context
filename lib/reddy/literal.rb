@@ -1,5 +1,3 @@
-require 'iconv'
-
 module Reddy
   # An RDF Literal, with value, encoding and language elements.
   class Literal
@@ -72,7 +70,7 @@ module Reddy
       # XMLLiteral and String values are encoding using C-style strings with
       # non-printable ASCII characters escaped.
       def format_as_n3(content, lang)
-        content = escape(content.to_s)
+        content = content.to_s.rdf_escape
         quoted_content = should_quote? ? "\"#{content}\"" : content
         "#{quoted_content}^^<#{value}>"
       end
@@ -99,101 +97,6 @@ module Reddy
       def xmlliteral?
         false
       end
-
-      #private
-      # "Borrowed" from JSON utf8_to_json
-      MAP = {
-        "\x0" => '\u0000',
-        "\x1" => '\u0001',
-        "\x2" => '\u0002',
-        "\x3" => '\u0003',
-        "\x4" => '\u0004',
-        "\x5" => '\u0005',
-        "\x6" => '\u0006',
-        "\x7" => '\u0007',
-        "\b"  =>  '\b',
-        "\t"  =>  '\t',
-        "\n"  =>  '\n',
-        "\xb" => '\u000B',
-        "\f"  =>  '\f',
-        "\r"  =>  '\r',
-        "\xe" => '\u000E',
-        "\xf" => '\u000F',
-        "\x10" => '\u0010',
-        "\x11" => '\u0011',
-        "\x12" => '\u0012',
-        "\x13" => '\u0013',
-        "\x14" => '\u0014',
-        "\x15" => '\u0015',
-        "\x16" => '\u0016',
-        "\x17" => '\u0017',
-        "\x18" => '\u0018',
-        "\x19" => '\u0019',
-        "\x1a" => '\u001A',
-        "\x1b" => '\u001B',
-        "\x1c" => '\u001C',
-        "\x1d" => '\u001D',
-        "\x1e" => '\u001E',
-        "\x1f" => '\u001F',
-        '"'   =>  '\"',
-        '\\'  =>  '\\\\',
-        '/'   =>  '/',
-      } # :nodoc:
-
-      # Convert a UTF8 encoded Ruby string _string_ to an escaped string, encoded with
-      # UTF16 big endian characters as \U????, and return it.
-      #
-      # \\:: Backslash
-      # \':: Single quote
-      # \":: Double quot
-      # \n:: ASCII Linefeed
-      # \r:: ASCII Carriage Return
-      # \t:: ASCCII Horizontal Tab
-      # \uhhhh:: character in BMP with Unicode value U+hhhh
-      # \U00hhhhhh:: character in plane 1-16 with Unicode value U+hhhhhh
-      if String.method_defined?(:force_encoding)
-        def escape(string) # :nodoc:
-          string << '' # XXX workaround: avoid buffer sharing
-          string.force_encoding(Encoding::ASCII_8BIT)
-          string.gsub!(/["\\\/\x0-\x1f]/) { MAP[$&] }
-          string.gsub!(/(
-                          (?:
-                            [\xc2-\xdf][\x80-\xbf]    |
-                            [\xe0-\xef][\x80-\xbf]{2} |
-                            [\xf0-\xf4][\x80-\xbf]{3}
-                          )+ |
-                          [\x80-\xc1\xf5-\xff]       # invalid
-                        )/nx) { |c|
-                          c.size == 1 and raise TypeError, "invalid utf8 byte: '#{c}'"
-                          s = Iconv.new('utf-16be', 'utf-8').iconv(c).unpack('H*')[0].upcase
-                          s.gsub!(/.{4}/n, '\\\\u\&')
-                        }
-          string.force_encoding(Encoding::UTF_8)
-          string
-        end
-      else
-        def escape(string) # :nodoc:
-          string = string.gsub(/["\\\/\x0-\x1f]/) { MAP[$&] }
-          string.gsub!(/(
-                          (?:
-                            [\xc2-\xdf][\x80-\xbf]    |
-                            [\xe0-\xef][\x80-\xbf]{2} |
-                            [\xf0-\xf4][\x80-\xbf]{3}
-                          )+ |
-                          [\x80-\xc1\xf5-\xff]       # invalid
-                        )/nx) { |c|
-                          c.size == 1 and raise TypeError, "invalid utf8 byte: '#{c}'"
-                          s = Iconv.new('utf-16be', 'utf-8').iconv(c).unpack('H*')[0].upcase
-                          s.gsub!(/.{4}/n, '\\\\u\&')
-                        }
-          string
-        end
-      end
-      
-      # Reverse operation of escape
-      def unescape(string)
-        string.gsub(/\\([\\\'\"nrt]|u\h{4}|U00\h[6])/) {MAP.invert[$&]}
-      end
     end
     
     class Null < Encoding
@@ -202,7 +105,7 @@ module Reddy
       end
 
       def format_as_n3(content, lang)
-        "\"#{escape(content)}\"" + (lang ? "@#{lang}" : "")
+        "\"#{content.to_s.rdf_escape}\"" + (lang ? "@#{lang}" : "")
         # Perform translation on value if it's typed
       end
 
@@ -243,7 +146,7 @@ module Reddy
       end
       
       def format_as_n3(content, lang)
-        "\"#{escape(content)}\"^^<#{value}>"
+        "\"#{content.to_s.rdf_escape}\"^^<#{value}>"
       end
 
       def format_as_trix(content, lang)
@@ -257,7 +160,7 @@ module Reddy
 
       # Map namespaces from context to each top-level element found within snippet
       def encode_contents(contents, options)
-        puts "encode_contents: '#{contents}'"
+        #puts "encode_contents: '#{contents}'"
         if contents.is_a?(String)
           ns_hash = options[:namespaces].values.inject({}) {|h, ns| h.merge(ns.xmlns_hash)}
           ns_strs = []
@@ -339,7 +242,7 @@ module Reddy
       options = {}
       options[:language] = language if language
       #puts "encoded: #{contents.dump}"
-      contents = encoding.unescape(contents)
+      contents = contents.rdf_unescape
       #puts "unencoded: #{contents.dump}"
       new(contents, encoding, options)
     end

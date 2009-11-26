@@ -11,9 +11,9 @@
 # $Id: test002.nt,v 1.1 2002/07/30 09:46:05 jcarroll Exp $
 # 
 #####################################################################
-_:j0A <http://example.org/property1> _:j0A .
-_:j2 <http://example.org/property2> _:j1B .
-_:j1B <http://example.org/property3> _:j0A .
+_:a <http://example.org/property1> _:a .
+_:bn0 <http://example.org/property2> _:b .
+_:b <http://example.org/property3> _:a .
 
 
 

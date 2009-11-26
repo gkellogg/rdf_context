@@ -11,10 +11,10 @@
 # $Id$
 # 
 #####################################################################
-_:d1 <http://www.w3.org/1999/02/22-rdf-syntax-ns#_1> _:d2 .
+_:a <http://www.w3.org/1999/02/22-rdf-syntax-ns#_1> _:b .
 
-_:d2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#_1> "1" .
-_:d2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#_2> "2" .
+_:b <http://www.w3.org/1999/02/22-rdf-syntax-ns#_1> "1" .
+_:b <http://www.w3.org/1999/02/22-rdf-syntax-ns#_2> "2" .
 
-_:d1 <http://www.w3.org/1999/02/22-rdf-syntax-ns#_2> "2" .
+_:a <http://www.w3.org/1999/02/22-rdf-syntax-ns#_2> "2" .
 

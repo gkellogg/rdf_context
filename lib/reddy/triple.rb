@@ -76,7 +76,7 @@ module Reddy
       else
         raise InvalidPredicate, "Predicate should be a URI"
       end
-    rescue UriRelativeException => e
+    rescue ParserException => e
       raise InvalidPredicate, "Couldn't make a URIRef: #{e.message}"
     end
 

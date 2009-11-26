@@ -11,7 +11,7 @@
 # $Id: test003.nt,v 1.2 2003/07/24 15:51:06 jcarroll Exp $
 # 
 #####################################################################
-_:j0A <http://example.org/property1> "value" .
+_:a <http://example.org/property1> "value" .
 
 
 
