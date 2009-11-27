@@ -1,3 +1,7 @@
+=== 0.1.5
+* Update RDFa tests to use Reddy RDF/XML parser.
+* All negative RDF/XML parser tests pass.
+
 === 0.1.4
 * Update N3 treetop parser to version 1.4.0 (no digits in parser rule names).
 * Fix N3 literal handling (still has bug with escaped double quote).

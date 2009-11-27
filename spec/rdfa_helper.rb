@@ -1,4 +1,3 @@
-require 'rdf/redland'
 require 'matchers'
 
 module RdfaHelper
@@ -31,27 +30,22 @@ module RdfaHelper
       self.suite = suite
       self.expectedResults = true
       statements.each do |statement|
-        next if statement.subject.is_a?(Redland::BNode)
+        next if statement.subject.is_a?(BNode)
         #next unless statement.subject.uri.to_s.match(/0001/)
         unless self.about
           self.about = URI.parse(statement.subject.uri.to_s)
-          self.name = statement.subject.uri.short_name
+          self.name = statement.subject.short_name
         end
         
-        if statement.predicate.uri.short_name == "expectedResults"
-          self.expectedResults = statement.object.literal.value == "true"
+        if statement.predicate.short_name == "expectedResults"
+          self.expectedResults = statement.object.contents == "true"
           #puts "expectedResults = #{statement.object.literal.value}"
-        elsif self.respond_to?("#{statement.predicate.uri.short_name}=")
-          s = case
-          when statement.object.literal?  then statement.object.literal
-          when statement.object.resource? then statement.object.uri
-          when statement.object.blank?    then statement.object.blank_identifier
-          else false
-          end
-          self.send("#{statement.predicate.uri.short_name}=", s.to_s)
+        elsif self.respond_to?("#{statement.predicate.short_name}=")
+          self.send("#{statement.predicate.short_name}=", statement.object.to_s)
           #puts "#{statement.predicate.uri.short_name} = #{s.to_s}"
         end
       end
+
     end
     
     def inspect
@@ -174,70 +168,25 @@ module RdfaHelper
       @@manifest_url = "#{BASE_MANIFEST_URL}#{suite}-manifest.rdf"
       
       manifest_str = File.read(File.join(TEST_DIR, "#{suite}-manifest.rdf"))
-      rdfxml_parser = Redland::Parser.new
-      test_hash = {}
-      # Replace with different logic for URI
-      rdfxml_parser.parse_string_as_stream(manifest_str, @@manifest_url) do |st|
-        a = test_hash[st.subject.uri.to_s] ||= []
+      parser = RdfXmlParser.new
+      
+      begin
+        parser.parse(manifest_str, @@manifest_url)
+      rescue
+        raise "Parse error: #{$!}\n\t#{parser.debug.join("\t\n")}\n\n"
+      end
+      graph = parser.graph
+      
+      # Group by subject
+      test_hash = graph.triples.inject({}) do |hash, st|
+        a = hash[st.subject] ||= []
         a << st
+        hash
       end
       
       @@test_cases = test_hash.values.map {|statements| TestCase.new(statements, suite)}.
         compact.
-        sort_by{|t| t.about.is_a?(URI) ? t.about.to_s : "zzz"}
-    end
-  end
-end
-
-
-class Redland::Uri
-  def short_name
-    u = URI.parse(self.to_s)
-    if u.fragment
-      return u.fragment
-    elsif u.path.split("/").last.class == String and u.path.split("/").last.length > 0
-      return u.path.split("/").last
-    else
-      return false
-    end
-  end
-end
-
-# Simple parser for NTriples
-class NTriplesParser
-  attr_reader :graph
-
-  def initialize(string, uri)
-    @graph = RdfaParser::Graph.new
-    RdfaParser::BNode.reset
-    
-    ntriples_parser = Redland::Parser.ntriples
-    ntriples_parser.parse_string_as_stream(string, uri) do |st|
-      s = redland_to_native(st.subject)
-      p = redland_to_native(st.predicate)
-      o = redland_to_native(st.object)
-      @graph.add_triple(s, p, o)
-    end
-  end
-  
-  def redland_to_native(resource)
-    case
-    when resource.literal?
-      node_type = Redland.librdf_node_get_literal_value_datatype_uri(resource.literal.node)
-      node_type = Redland.librdf_uri_to_string(node_type) if node_type
-      RdfaParser::Literal.typed(resource.literal.value, node_type, :language => resource.literal.language)
-    when resource.blank?
-      # Cache anonymous blank identifiers
-      @bn_hash ||= {}
-      id = resource.blank_identifier.to_s
-      id = nil if id.match(/^r[r\d]+$/)
-      bn = @bn_hash[resource.blank_identifier.to_s] ||= RdfaParser::BNode.new(id)
-      bn.identifier
-      bn
-    when resource.resource?
-      RdfaParser::URIRef.new(resource.uri.to_s)
-    else
-      nil
+        sort_by{|t| t.about.is_a?(URIRef) ? t.about.to_s : "zzz"}
     end
   end
 end

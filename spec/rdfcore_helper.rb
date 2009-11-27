@@ -70,11 +70,11 @@ module RdfCoreHelper
     
     # Read in file, and apply modifications reference either .html or .xhtml
     def input
-      body = File.read(inputDocument)
+      File.read(inputDocument)
     end
 
     def output
-      body = File.read(outputDocument)
+      outputDocument && File.read(outputDocument)
     end
 
     # Run test case, yields input for parser to create triples
@@ -85,9 +85,7 @@ module RdfCoreHelper
       @parser = RdfXmlParser.new
       yield(rdf_string, @parser)
 
-      query_string = output
-      
-      @parser.graph.should be_equivalent_graph(output, self)
+      @parser.graph.should be_equivalent_graph(output, self) if output
     end
 
     def trace

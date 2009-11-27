@@ -131,7 +131,7 @@ xmlns:ex="http://www.example.org/" xml:lang="en" xml:base="http://www.example.or
     
     lambda do
       graph = @parser.parse(sampledoc, "http://example.com")
-    end.should raise_error(ParserException, /Bad ID format/)
+    end.should raise_error(ParserException, /ID addtribute '.*' must be a NCName/)
   end
   
   it "should make sure that the value of rdf:ID attributes match the XML Name production (child-element version)" do
@@ -188,7 +188,7 @@ EOF
     
     lambda do
       graph = @parser.parse(sampledoc, "http://example.com")
-    end.should raise_error(ParserException, "Bad ID format 'a/b'")
+    end.should raise_error(ParserException, "ID addtribute 'a/b' must be a NCName")
   end
   
   it "should be able to handle Bags/Alts etc." do
@@ -311,7 +311,7 @@ EOF
     end
 
     def self.negative_tests
-      [] # RdfCoreHelper::TestCase.negative_parser_tests rescue []
+      RdfCoreHelper::TestCase.negative_parser_tests rescue []
     end
     
     # Negative parser tests should raise errors.
@@ -332,9 +332,15 @@ EOF
     
     describe "negative parser tests" do
       negative_tests.each do |t|
+        #next unless t.about.uri.to_s =~ /rdfms-empty-property-elements/
+        #next unless t.name =~ /1/
+        #puts t.inspect
         specify "test #{t.about.uri.to_s}" do
           t.run_test do |rdf_string, parser|
-            lambda { parser.parse(rdf_string, t.about.uri.to_s); puts parser.debug }.should raise_error(Reddy::ParserException)
+            lambda do
+              parser.parse(rdf_string, t.about.uri.to_s)
+              parser.graph.should be_equivalent_graph("", t)
+            end.should raise_error(RdfException)
           end
         end
       end

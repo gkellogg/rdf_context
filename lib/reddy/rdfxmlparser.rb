@@ -6,7 +6,18 @@ module Reddy
   include LibXML
   
   class RdfXmlParser
-    NC_REGEXP = Regexp.new("^([a-zA-Z_]|\\\\u[0-9a-fA-F])([a-zA-Z0-9_\.-]|\\\\u[0-9a-fA-F]{4})*$")
+    NC_REGEXP = Regexp.new(
+      %{^
+        (?!\\\\u0301)             # &#x301; is a non-spacing acute accent.
+                                  # It is legal within an XML Name, but not as the first character.
+        (  [a-zA-Z_]
+         | \\\\u[0-9a-fA-F]
+        )
+        (  [0-9a-zA-Z_\.-]
+         | \\\\u([0-9a-fA-F]{4})  # \u followed by a sequence of four hex digits
+        )*
+      $},
+      Regexp::EXTENDED)
 
     CORE_SYNTAX_TERMS = %w(RDF ID about parseType resource nodeID datatype).map {|n| "http://www.w3.org/1999/02/22-rdf-syntax-ns##{n}"}
     OLD_TERMS = %w(aboutEach aboutEachPrefix bagID).map {|n| "http://www.w3.org/1999/02/22-rdf-syntax-ns##{n}"}
@@ -114,7 +125,7 @@ module Reddy
       @uri = Addressable::URI.parse(uri).to_s
       @xml = Nokogiri::XML.parse(xml_str)
       @id_mapping = Hash.new
-
+      
       root = @xml.root
       
       # Look for rdf:RDF elements and process each.
@@ -200,7 +211,6 @@ module Reddy
         elsif is_propertyAttr?(attr)
           # Attributes not RDF_TYPE
           predicate = attr.uri
-          predicate = ec.li_next(predicate) if predicate == RDF_NS.li
           lit = Literal.untyped(attr.value, ec.language)
           add_triple(attr, subject, predicate, lit)
         end
@@ -213,6 +223,7 @@ module Reddy
         child_ec = ec.clone(child)
         predicate = child.uri
         add_debug(child, "propertyElt, predicate: #{predicate}")
+        propertyElementURI_check(child)
         
         # Determine the content type of this property element
         text_nodes = child.children.select {|e| e.text? && !e.blank?}
@@ -230,6 +241,8 @@ module Reddy
         # Note that the [base URI] accessor is computed by XML Base before any xml:base attribute information item
         # is deleted.
         attrs = {}
+        id = datatype = parseType = resourceAttr = nodeID = nil
+        
         child.attribute_nodes.each do |attr|
           if attr.namespace.to_s.empty?
             # The support for a limited set of non-namespaced names is REQUIRED and intended to allow
@@ -240,31 +253,36 @@ module Reddy
             #attrs[attr.to_s] = attr.value unless attr.to_s.match?(/^xml/)
           elsif attr.namespace.href == XML_NS.uri.to_s
             # No production. Lang and base elements already extracted
+          elsif attr.namespace.href == RDF_NS.uri.to_s
+            case attr.name
+            when "ID"         then id = attr.value
+            when "datatype"   then datatype = attr.value
+            when "parseType"  then parseType = attr.value
+            when "resource"   then resourceAttr = attr.value
+            when "nodeID"     then nodeID = attr.value
+            else                   attrs[attr] = attr.value
+            end
           else
-            attrs[attr.uri.to_s] = attr.value
+            attrs[attr] = attr.value
           end
         end
-        id = attrs.delete(RDF_NS.ID.to_s)
-        datatype = attrs.delete(RDF_NS.datatype.to_s)
-        parseType = attrs.delete(RDF_NS.parseType.to_s)
-        resourceAttr = attrs.delete(RDF_NS.resource.to_s)
-        nodeID = attrs.delete(RDF_NS.nodeID.to_s)
         
+        if nodeID && resourceAttr
+          add_debug(el, "Cannot have rdf:nodeID and rdf:resource.")
+          raise ParserException.new("Cannot have rdf:nodeID and rdf:resource.") if @strict
+        end
+
         # Apply character transformations
-        id = id.rdf_escape if id
+        id = id_check(el, id.rdf_escape, nil) if id
         resourceAttr = resourceAttr.rdf_escape if resourceAttr
-        nodeID = nodeID.rdf_escape if nodeID
+        nodeID = nodeID_check(el, nodeID.rdf_escape) if nodeID
 
         add_debug(el, "attrs: #{attrs.inspect}")
         add_debug(el, "datatype: #{datatype}") if datatype
         add_debug(el, "parseType: #{parseType}") if parseType
         add_debug(el, "resource: #{resourceAttr}") if resourceAttr
         add_debug(el, "nodeID: #{nodeID}") if nodeID
-        if id
-          add_debug(el, "id: #{id}")
-          # Satisfy constraint-id. id must be an NCName
-          raise ParserException.new("ID addtribute '#{id}' must be a NCName") unless id_check?(id)
-        end
+        add_debug(el, "id: #{id}") if id
         
         if attrs.empty? && datatype.nil? && parseType.nil? && element_nodes.length == 1
           # Production resourcePropertyElt
@@ -277,13 +295,19 @@ module Reddy
         elsif attrs.empty? && parseType.nil? && element_nodes.length == 0 && text_nodes.length > 0
           # Production literalPropertyElt
           add_debug(child, "literalPropertyElt")
-
+          
           literal = datatype ? Literal.typed(child.inner_html, datatype) : Literal.untyped(child.inner_html, child_ec.language)
           add_triple(child, subject, predicate, literal)
           reify(id, child, subject, predicate, literal, ec) if id
         elsif parseType == "Resource"
           # Production parseTypeResourcePropertyElt
           add_debug(child, "parseTypeResourcePropertyElt")
+
+          unless attrs.empty?
+            warn = "Resource Property with extra attributes: '#{attrs.inspect}'"
+            add_debug(child, warn)
+            raise ParserException.new(warn) if @strict
+          end
 
           # For element e with possibly empty element content c.
           n = BNode.new
@@ -311,6 +335,12 @@ module Reddy
           # Production parseTypeCollectionPropertyElt
           add_debug(child, "parseTypeCollectionPropertyElt")
 
+          unless attrs.empty?
+            warn = "Resource Property with extra attributes: '#{attrs.inspect}'"
+            add_debug(child, warn)
+            raise ParserException.new(warn) if @strict
+          end
+
           # For element event e with possibly empty nodeElementList l. Set s:=list().
           # For each element event f in l, n := bnodeid(identifier := generated-blank-node-id()) and append n to s to give a sequence of events.
           s = element_nodes.map { BNode.new }
@@ -332,6 +362,18 @@ module Reddy
         elsif parseType   # Literal or Other
           # Production parseTypeResourcePropertyElt
           add_debug(child, parseType == "Literal" ? "parseTypeResourcePropertyElt" : "parseTypeOtherPropertyElt (#{parseType})")
+
+          unless attrs.empty?
+            warn = "Resource Property with extra attributes: '#{attrs.inspect}'"
+            add_debug(child, warn)
+            raise ParserException.new(warn) if @strict
+          end
+
+          if resourceAttr
+            warn = "illegal rdf:resource"
+            add_debug(child, warn)
+            raise ParserException.new(warn) if @strict
+          end
 
           object = Literal.typed(child.children, XML_LITERAL, :namespaces => child_ec.uri_mappings)
           add_triple(child, subject, predicate, object)
@@ -356,13 +398,17 @@ module Reddy
 
             # produce triples for attributes
             attrs.each_pair do |attr, val|
-              add_debug(el, "attr: #{attr}='#{val}'")
-              if attr == RDF_TYPE
+              add_debug(el, "attr: #{attr.name}='#{val}'")
+              
+              if attr.uri.to_s == RDF_TYPE
                 add_triple(child, resource, RDF_TYPE, val)
               else
+                # Check for illegal attributes
+                next unless is_propertyAttr?(attr)
+
                 # Attributes not in RDF_TYPE
                 lit = Literal.untyped(val, child_ec.language)
-                add_triple(child, resource, attr, lit)
+                add_triple(child, resource, attr.uri.to_s, lit)
               end
             end
             add_triple(child, subject, predicate, resource)
@@ -391,28 +437,30 @@ module Reddy
     def parse_subject(el, ec)
       old_property_check(el)
       
+      nodeElementURI_check(el)
       about = el.attribute("about")
       id = el.attribute("ID")
       nodeID = el.attribute("nodeID")
+      
+      if nodeID && about
+        add_debug(el, "Cannot have rdf:nodeID and rdf:about.")
+        raise ParserException.new("Cannot have rdf:nodeID and rdf:about.") if @strict
+      elsif nodeID && id
+        add_debug(el, "Cannot have rdf:nodeID and rdf:ID.")
+        raise ParserException.new("Cannot have rdf:nodeID and rdf:ID.") if @strict
+      end
 
       case
       when id
-        id = id.value.rdf_escape if id
-
-        add_debug(el, "parse_subject, id: '#{id}'")
-        if id_check?(id)
-          URIRef.new("##{id}", ec.base)
-        else
-          add_debug(el, "Bad ID format '#{id}'")
-          raise Reddy::ParserException.new("Bad ID format '#{id}'") if @strict
-          nil
-        end
+        add_debug(el, "parse_subject, id: '#{id.value.rdf_escape}'")
+        id_check(el, id.value.rdf_escape, ec.base) # Returns URI
       when nodeID
-        nodeID = nodeID.value.rdf_escape if nodeID
+        # The value of rdf:nodeID must match the XML Name production
+        nodeID = nodeID_check(el, nodeID.value.rdf_escape)
         add_debug(el, "parse_subject, nodeID: '#{nodeID}")
         BNode.new(nodeID)
       when about
-        about = about.value.rdf_escape if about
+        about = about.value.rdf_escape
         add_debug(el, "parse_subject, about: '#{about}'")
         URIRef.new(about, ec.base)
       else
@@ -421,13 +469,69 @@ module Reddy
       end
     end
     
-    def id_check?(id)
-      NC_REGEXP.match(id)
+    # ID attribute must be an NCName
+    def id_check(el, id, base)
+      if NC_REGEXP.match(id)
+        # ID may only be specified once for the same URI
+        if base
+          uri = URIRef.new("##{id}", base)
+          if @id_mapping[id] && @id_mapping[id] == uri
+            warn = "ID addtribute '#{id}' may only be defined once for the same URI"
+            add_debug(el, warn)
+            raise Reddy::ParserException.new(warn) if @strict
+          end
+          
+          @id_mapping[id] = uri
+          # Returns URI, in this case
+        else
+          id
+        end
+      else
+        warn = "ID addtribute '#{id}' must be a NCName"
+        add_debug(el, "ID addtribute '#{id}' must be a NCName")
+        add_debug(el, warn)
+        raise Reddy::ParserException.new(warn) if @strict
+        nil
+      end
+    end
+    
+    # nodeID must be an XML Name
+    # nodeID must pass Production rdf-id
+    def nodeID_check(el, nodeID)
+      if NC_REGEXP.match(nodeID)
+        nodeID
+      else
+        add_debug(el, "nodeID addtribute '#{nodeID}' must be an XML Name")
+        raise Reddy::ParserException.new("nodeID addtribute '#{nodeID}' must be a NCName") if @strict
+        nil
+      end
     end
     
     def is_propertyAttr?(attr)
-      !(CORE_SYNTAX_TERMS + OLD_TERMS).include?(attr.uri.to_s) &&
+      if ([RDF_NS.Description.to_s, RDF_NS.li.to_s] + OLD_TERMS).include?(attr.uri.to_s)
+        warn = "Invalid use of rdf:#{attr.name}"
+        add_debug(attr, warn)
+        raise InvalidPredicate.new(warn) if @strict
+        return false
+      end
+      !CORE_SYNTAX_TERMS.include?(attr.uri.to_s) &&
       attr.namespace.href != XML_NS.uri.to_s
+    end
+    
+    def nodeElementURI_check(el)
+      if (CORE_SYNTAX_TERMS + [RDF_NS.li.to_s] + OLD_TERMS).include?(el.uri.to_s)
+        warn = "Invalid use of rdf:#{el.name}"
+        add_debug(el, warn)
+        raise InvalidSubject.new(warn) if @strict
+      end
+    end
+
+    def propertyElementURI_check(el)
+      if (CORE_SYNTAX_TERMS + [RDF_NS.Description.to_s] + OLD_TERMS).include?(el.uri.to_s)
+        warn = "Invalid use of rdf:#{el.name}"
+        add_debug(el, warn)
+        raise InvalidPredicate.new(warn) if @strict
+      end
     end
 
     def old_property_check(el)

@@ -1,3 +1,5 @@
+require 'rdf/redland'
+
 module Matchers
   class BeEquivalentGraph
     def initialize(expected, info)
