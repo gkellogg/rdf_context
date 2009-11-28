@@ -2,15 +2,16 @@ require File.join(File.dirname(__FILE__), 'spec_helper')
 include Reddy
 
 describe "N3 parser" do
+  before(:each) { @parser = N3Parser.new(:strict => true) }
   
   describe "parse simple ntriples" do
     it "should parse simple triple" do
       n3_string = "<http://example.org/> <http://xmlns.com/foaf/0.1/name> \"Tom Morris\" . "
-      parser = Reddy::N3Parser.new(n3_string)
-      parser.graph[0].subject.to_s.should == "http://example.org/"
-      parser.graph[0].predicate.to_s.should == "http://xmlns.com/foaf/0.1/name"
-      parser.graph[0].object.to_s.should == "Tom Morris"
-      parser.graph.size.should == 1
+      @parser.parse(n3_string)
+      @parser.graph[0].subject.to_s.should == "http://example.org/"
+      @parser.graph[0].predicate.to_s.should == "http://xmlns.com/foaf/0.1/name"
+      @parser.graph[0].object.to_s.should == "Tom Morris"
+      @parser.graph.size.should == 1
     end
 
     # NTriple tests from http://www.w3.org/2000/10/rdf-tests/rdfcore/ntriples/test.nt
@@ -22,8 +23,8 @@ describe "N3 parser" do
         "line with spaces"          => "      "
       }.each_pair do |name, statement|
         specify "test #{name}" do
-          parser = Reddy::N3Parser.new(statement)
-          parser.graph.size.should == 0
+          @parser.parse(statement)
+          @parser.graph.size.should == 0
         end
       end
     end
@@ -60,11 +61,11 @@ describe "N3 parser" do
       "Typed Literals" => '<http://example.org/resource32> <http://example.org/property> "abc"^^<http://example.org/datatype1> .',
     }.each_pair do |name, statement|
       specify "test #{name}" do
-        parser = Reddy::N3Parser.new([statement].flatten.first)
-        parser.graph.should_not be_nil
-        parser.graph.size.should == 1
-        #puts parser.graph[0].to_ntriples
-        parser.graph[0].to_ntriples.should == [statement].flatten.last.gsub(/\s+/, " ").strip
+        @parser.parse([statement].flatten.first)
+        @parser.graph.should_not be_nil
+        @parser.graph.size.should == 1
+        #puts @parser.graph[0].to_ntriples
+        @parser.graph[0].to_ntriples.should == [statement].flatten.last.gsub(/\s+/, " ").strip
       end
     end
   end
@@ -82,10 +83,10 @@ describe "N3 parser" do
       "€" => '<http://example.org/resource17> <http://example.org/property> "\u20AC" .',
     }.each_pair do |contents, triple|
       specify "test #{contents}" do
-        parser = Reddy::N3Parser.new(triple)
-        parser.graph.should_not be_nil
-        parser.graph.size.should == 1
-        parser.graph[0].object.contents.should == contents
+        @parser.parse(triple)
+        @parser.graph.should_not be_nil
+        @parser.graph.size.should == 1
+        @parser.graph[0].object.contents.should == contents
       end
     end
   end
@@ -115,39 +116,39 @@ describe "N3 parser" do
   
   it "should throw an exception when presented with a BNode as a predicate" do
     n3doc = "_:a _:b _:c ."
-    lambda do parser = N3Parser.new(n3doc) end.should raise_error(Reddy::Triple::InvalidPredicate)
+    lambda { @parser.parse(n3doc) }.should raise_error(Reddy::Triple::InvalidPredicate)
   end
 
   it "should create BNodes" do
     n3doc = "_:a a _:c ."
-    parser = N3Parser.new(n3doc)
-    parser.graph[0].subject.class.should == Reddy::BNode
-    parser.graph[0].object.class.should == Reddy::BNode
+    @parser.parse(n3doc)
+    @parser.graph[0].subject.class.should == Reddy::BNode
+    @parser.graph[0].object.class.should == Reddy::BNode
   end
   
   it "should create URIRefs" do
     n3doc = "<http://example.org/joe> <http://xmlns.com/foaf/0.1/knows> <http://example.org/jane> ."
-    parser = N3Parser.new(n3doc)
-    parser.graph[0].subject.class.should == Reddy::URIRef
-    parser.graph[0].object.class.should == Reddy::URIRef
+    @parser.parse(n3doc)
+    @parser.graph[0].subject.class.should == Reddy::URIRef
+    @parser.graph[0].object.class.should == Reddy::URIRef
   end
   
   it "should create literals" do
     n3doc = "<http://example.org/joe> <http://xmlns.com/foaf/0.1/name> \"Joe\"."
-    parser = N3Parser.new(n3doc)
-    parser.graph[0].object.class.should == Reddy::Literal
+    @parser.parse(n3doc)
+    @parser.graph[0].object.class.should == Reddy::Literal
   end
   
   it "should create typed literals" do
     n3doc = "<http://example.org/joe> <http://xmlns.com/foaf/0.1/name> \"Joe\"^^<http://www.w3.org/2001/XMLSchema#string> ."
-    parser = N3Parser.new(n3doc)
-    parser.graph[0].object.class.should == Reddy::Literal
+    @parser.parse(n3doc)
+    @parser.graph[0].object.class.should == Reddy::Literal
   end
   
   it "should map <#> to document uri" do
     n3doc = "@prefix : <#> ."
-    parser = N3Parser.new(n3doc, "http://the.document.itself")
-    parser.graph.nsbinding.should == {"__local__", Namespace.new("http://the.document.itself", "__local__")}
+    @parser.parse(n3doc, "http://the.document.itself")
+    @parser.graph.nsbinding.should == {"__local__", Namespace.new("http://the.document.itself", "__local__")}
   end
 
   it "should parse testcase" do
@@ -161,8 +162,8 @@ describe "N3 parser" do
 <http://www.w3.org/2000/10/rdf-tests/rdfcore/xmlbase/test001.nt> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/10/rdf-tests/rdfcore/testSchema#NT-Document> .
 <http://www.w3.org/2000/10/rdf-tests/rdfcore/xmlbase/test001.rdf> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/10/rdf-tests/rdfcore/testSchema#RDF-XML-Document> .
 EOF
-    parser = N3Parser.new(sampledoc, "http://www.w3.org/2000/10/rdf-tests/rdfcore/amp-in-url/Manifest.rdf")
-    ntriples = parser.graph.to_ntriples
+    @parser.parse(sampledoc, "http://www.w3.org/2000/10/rdf-tests/rdfcore/amp-in-url/Manifest.rdf")
+    ntriples = @parser.graph.to_ntriples
     ntriples = sort_ntriples(ntriples)
 
     nt_string = sort_ntriples(sampledoc)
@@ -171,8 +172,8 @@ EOF
   
   def test_file(filepath)
     n3_string = File.read(filepath)
-    parser = N3Parser.new(n3_string, "file:#{filepath}")
-    ntriples = parser.graph.to_ntriples
+    @parser.parse(n3_string, "file:#{filepath}")
+    ntriples = @parser.graph.to_ntriples
     ntriples.gsub!(/_\:bn[\d|\-]+/, '_:node1')
     ntriples = sort_ntriples(ntriples)
 

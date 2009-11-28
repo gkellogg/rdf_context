@@ -1,6 +1,9 @@
 === 0.1.5
 * Update RDFa tests to use Reddy RDF/XML parser.
 * All negative RDF/XML parser tests pass.
+* Add Reddy::Parser, super-class of other parsers and move common code.
+* Change N3Parser to use same new/parse logic as other parsers.
+* Remove debug array by default, and add in calls to tests.
 
 === 0.1.4
 * Update N3 treetop parser to version 1.4.0 (no digits in parser rule names).

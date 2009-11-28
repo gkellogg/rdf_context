@@ -5,8 +5,8 @@ module Matchers
     def initialize(expected, info)
       @expected = case expected
       when Graph then expected
-      when Array then N3Parser.new(expected.join("\n"), info.about).graph
-      when String then N3Parser.new(expected, info.about).graph
+      when Array then N3Parser.parse(expected.join("\n"), info.about, :strict => true)
+      when String then N3Parser.parse(expected, info.about, :strict => true)
       when N3Parser then expected.graph
       else nil
       end
@@ -15,8 +15,8 @@ module Matchers
     def matches?(actual)
       @actual = case actual
       when Graph then actual
-      when Array then N3Parser.new(actual.join("\n"), @info.about).graph
-      when String then N3Parser.new(actual, @info.about).graph
+      when Array then N3Parser.parse(actual.join("\n"), @info.about, :strict => true)
+      when String then N3Parser.parse(actual, @info.about, :strict => true)
       when N3Parser then actual.graph
       else nil
       end

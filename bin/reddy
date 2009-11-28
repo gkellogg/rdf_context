@@ -1,0 +1,59 @@
+#!/usr/bin/env ruby -s
+require 'rubygems'
+require File.expand_path(File.dirname(__FILE__) + "/../lib/reddy")
+require 'getoptlong'
+class Parse
+  include Reddy
+  def parse(file, base_uri)
+    puts "Parse: #{file}" if $quiet
+    parser = case file
+    when /\.nt$/ then N3Parser.new
+    when /\.x?html/ then RdfaParser.new
+    else RdfXmlParser.new
+    end
+    parser.parse(File.read(file), base_uri, :strict => true)
+    output = case $format
+    when "xml"
+      parser.graph.to_rdfxml
+    else
+      parser.graph.to_ntriples
+    end
+    puts output unless $quiet
+
+    puts parser.debug.join("\n\t") if $verbose
+  rescue RdfException => e
+    puts "Parse failure: #{e.message}"
+    puts parser.debug if $verbose && parser
+    #raise
+  rescue Exception => e
+    puts "Parser fault: #{e.message}"
+    puts parser.debug if parser && !$quiet
+    raise
+  end
+end
+
+$verbose = false
+base_uri  = "http://example.com"
+
+opts = GetoptLong.new(
+  ["--verbose", GetoptLong::NO_ARGUMENT],
+  ["--quiet", GetoptLong::NO_ARGUMENT],
+  ["--debug", GetoptLong::NO_ARGUMENT],
+  ["--format", GetoptLong::REQUIRED_ARGUMENT],
+  ["--uri", GetoptLong::REQUIRED_ARGUMENT]
+)
+opts.each do |opt, arg|
+  case opt
+  when '--verbose' then $verbose = true
+  when '--quiet' then $quiet = true
+  when '--debug' then $DEBUG = true
+  when '--format' then $format = arg
+  when '--uri' then base_uri = arg
+  end
+end
+
+x = Parse.new
+ARGV.each do |test_file|
+  x.parse(test_file, base_uri)
+end
+

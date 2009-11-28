@@ -3,28 +3,44 @@ require 'treetop'
 Treetop.load(File.join(File.dirname(__FILE__), "n3_grammar"))
 
 module Reddy
-  class N3Parser
-    attr_accessor :graph
+  class Parser; end
+  class N3Parser < Parser
 
-    ## 
-    # Creates a new parser for N3 (or Turtle).
-    #
+    # Parse N3
     # @param [String] n3_str the Notation3/Turtle string
     # @param [String] uri the URI of the document
+    # @param [Hash] options
+    # _debug_:: Array to place debug messages
+    # @returns [Graph]
     #
     # @author Patrick Sinclair (metade)
-    def initialize(n3_str, uri=nil)
+    #
+    # Parse N3 document from a string or input stream to closure or graph.
+    #
+    # Optionally, the stream may be a Nokogiri::HTML::Document or Nokogiri::XML::Document
+    # With a block, yeilds each statement with URIRef, BNode or Literal elements
+    # 
+    # Raises Reddy::RdfException or subclass
+    def parse(stream, uri = nil, options = {}, &block) # :yields: triple
       @uri = Addressable::URI.parse(uri.to_s) unless uri.nil?
+      @strict = true #options[:strict] if options.has_key?(:strict)
+      @debug = options[:debug] if options.has_key?(:debug)
+
+      @callback = block
       parser = N3GrammerParser.new
-      document = parser.parse(n3_str)
-      if document
-        @graph = Graph.new
-        process_directives(document)
-        process_statements(document)
-      else
+
+      @doc = stream.respond_to?(:read) ? stream.read : stream
+      
+      document = parser.parse(@doc)
+      unless document
         reason = parser.failure_reason
         raise ParserException.new(reason)
       end
+      
+      @graph = Graph.new
+      process_directives(document)
+      process_statements(document)
+      @graph
     end
 
     protected
@@ -50,13 +66,9 @@ module Reddy
         properties.each do |p|      
           predicate = process_verb(p.verb)
           objects = process_objects(p.object_list)
-          objects.each { |object| triple(subject, predicate, object) }
+          objects.each { |object| add_triple("statement", subject, predicate, object) }
         end
       end
-    end
-
-    def triple(subject, predicate, object)
-      @graph.add_triple(subject, predicate, object)
     end
 
     def process_anonnode(anonnode)
@@ -65,7 +77,7 @@ module Reddy
       properties.each do |p|      
         predicate = process_node(p.verb)
         objects = process_objects(p.object_list)
-        objects.each { |object| triple(bnode, predicate, object) }
+        objects.each { |object| add_triple("anonnode", bnode, predicate, object) }
       end
       bnode
     end

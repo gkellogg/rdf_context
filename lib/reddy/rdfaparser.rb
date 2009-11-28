@@ -1,18 +1,14 @@
-##
-# An RDFa parser in Ruby
-#
-# Based on processing rules described here: http://www.w3.org/TR/rdfa-syntax/#s_model
-#
-# Ben Adida
-# 2008-05-07
-# Gregg Kellogg
-# 2009-08-04
-
 module Reddy
-  # a new RDFa Parser MUST be instantiated for every parsed document
-  class RdfaParser
-    attr_reader :debug
-    attr_reader :graph
+  ##
+  # An RDFa parser in Ruby
+  #
+  # Based on processing rules described here: http://www.w3.org/TR/rdfa-syntax/#s_model
+  #
+  # Ben Adida
+  # 2008-05-07
+  # Gregg Kellogg
+  # 2009-08-04
+  class RdfaParser < Parser
     attr_reader :namespace
 
     # The Recursive Baggage
@@ -48,19 +44,16 @@ module Reddy
       end
     end
 
-    # Create new parser instance. Options:
-    # _graph_:: Graph to parse into, otherwie a new RdfaParser::Graph instance is created
-    def initialize(options = {})
-      options = {:graph => Graph.new}.merge(options)
-      @debug = []
-      BNode.reset # Start sequence anew
-
-      # initialize the triplestore
-      @graph = options[:graph]
-    end
-  
     # Parse XHRML+RDFa document from a string or input stream to closure or graph.
-    # _base_ indicates the base URI of the document.
+    # @param  [IO] stream the HTML+RDFa IO stream, string, Nokogiri::HTML::Document or Nokogiri::XML::Document
+    # @param [String] uri the URI of the document
+    # @param [Hash] options
+    # _strict_:: Fail when error detected, otherwise just continue
+    # _profile_:: One of _xhtml1_, _html4_, or _html5_ to override intuition
+    # _debug_:: Array to place debug messages
+    # @returns [Graph]
+    #
+    # @author Gregg Kellogg
     #
     # Optionally, the stream may be a Nokogiri::HTML::Document or Nokogiri::XML::Document
     # With a block, yeilds each statement with URIRef, BNode or Literal elements
@@ -69,20 +62,19 @@ module Reddy
     # XHTML1:: http://www.w3.org/1999/xhtml This can also be determined by <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN" "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd">
     # HTML4::
     # HTML5::
-    # Options:
-    # _profile_:: One of _xhtml1_, _html4_, or _html5_ to override intuition
-    # _strict_:: Fail when error detected, otherwise just continue
     # 
-    # Raises RdfaParser::RdfaException or subclass
-    def parse(stream, base, options = {}, &block) # :yields: triple
+    # Raises Reddy::RdfException or subclass
+    def parse(stream, uri = nil, options = {}, &block) # :yields: triple
+      @uri = Addressable::URI.parse(uri).to_s unless uri.nil?
+      @strict = options[:strict] if options.has_key?(:strict)
+      @debug = options[:debug] if options.has_key?(:debug)
+
       @doc = case stream
       when Nokogiri::HTML::Document then stream
       when Nokogiri::XML::Document then stream
-      else   Nokogiri::XML.parse(stream, base)
+      else   Nokogiri::XML.parse(stream, uri)
       end
       
-      @strict = options[:strict]
-      @base = base.to_s
       raise ParserException, "Empty document" if @doc.nil? && @strict
       @callback = block
 
@@ -92,27 +84,12 @@ module Reddy
       @namespace = Namespace.new(ns, "html") if ns
       
       # parse
-      parse_whole_document(@doc, @base)
+      parse_whole_document(@doc, @uri)
 
       @graph
     end
     
     protected
-  
-    # add a triple, object can be literal or URI or bnode
-    def add_triple(node, subject, predicate, object)
-      add_debug(node, "triple: #{subject}, #{predicate}, #{object}")
-      triple = Triple.new(subject, predicate, object)
-      if @callback
-        @callback.call(triple)  # Perform yield to saved block
-      else
-        @graph << triple
-      end
-      triple
-    rescue RdfException => e
-      add_debug(node, "add_triple raised #{e.class}: #{e.message}")
-      raise if @strict
-    end
   
     # Parsing an RDFa document (this is *not* the recursive method)
     def parse_whole_document(doc, base)
@@ -148,15 +125,6 @@ module Reddy
 
       add_debug(element, "mappings: #{mappings.keys.join(", ")}")
       mappings
-    end
-
-    def node_path(node)
-      node.is_a?(Nokogiri::XML::Element) ? "#{node_path(node.parent)}/#{node.name}" : ""
-    end
-    
-    def add_debug(node, message)
-      puts "#{node_path(node)}: #{message}" if $DEBUG
-      @debug << "#{node_path(node)}: #{message}"
     end
 
     # The recursive helper function
@@ -408,7 +376,7 @@ module Reddy
         # we force a non-nil name, otherwise it generates a new name
         BNode.new(suffix || "")
       elsif curie.to_s.empty?
-        @debug << "curie_to_resource_or_bnode #{URIRef.new(subject)}"
+        add_debug(nil, "curie_to_resource_or_bnode #{URIRef.new(subject)}")
         # Empty curie resolves to current subject (No, an empty curie should be ignored)
 #        URIRef.new(subject)
         nil

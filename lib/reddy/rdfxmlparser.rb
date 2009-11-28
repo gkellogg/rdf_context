@@ -1,11 +1,8 @@
 #require 'ruby-debug'
 require 'xml'
-include Reddy
 
 module Reddy
-  include LibXML
-  
-  class RdfXmlParser
+  class RdfXmlParser < Parser
     NC_REGEXP = Regexp.new(
       %{^
         (?!\\\\u0301)             # &#x301; is a non-spacing acute accent.
@@ -21,9 +18,6 @@ module Reddy
 
     CORE_SYNTAX_TERMS = %w(RDF ID about parseType resource nodeID datatype).map {|n| "http://www.w3.org/1999/02/22-rdf-syntax-ns##{n}"}
     OLD_TERMS = %w(aboutEach aboutEachPrefix bagID).map {|n| "http://www.w3.org/1999/02/22-rdf-syntax-ns##{n}"}
-
-    attr_reader :debug
-    attr_accessor :xml, :graph
 
     # The Recursive Baggage
     class EvaluationContext # :nodoc: all
@@ -109,24 +103,38 @@ module Reddy
       end
     end
 
-    # Create new parser instance. Options:
-    # _graph_:: Graph to parse into, otherwie a new RdfaParser::Graph instance is created
-    def initialize(options = {})
-      options = {:graph => Graph.new}.merge(options)
-      @debug = []
-      @strict = true
-      BNode.reset # Start sequence anew
+    # Parse RDF/XML
+    # @param [IO] stream the RDF/XML IO stream, string or Nokogiri::XML::Document
+    # @param [String] uri the URI of the document
+    # @param [Hash] options
+    # _strict_:: Fail when error detected, otherwise just continue
+    # _debug_:: Array to place debug messages
+    # @returns [Graph]
+    #
+    # @author Gregg Kellogg
+    #
+    # Parse RDF/XML document from a string or input stream to closure or graph.
+    #
+    # Optionally, the stream may be a string or Nokogiri::XML::Document
+    # With a block, yeilds each statement with URIRef, BNode or Literal elements
+    # 
+    # Raises Reddy::RdfException or subclass
+    def parse(stream, uri = nil, options = {}, &block) # :yields: triple
+      @uri = Addressable::URI.parse(uri).to_s unless uri.nil?
+      @strict = options[:strict] if options.has_key?(:strict)
+      @debug = options[:debug] if options.has_key?(:debug)
 
-      # initialize the triplestore
-      @graph = options[:graph]
-    end
-
-    def parse(xml_str, uri, options = {}) # :yields: triple
-      @uri = Addressable::URI.parse(uri).to_s
-      @xml = Nokogiri::XML.parse(xml_str)
-      @id_mapping = Hash.new
+      @doc = case stream
+      when Nokogiri::XML::Document then stream
+      else   Nokogiri::XML.parse(stream, uri)
+      end
       
-      root = @xml.root
+      @id_mapping = Hash.new
+
+      raise ParserException, "Empty document" if @doc.nil? && @strict
+      @callback = block
+      
+      root = @doc.root
       
       # Look for rdf:RDF elements and process each.
       rdf_nodes = root.xpath("//rdf:RDF", RDF_NS.short => RDF_NS.uri.to_s)
@@ -154,33 +162,6 @@ module Reddy
     end
   
     private
-    def add_debug(node, message)
-      puts "#{node_path(node)}: #{message}" if $DEBUG
-      @debug << "#{node_path(node)}: #{message}"
-    end
-
-    def node_path(node)
-      case node
-      when Nokogiri::XML::Element, Nokogiri::XML::Attr then "#{node_path(node.parent)}/#{node.name}"
-      else ""
-      end
-    end
-    
-    # add a triple, object can be literal or URI or bnode
-    def add_triple(node, subject, predicate, object)
-      triple = Triple.new(subject, predicate, object)
-      add_debug(node, "triple: #{triple}")
-      if @callback
-        @callback.call(triple)  # Perform yield to saved block
-      else
-        @graph << triple
-      end
-      triple
-    rescue RdfException => e
-      add_debug(node, "add_triple raised #{e.class}: #{e.message}")
-      raise if @strict
-    end
-  
     def is_rdf_root? (node)
       node.name == "RDF" && node.namespace.href == RDF_NS.uri.to_s
     end
@@ -192,8 +173,6 @@ module Reddy
       add_debug(el, "nodeElement, ec: #{ec.inspect}")
       add_debug(el, "nodeElement, el: #{el.uri}")
       add_debug(el, "nodeElement, subject: #{subject.nil? ? 'nil' : subject.to_s}")
-
-      # XXX xml.lang, xml.base?
 
       unless el.uri == RDF_NS.Description.to_s
         add_triple(el, subject, RDF_TYPE, el.uri)

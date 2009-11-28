@@ -45,7 +45,6 @@ module RdfaHelper
           #puts "#{statement.predicate.uri.short_name} = #{s.to_s}"
         end
       end
-
     end
     
     def inspect
@@ -157,7 +156,7 @@ module RdfaHelper
     end
     
     def trace
-      @parser.debug.join("\n")
+      @parser.debug.to_a.join("\n")
     end
     
     def self.test_cases(suite)
@@ -173,7 +172,7 @@ module RdfaHelper
       begin
         parser.parse(manifest_str, @@manifest_url)
       rescue
-        raise "Parse error: #{$!}\n\t#{parser.debug.join("\t\n")}\n\n"
+        raise "Parse error: #{$!}\n\t#{parser.debug.to_a.join("\t\n")}\n\n"
       end
       graph = parser.graph
       
