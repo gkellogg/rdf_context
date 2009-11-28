@@ -6,21 +6,20 @@ module Reddy
   class Parser; end
   class N3Parser < Parser
 
-    # Parse N3
-    # @param [String] n3_str the Notation3/Turtle string
-    # @param [String] uri the URI of the document
-    # @param [Hash] options
-    # _debug_:: Array to place debug messages
-    # @returns [Graph]
-    #
-    # @author Patrick Sinclair (metade)
-    #
     # Parse N3 document from a string or input stream to closure or graph.
     #
     # Optionally, the stream may be a Nokogiri::HTML::Document or Nokogiri::XML::Document
     # With a block, yeilds each statement with URIRef, BNode or Literal elements
     # 
-    # Raises Reddy::RdfException or subclass
+    # @param [String] n3_str:: the Notation3/Turtle string
+    # @param [String] uri:: the URI of the document
+    # @param [Hash] options:: Options include the following
+    # <em>options[:debug]</em>:: Array to place debug messages
+    # <em>options[:strict]</em>:: Abort or proceed on error
+    # @return [Graph]
+    # @raise Reddy::RdfException or subclass
+    #
+    # @author Patrick Sinclair (metade)
     def parse(stream, uri = nil, options = {}, &block) # :yields: triple
       @uri = Addressable::URI.parse(uri.to_s) unless uri.nil?
       @strict = true #options[:strict] if options.has_key?(:strict)
@@ -51,10 +50,10 @@ module Reddy
       directives.each { |d| namespace(d.uri_ref.uri.text_value, d.nprefix.text_value) }
     end
 
-    def namespace(uri, short)
+    def namespace(uri, prefix)
       uri = @uri if uri == '#'
-      short = '__local__' if short == ''
-      @graph.namespace(uri, short)
+      prefix = '__local__' if prefix == ''
+      @graph.namespace(uri, prefix)
     end
 
     def process_statements(document)

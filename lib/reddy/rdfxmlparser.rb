@@ -3,24 +3,11 @@ require 'xml'
 
 module Reddy
   class RdfXmlParser < Parser
-    NC_REGEXP = Regexp.new(
-      %{^
-        (?!\\\\u0301)             # &#x301; is a non-spacing acute accent.
-                                  # It is legal within an XML Name, but not as the first character.
-        (  [a-zA-Z_]
-         | \\\\u[0-9a-fA-F]
-        )
-        (  [0-9a-zA-Z_\.-]
-         | \\\\u([0-9a-fA-F]{4})  # \u followed by a sequence of four hex digits
-        )*
-      $},
-      Regexp::EXTENDED)
-
     CORE_SYNTAX_TERMS = %w(RDF ID about parseType resource nodeID datatype).map {|n| "http://www.w3.org/1999/02/22-rdf-syntax-ns##{n}"}
     OLD_TERMS = %w(aboutEach aboutEachPrefix bagID).map {|n| "http://www.w3.org/1999/02/22-rdf-syntax-ns##{n}"}
 
     # The Recursive Baggage
-    class EvaluationContext # :nodoc: all
+    class EvaluationContext # :nodoc:
       attr_reader :base
       attr :subject, true
       attr :uri_mappings, true
@@ -52,6 +39,7 @@ module Reddy
         new_ec
       end
       
+      # Extract Evaluation Context from an element by looking at ancestors recurively
       def extract_from_ancestors(el)
         ancestors = el.ancestors
         while ancestors.length > 0
@@ -62,6 +50,7 @@ module Reddy
         extract_from_element(el)
       end
 
+      # Extract Evaluation Context from an element
       def extract_from_element(el)
         b = el.attribute_with_ns("base", XML_NS.uri.to_s)
         lang = el.attribute_with_ns("lang", XML_NS.uri.to_s)
@@ -82,6 +71,7 @@ module Reddy
         mappings
       end
       
+      # Produce the next list entry for this context
       def li_next(predicate)
         @li_counter += 1
         predicate = Addressable::URI.parse(predicate.to_s)
@@ -103,22 +93,20 @@ module Reddy
       end
     end
 
-    # Parse RDF/XML
-    # @param [IO] stream the RDF/XML IO stream, string or Nokogiri::XML::Document
-    # @param [String] uri the URI of the document
-    # @param [Hash] options
-    # _strict_:: Fail when error detected, otherwise just continue
-    # _debug_:: Array to place debug messages
-    # @returns [Graph]
-    #
-    # @author Gregg Kellogg
-    #
     # Parse RDF/XML document from a string or input stream to closure or graph.
     #
     # Optionally, the stream may be a string or Nokogiri::XML::Document
     # With a block, yeilds each statement with URIRef, BNode or Literal elements
     # 
-    # Raises Reddy::RdfException or subclass
+    # @param [IO] stream:: the RDF/XML IO stream, string or Nokogiri::XML::Document
+    # @param [String] uri:: the URI of the document
+    # @param [Hash] options:: Parser options, one of
+    # <em>options[:debug]</em>:: Array to place debug messages
+    # <em>options[:strict]</em>:: Raise Error if true, continue with lax parsing, otherwise
+    # @return [Graph]:: Returns the graph containing parsed triples
+    # @raise [Error]:: Raises RdfError if _strict_
+    #
+    # @author Gregg Kellogg
     def parse(stream, uri = nil, options = {}, &block) # :yields: triple
       @uri = Addressable::URI.parse(uri).to_s unless uri.nil?
       @strict = options[:strict] if options.has_key?(:strict)
@@ -137,7 +125,7 @@ module Reddy
       root = @doc.root
       
       # Look for rdf:RDF elements and process each.
-      rdf_nodes = root.xpath("//rdf:RDF", RDF_NS.short => RDF_NS.uri.to_s)
+      rdf_nodes = root.xpath("//rdf:RDF", RDF_NS.prefix => RDF_NS.uri.to_s)
       if rdf_nodes.length == 0
         # If none found, root element may be processed as an RDF Node
 
@@ -162,10 +150,19 @@ module Reddy
     end
   
     private
+    # Is the node rdf:RDF?
     def is_rdf_root? (node)
       node.name == "RDF" && node.namespace.href == RDF_NS.uri.to_s
     end
     
+    # XML nodeElement production
+    #
+    # @param [XML Element] el:: XMl Element to parse
+    # @param [EvaluationContext] ec:: Evaluation context
+    # @return [URIRef] subject:: The subject found for the node
+    # @raise [RdfException]:: Raises Exception if _strict_
+    #
+    # @author Gregg Kellogg
     def nodeElement(el, ec)
       # subject
       subject = ec.subject || parse_subject(el, ec)
@@ -403,7 +400,7 @@ module Reddy
     end
     
     private
-    # reification
+    # Reify subject, predicate, and object given the EvaluationContext (ec) and current XMl element (el)
     def reify(id, el, subject, predicate, object, ec)
       add_debug(el, "reify, id: #{id}")
       rsubject = URIRef.new("#" + id, ec.base)
@@ -413,6 +410,7 @@ module Reddy
       add_triple(el, rsubject, RDF_TYPE, RDF_NS.Statement)
     end
 
+    # Figure out the subject from the element.
     def parse_subject(el, ec)
       old_property_check(el)
       
@@ -486,6 +484,7 @@ module Reddy
       end
     end
     
+    # Is this attribute a Property Attribute?
     def is_propertyAttr?(attr)
       if ([RDF_NS.Description.to_s, RDF_NS.li.to_s] + OLD_TERMS).include?(attr.uri.to_s)
         warn = "Invalid use of rdf:#{attr.name}"
@@ -497,6 +496,7 @@ module Reddy
       attr.namespace.href != XML_NS.uri.to_s
     end
     
+    # Check Node Element name
     def nodeElementURI_check(el)
       if (CORE_SYNTAX_TERMS + [RDF_NS.li.to_s] + OLD_TERMS).include?(el.uri.to_s)
         warn = "Invalid use of rdf:#{el.name}"
@@ -505,6 +505,7 @@ module Reddy
       end
     end
 
+    # Check Property Element name
     def propertyElementURI_check(el)
       if (CORE_SYNTAX_TERMS + [RDF_NS.Description.to_s] + OLD_TERMS).include?(el.uri.to_s)
         warn = "Invalid use of rdf:#{el.name}"
@@ -513,6 +514,7 @@ module Reddy
       end
     end
 
+    # Check for the use of an obsolete RDF property
     def old_property_check(el)
       el.attribute_nodes.each do |attr|
         if OLD_TERMS.include?(attr.uri.to_s)

@@ -52,43 +52,24 @@ class String
   # \t:: ASCCII Horizontal Tab
   # \uhhhh:: character in BMP with Unicode value U+hhhh
   # \U00hhhhhh:: character in plane 1-16 with Unicode value U+hhhhhh
-  if String.method_defined?(:force_encoding)
-    def rdf_escape # :nodoc:
-      string = self + '' # XXX workaround: avoid buffer sharing
-      string.force_encoding(Encoding::ASCII_8BIT)
-      string.gsub!(/["\\\/\x0-\x1f]/) { RDF_MAP[$&] }
-      string.gsub!(/(
-                      (?:
-                        [\xc2-\xdf][\x80-\xbf]    |
-                        [\xe0-\xef][\x80-\xbf]{2} |
-                        [\xf0-\xf4][\x80-\xbf]{3}
-                      )+ |
-                      [\x80-\xc1\xf5-\xff]       # invalid
-                    )/nx) { |c|
-                      c.size == 1 and raise TypeError, "invalid utf8 byte: '#{c}'"
-                      s = Iconv.new('utf-16be', 'utf-8').iconv(c).unpack('H*')[0].upcase
-                      s.gsub!(/.{4}/n, '\\\\u\&')
-                    }
-      string.force_encoding(Encoding::UTF_8)
-      string
-    end
-  else
-    def rdf_escape # :nodoc:
-      string = self.gsub(/["\\\/\x0-\x1f]/) { RDF_MAP[$&] }
-      string.gsub!(/(
-                      (?:
-                        [\xc2-\xdf][\x80-\xbf]    |
-                        [\xe0-\xef][\x80-\xbf]{2} |
-                        [\xf0-\xf4][\x80-\xbf]{3}
-                      )+ |
-                      [\x80-\xc1\xf5-\xff]       # invalid
-                    )/nx) { |c|
-                      c.size == 1 and raise TypeError, "invalid utf8 byte: '#{c}'"
-                      s = Iconv.new('utf-16be', 'utf-8').iconv(c).unpack('H*')[0].upcase
-                      s.gsub!(/.{4}/n, '\\\\u\&')
-                    }
-      string
-    end
+  def rdf_escape
+    string = self + '' # XXX workaround: avoid buffer sharing
+    string.force_encoding(Encoding::ASCII_8BIT) if String.method_defined?(:force_encoding)
+    string.gsub!(/["\\\/\x0-\x1f]/) { RDF_MAP[$&] }
+    string.gsub!(/(
+                    (?:
+                      [\xc2-\xdf][\x80-\xbf]    |
+                      [\xe0-\xef][\x80-\xbf]{2} |
+                      [\xf0-\xf4][\x80-\xbf]{3}
+                    )+ |
+                    [\x80-\xc1\xf5-\xff]       # invalid
+                  )/nx) { |c|
+                    c.size == 1 and raise TypeError, "invalid utf8 byte: '#{c}'"
+                    s = Iconv.new('utf-16be', 'utf-8').iconv(c).unpack('H*')[0].upcase
+                    s.gsub!(/.{4}/n, '\\\\u\&')
+                  }
+    string.force_encoding(Encoding::UTF_8) if String.method_defined?(:force_encoding)
+    string
   end
   
   # Unescape characters in strings.

@@ -1,41 +1,44 @@
 module Reddy
-  # A simple graph to hold triples (from Reddy)
+  # A simple graph to hold triples.
+  #
+  # Graphs store triples, and the namespaces associated with those triples, where defined
   class Graph
-    attr_accessor :triples, :nsbinding
+    attr_accessor :triples, :nsbinding, :name
 
-    def initialize
+    # Create a Graph with the given type, name and options
+    #
+    # @param [Hash] options:: Options
+    # <em>options[:store_type]</em>:: storage type, currently only <tt>:memory</tt> is supported
+    # <em>options[:name]</em>:: Name for this graph
+    def initialize(options = {})
       @triples = []
       @nsbinding = {}
+      @name = options[:name]
     end
 
-    def self.load (uri)
-      RdfXmlParser.new(open(uri)).graph
-    end
-
+    # Number of Triples in the graph
     def size
       @triples.size
     end
 
-    def each
-      @triples.each { |value| yield value }
-    end
-    
+    # List of distinct subjects in graph
     def subjects
       @triples.map {|t| t.subject}.uniq
     end
     
+    # List of distinct predicates in graph
+    def predicates
+      @triples.map {|t| t.predicate}.uniq
+    end
+    
+    # List of distinct objects in graph
+    def objects
+      @triples.map {|t| t.object}.uniq
+    end
+    
+    # Indexed statement in serialized graph triples. Equivalent to graph.triples[item] 
     def [] (item)
       @triples[item]
-    end
-
-    def each_with_subject(subject)
-      @triples.each do |value|
-        yield value if value.subject == subject
-      end
-    end
-
-    def get_resource(subject)
-      @triples.find_all { |i| true if i.subject == subject}
     end
 
     ## 
@@ -44,19 +47,16 @@ module Reddy
     # ==== Example
     #   g = Graph.new; g.add_triple(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new) # => results in the triple being added to g; returns an array of g's triples
     #
-    # @param [URIRef, BNode] s the subject of the triple
-    # @param [URIRef] p the predicate of the triple
-    # @param [URIRef, BNode, Literal, TypedLiteral] o the object of the triple
+    # @param [URIRef, BNode] subject:: the subject of the triple
+    # @param [URIRef] predicate:: the predicate of the triple
+    # @param [URIRef, BNode, Literal] object:: the object of the triple
+    # @return [Array]:: An array of the triples (leaky abstraction? consider returning the graph instead)
+    # @raise [Error]:: Checks parameter types and raises if they are incorrect.
     #
-    # ==== Returns
-    # @return [Array] An array of the triples (leaky abstraction? consider returning the graph instead)
-    #
-    # @raise [Error] Checks parameter types and raises if they are incorrect.
     # @author Tom Morris
-    def add_triple(s, p, o)
-      @triples += [ Triple.new(s, p, o) ]
+    def add_triple(subject, predicate, object)
+      @triples += [ Triple.new(subject, predicate, object) ]
     end
-
 
     ## 
     # Adds an extant triple to a graph
@@ -64,15 +64,12 @@ module Reddy
     # ==== Example
     #   g = Graph.new; t = Triple.new(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new); g << t) # => results in the triple being added to g; returns an array of g's triples
     #
-    # @param [Triple] t the triple to be added to the graph
-    #
-    # ==== Returns
-    # @return [Array] An array of the triples (leaky abstraction? consider returning the graph instead)
+    # @param [Triple] t:: the triple to be added to the graph
+    # @return [Array]:: An array of the triples (leaky abstraction? consider returning the graph instead)
     #
     # @author Tom Morris
     def << (triple)
-  #    self.add_triple(s, p, o)
-      @triples += [ triple ]
+      @triples << triple
     end
     
     ## 
@@ -81,11 +78,9 @@ module Reddy
     # ==== Example
     #   g = Graph.new; g.add_triple(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new); g.to_ntriples  # => returns a string of the graph in N-Triples form
     #
-    # ==== Returns
-    # @return [String] The graph in N-Triples.
+    # @return [String]:: The graph in N-Triples.
     #
     # @author Tom Morris
-
     def to_ntriples
       @triples.collect do |t|
         t.to_ntriples
@@ -95,7 +90,12 @@ module Reddy
     # Output graph using to_ntriples
     def to_s; self.to_ntriples; end
 
-    # Dump model to RDF/XML
+    ## 
+    # Exports the graph to RDF in RDF/XML form.
+    #
+    # @return [String]:: The RDF/XML graph
+    #
+    # @author Gregg Kellogg
     def to_rdfxml
       replace_text = {}
       rdfxml = ""
@@ -108,13 +108,13 @@ module Reddy
         "xml"   => XML_NS
       )
       rdf_attrs = extended_bindings.values.inject({}) { |hash, ns| hash.merge(ns.xmlns_attr => ns.uri.to_s)}
-      uri_bindings = extended_bindings.values.inject({}) { |hash, ns| hash.merge(ns.uri.to_s => ns.short)}
+      uri_bindings = extended_bindings.values.inject({}) { |hash, ns| hash.merge(ns.uri.to_s => ns.prefix)}
       xml.instruct!
       xml.rdf(:RDF, rdf_attrs) do
         # Add statements for each subject
         subjects.each do |s|
           xml.rdf(:Description, (s.is_a?(BNode) ? "rdf:nodeID" : "rdf:about") => s) do
-            each_with_subject(s) do |triple|
+            triples(:subject => s) do |triple|
               xml_args = triple.object.xml_args
               if triple.object.is_a?(Literal) && triple.object.xmlliteral?
                 replace_text["__replace_with_#{triple.object.object_id}__"] = xml_args[0]
@@ -135,88 +135,90 @@ module Reddy
     end
     
     ## 
-    # Creates a new namespace given a URI and the short name and binds it to the graph.
+    # Creates a new namespace given a URI and the prefix and binds it to the graph.
     #
     # ==== Example
     #   g = Graph.new; g.namespace("http://xmlns.com/foaf/0.1/", "foaf") # => binds the Foaf namespace to g
     #
-    # @param [String] uri the URI of the namespace
-    # @param [String] short the short name of the namespace
-    #
-    # ==== Returns
-    # @return [Namespace] The newly created namespace.
-    #
-    # @raise [Error] Checks validity of the desired shortname and raises if it is incorrect.
-    # @raise [Error] Checks that the newly created Namespace is of type Namespace and raises if it is incorrect.
+    # @param [String] uri:: the URI of the namespace
+    # @param [String] prefix:: the prefix name of the namespace
+    # @return [Namespace]:: The newly created namespace.
+    # @raise [Error]:: Checks validity of the desired shortname and raises if it is incorrect.
+    # @raise [Error]:: Checks that the newly created Namespace is of type Namespace and raises if it is incorrect.
     # @author Tom Morris
-
-    def namespace(uri, short)
-      self.bind Namespace.new(uri, short)
+    def namespace(uri, prefix)
+      self.bind(Namespace.new(uri, prefix))
     end
 
+    # Bind a namespace to the graph
     def bind(namespace)
       if namespace.class == Namespace
-        @nsbinding["#{namespace.short}"] = namespace
+        @nsbinding["#{namespace.prefix}"] = namespace
       else
         raise GraphException, "Can't bind #{namespace.inspect} as namespace"
       end
     end
 
-    def has_bnode_identifier?(bnodeid)
-      temp_bnode = BNode.new(bnodeid)
-      returnval = false
-      @triples.each { |triple|
-        if triple.subject.eql?(temp_bnode)
-          returnval = true
-          break
-        end
-        if triple.object.eql?(temp_bnode)
-          returnval = true
-          break
-        end
-      }
-      return returnval
-    end
-
-    def get_bnode_by_identifier(bnodeid)
-      temp_bnode = BNode.new(bnodeid)
-      each do |triple|
-        if triple.subject == temp_bnode
-          return triple.subject
-        end
-        if triple.object == temp_bnode
-          return triple.object
-        end
-      end
-      return false
-    end
-    
-    def get_by_type(object)
-      out = []
-      each do |t|
-        next unless t.is_type?
-        next unless case object
-                    when String
-                      object == t.object.to_s
-                    when Regexp
-                      object.match(t.object.to_s)
-                    else
-                      object == t.object
-                    end
-        out << t.subject
-      end
-      return out
-    end
-    
-    def join(graph)
-      if graph.class == Graph
-        graph.each { |t| 
-          self << t
-        }
+    # Triples from graph, optionally matching subject, predicate, or object
+    #
+    # ==== Example
+    #
+    #
+    # @param [Hash] options:: List of options for matching triples
+    # <em>options[:subject]</em>:: If specified, limited to triples having the specified subject
+    # <em>options[:predicate]</em>:: If specified, limited to triples having the specified predicate
+    # <em>options[:object]</em>:: If specified, limited to triples having the specified object. May be a Regexp
+    # @return [Array]:: List of matched triples
+    #
+    # @author Gregg Kellogg
+    def triples(options = {})
+      subject = options[:subject]
+      predicate = options[:predicate]
+      object = options[:object]
+      if subject || predicate || object
+        @triples.select do |triple|
+          next if subject && triple.subject != subject
+          next if predicate && triple.predicate != predicate
+          case object
+          when Regexp
+            next unless object.match(triple.object.to_s)
+          when URIRef, BNode, Literal, String
+            next unless triple.object == object
+          end
+            
+          yield triple if block_given?
+          triple
+        end.compact
+      elsif block_given?
+        @triples.each {|triple| yield triple}
       else
-        raise GraphException, "join requires you provide a graph object"
+        @triples
       end
     end
+    alias_method :find, :triples
 
+    # Detect the presence of a BNode in the graph, either as a subject or an object
+    #
+    # @param [BNode, String] bn:: BNode or identifier to find
+    def has_bnode_identifier?(bn)
+      bn = BNode.new(bn) unless bn.is_a?(BNode)
+      triples do |triple|
+        return true if triple.subject.eql?(bn) || triple.object.eql?(bn)
+      end
+      false
+    end
+
+    # Get list of subjects having rdf:type == object
+    #
+    # @param [Resource, Regexp, String] object:: Type resource
+    def get_by_type(object)
+      triples(:predicate => RDF_TYPE, :object => object).map {|t| t.subject}
+    end
+    
+    # Merge a graph into this graph
+    def merge!(graph)
+      raise GraphException.new("merge without a graph") unless graph.is_a?(Graph)
+      @triples += graph.triples
+    end
   end
 end

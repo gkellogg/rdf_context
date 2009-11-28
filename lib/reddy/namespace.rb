@@ -1,34 +1,31 @@
 module Reddy
   # From Reddy
   class Namespace
-    attr_accessor :short, :uri, :fragment
+    attr_accessor :prefix, :uri, :fragment
  
     ## 
-    # Creates a new namespace given a URI and the short name.
+    # Creates a new namespace given a URI and the prefix.
     #
+    #  nil is a valid prefix to specify the default namespace
     # ==== Example
     #   Namespace.new("http://xmlns.com/foaf/0.1/", "foaf") # => returns a new Foaf namespace
     #
-    # @param [String] uri the URI of the namespace
-    # @param [String] short the short name of the namespace
-    # @param [Boolean] fragment are the identifiers on this resource fragment identifiers? (e.g. '#')  Defaults to false.
+    # @param [String] uri:: the URI of the namespace
+    # @param [String] prefix:: the prefix of the namespace
+    # @param [Boolean] fragment:: are the identifiers on this resource fragment identifiers? (e.g. '#')  Defaults to false.
+    # @return [Namespace]:: The newly created namespace.
+    # @raise [Error]:: Checks validity of the desired prefix and raises if it is incorrect.
     #
-    # ==== Returns
-    # @return [Namespace] The newly created namespace.
-    #
-    # @raise [Error] Checks validity of the desired shortname and raises if it is incorrect.
-    # [gk] nil is a valid shortname to specify the default namespace
     # @author Tom Morris, Pius Uzamere
-
-    def initialize(uri, short, fragment = nil)
+    def initialize(uri, prefix, fragment = nil)
       @uri = URIRef.new(uri) unless uri.is_a?(URIRef)
       @fragment = fragment
       @fragment = uri.to_s.match(/\#$/) ? true : false if fragment.nil?
-      short = nil if short.to_s.empty?
-      if shortname_valid?(short)
-        @short = short
+      prefix = nil if prefix.to_s.empty?
+      if prefix_valid?(prefix)
+        @prefix = prefix
       else
-        raise ParserException, "Invalid shortname '#{short}'"
+        raise ParserException, "Invalid prefix '#{prefix}'"
       end
     end
 
@@ -39,16 +36,9 @@ module Reddy
     #   foaf = Namespace.new("http://xmlns.com/foaf/0.1/", "foaf"); foaf.knows # => returns a new URIRef with URI "http://xmlns.com/foaf/0.1/knows"
     #   foaf = Namespace.new("http://xmlns.com/foaf/0.1/", "foaf", true); foaf.knows # => returns a new URIRef with URI "http://xmlns.com/foaf/0.1/#knows"
     #
-    # @param [String] uri the URI of the namespace
-    # @param [String] short the short name of the namespace
-    # @param [Boolean] fragment are the identifiers on this resource fragment identifiers? (e.g. '#')  Defaults to false.
-    #
-    # ==== Returns
-    # @return [URIRef] The newly created URIRegerence.
-    #
-    # @raise [Error] Checks validity of the desired shortname and raises if it is incorrect.
+    # @return [URIRef]:: The newly created URIRegerence.
+    # @raise [Error]:: Checks validity of the desired prefix and raises if it is incorrect.
     # @author Tom Morris, Pius Uzamere
-
     def method_missing(methodname, *args)
       self + methodname
     end
@@ -58,6 +48,7 @@ module Reddy
       URIRef.new((fragment ? "##{suffix}" : suffix.to_s), @uri)
     end
 
+    # Bind this namespace to a Graph
     def bind(graph)
       if graph.class == Graph
         graph.bind(self)
@@ -66,31 +57,30 @@ module Reddy
       end
     end
 
+    # Compare namespaces
     def eql?(other)
-      @short == other.short && @uri == other.uri && @fragment == other.fragment
+      @prefix == other.prefix && @uri == other.uri && @fragment == other.fragment
     end
     alias_method :==, :eql?
 
     # Output xmlns attribute name
     def xmlns_attr
-      short.nil? ? "xmlns" : "xmlns:#{short}"
+      prefix.nil? ? "xmlns" : "xmlns:#{prefix}"
     end
     
+    # Output namespace definition as a hash
     def xmlns_hash
       {xmlns_attr => @uri.to_s}
     end
     
     def inspect
-      "Namespace[abbr='#{short}',uri='#{uri}']"
+      "Namespace[abbr='#{prefix}',uri='#{uri}']"
     end
     
     private
-    def shortname_valid?(shortname)
-      if shortname =~ /\A[a-zA-Z_][a-zA-Z0-9_]*\Z/ || shortname.nil?
-        return true
-      else
-        return false
-      end
+    # The Namespace prefix must be an NCName
+    def prefix_valid?(prefix)
+      NC_REGEXP.match(prefix) || prefix.to_s.empty?
     end
   end
 end

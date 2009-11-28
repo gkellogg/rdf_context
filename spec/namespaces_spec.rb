@@ -16,7 +16,7 @@ describe "Namespace" do
   
   it "should have a URI" do
     lambda do
-      test = Namespace.new(short='foaf')
+      test = Namespace.new(prefix='foaf')
     end.should raise_error
   end
   
@@ -35,6 +35,7 @@ describe "Namespace" do
     # rdflib does this using graph.bind('prefix', namespace)
     g = Graph.new
     subject.bind(g)
+    puts g.nsbinding.inspect
     should == g.nsbinding["foaf"]
   end
   

@@ -12,7 +12,7 @@ module Reddy
     attr_reader :namespace
 
     # The Recursive Baggage
-    class EvaluationContext # :nodoc: all
+    class EvaluationContext # :nodoc:
       attr :base, true
       attr :parent_subject, true
       attr :parent_object, true
@@ -30,6 +30,7 @@ module Reddy
         @language = nil
       end
 
+      # Copy this Evaluation Context
       def initialize_copy(from)
           # clone the evaluation context correctly
           @uri_mappings = from.uri_mappings.clone
@@ -44,26 +45,20 @@ module Reddy
       end
     end
 
-    # Parse XHRML+RDFa document from a string or input stream to closure or graph.
-    # @param  [IO] stream the HTML+RDFa IO stream, string, Nokogiri::HTML::Document or Nokogiri::XML::Document
-    # @param [String] uri the URI of the document
-    # @param [Hash] options
-    # _strict_:: Fail when error detected, otherwise just continue
-    # _profile_:: One of _xhtml1_, _html4_, or _html5_ to override intuition
-    # _debug_:: Array to place debug messages
-    # @returns [Graph]
-    #
-    # @author Gregg Kellogg
+    # Parse XHTML+RDFa document from a string or input stream to closure or graph.
     #
     # Optionally, the stream may be a Nokogiri::HTML::Document or Nokogiri::XML::Document
     # With a block, yeilds each statement with URIRef, BNode or Literal elements
     #
-    # The namespace for the HTML is intuited from the encoding. This code supports the following
-    # XHTML1:: http://www.w3.org/1999/xhtml This can also be determined by <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN" "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd">
-    # HTML4::
-    # HTML5::
-    # 
-    # Raises Reddy::RdfException or subclass
+    # @param  [IO] stream:: the HTML+RDFa IO stream, string, Nokogiri::HTML::Document or Nokogiri::XML::Document
+    # @param [String] uri:: the URI of the document
+    # @param [Hash] options:: Parser options, one of
+    # <em>options[:debug]</em>:: Array to place debug messages
+    # <em>options[:strict]</em>:: Raise Error if true, continue with lax parsing, otherwise
+    # @return [Graph]:: Returns the graph containing parsed triples
+    # @raise [Error]:: Raises RdfError if _strict_
+    #
+    # @author Gregg Kellogg
     def parse(stream, uri = nil, options = {}, &block) # :yields: triple
       @uri = Addressable::URI.parse(uri).to_s unless uri.nil?
       @strict = options[:strict] if options.has_key?(:strict)
@@ -89,7 +84,7 @@ module Reddy
       @graph
     end
     
-    protected
+    private
   
     # Parsing an RDFa document (this is *not* the recursive method)
     def parse_whole_document(doc, base)
@@ -105,7 +100,7 @@ module Reddy
       # initialize the evaluation context with the appropriate base
       evaluation_context= EvaluationContext.new(base)
 
-      self.traverse(doc.root, evaluation_context)
+      traverse(doc.root, evaluation_context)
     end
   
     # Extract the XMLNS mappings from an element
@@ -344,7 +339,7 @@ module Reddy
       
         element.children.each do |child|
           # recurse only if it's an element
-          self.traverse(child, new_ec) if child.class == Nokogiri::XML::Element
+          traverse(child, new_ec) if child.class == Nokogiri::XML::Element
         end
       end
     end

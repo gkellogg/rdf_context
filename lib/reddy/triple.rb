@@ -1,5 +1,7 @@
 module Reddy
-  # Triple from Reddy, to aid it merger
+  # An RDF Triple, or statement.
+  #
+  # Statements are composed of _subjects_, _predicates_ and _objects_.
   class Triple
     attr_accessor :subject, :object, :predicate
 
@@ -9,15 +11,12 @@ module Reddy
     # ==== Example
     #   Triple.new(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new) # => results in the creation of a new triple and returns it
     #
-    # @param [URIRef, BNode] s the subject of the triple
-    # @param [URIRef] p the predicate of the triple
-    # @param [URIRef, BNode, Literal, TypedLiteral] o the object of the triple
+    # @param [URIRef, BNode] subject:: the subject of the triple
+    # @param [URIRef] predicate:: the predicate of the triple
+    # @param [URIRef, BNode, Literal, TypedLiteral] object:: the object of the triple
+    # @return [Triple]:: An array of the triples (leaky abstraction? consider returning the graph instead)
+    # @raise [Error]:: Checks parameter types and raises if they are incorrect.
     #
-    # ==== Returns
-    #
-    # @return [Triple] An array of the triples (leaky abstraction? consider returning the graph instead)
-    #
-    # @raise [Error] Checks parameter types and raises if they are incorrect.
     # @author Tom Morris
     def initialize (subject, predicate, object)
       @subject   = self.class.coerce_subject(subject)
@@ -25,6 +24,7 @@ module Reddy
       @object    = self.class.coerce_object(object)
     end
 
+    # Serialize Triple to N-Triples
     def to_ntriples
       @subject.to_ntriples + " " + @predicate.to_ntriples + " " + @object.to_ntriples + " ."
     end
@@ -35,10 +35,12 @@ module Reddy
       [@subject, @predicate, @object].inspect
     end
 
+    # Is the predicate of this statment rdf:type?
     def is_type?
       @predicate.to_s == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
     end
 
+    # Two triples are equal if their of their subjects, predicates and objects are equal.
     def eql? (other)
       other.is_a?(self.class) &&
       other.subject == self.subject &&
@@ -50,6 +52,10 @@ module Reddy
 
     protected
 
+    # Coerce a subject to the appropriate Reddy type.
+    # 
+    # @param[URI, URIRef, String] subject:: If a String looks like a URI, a URI is created, otherwise a BNode.
+    # @raise[InvalidSubject]:: If subject can't be intuited.
     def self.coerce_subject(subject)
       case subject
       when Addressable::URI
@@ -67,12 +73,18 @@ module Reddy
       end
     end
 
-    def self.coerce_predicate(uri_or_string)
-      case uri_or_string
+    # Coerce a predicate to the appropriate Reddy type.
+    # 
+    # @param[URI, URIRef, String] subject:: If a String looks like a URI, a URI is created
+    # @raise[InvalidSubject]:: If subject can't be predicate.
+    def self.coerce_predicate(predicate)
+      case predicate
+      when Addressable::URI
+        URIRef.new(predicate.to_s)
       when URIRef
-        uri_or_string
+        predicate
       when String
-        URIRef.new uri_or_string
+        URIRef.new predicate
       else
         raise InvalidPredicate, "Predicate should be a URI"
       end
@@ -80,6 +92,10 @@ module Reddy
       raise InvalidPredicate, "Couldn't make a URIRef: #{e.message}"
     end
 
+    # Coerce a object to the appropriate Reddy type.
+    # 
+    # @param[URI, URIRef, String, Integer, Float, BNode, Literal] object:: If a String looks like a URI, a URI is created, otherwise an untyped Literal.
+    # @raise[InvalidSubject]:: If subject can't be predicate.
     def self.coerce_object(object)
       case object
       when Addressable::URI

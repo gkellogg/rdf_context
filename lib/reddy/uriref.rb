@@ -30,6 +30,7 @@ module Reddy
       @uri = @@uri_hash[@uri.to_s]
     end
     
+    # Create a URI, either by appending a fragment, or using the input URI
     def + (input)
       input_uri = Addressable::URI.parse(input.to_s)
       return URIRef.new(input_uri, self.to_s)

@@ -13,15 +13,6 @@ describe "Graphs" do
     end.should_not raise_error
   end
   
-  it "should give you a list of resources of a particular type" do
-    subject.add_triple(URIRef.new("http://example.org/joe"), URIRef.new("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"), URIRef.new("http://xmlns.com/foaf/0.1/Person"))
-    subject.add_triple(URIRef.new("http://example.org/jane"), URIRef.new("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"), URIRef.new("http://xmlns.com/foaf/0.1/Person"))
-
-    subject.get_by_type("http://xmlns.com/foaf/0.1/Person").size.should == 2
-    subject.get_by_type("http://xmlns.com/foaf/0.1/Person")[0].to_s.should == "http://example.org/joe"
-    subject.get_by_type("http://xmlns.com/foaf/0.1/Person")[1].to_s.should == "http://example.org/jane"
-  end
-
   it "should support << as an alias for add_triple" do
     lambda do
       subject << Triple.new(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new)
@@ -41,16 +32,6 @@ describe "Graphs" do
     subject.has_bnode_identifier?('john').should be_true
     subject.has_bnode_identifier?('jane').should be_true
     subject.has_bnode_identifier?('jack').should_not be_true
-  end
-  
-  it "should be able to return BNodes on demand" do
-    john = BNode.new('john')
-    jane = BNode.new('jane')
-    foaf = Namespace.new("http://xmlns.com/foaf/0.1/", "foaf")
-    subject << Triple.new(john, foaf.knows, jane)
-    subject.get_bnode_by_identifier('john').should == john
-    subject.get_bnode_by_identifier('jane').should == jane
-    subject.get_bnode_by_identifier('barny').should == false
   end
   
   it "should allow you to create and bind Namespace objects on-the-fly" do
@@ -154,12 +135,12 @@ HERE
     end
     
     it "should allow you to select one resource" do
-      subject.get_resource(@ex.john).size.should == 2
+      subject.triples(:subject => @ex.john).size.should == 2
     end
 
     it "should allow iteration" do
       count = 0
-      subject.each do |t|
+      subject.triples do |t|
         count = count + 1
         t.class.should == Triple
       end
@@ -168,13 +149,44 @@ HERE
 
     it "should allow iteration over a particular subject" do
       count = 0
-      subject.each_with_subject(@ex.john) do |t|
+      subject.triples(:subject => @ex.john) do |t|
         count = count + 1
         t.class.should == Triple
+        t.subject.should == @ex.john
       end
       count.should == 2
     end
 
+    it "should give you a list of resources of a particular type" do
+      subject.add_triple(@ex.john, RDF_TYPE, @foaf.Person)
+      subject.add_triple(@ex.jane, RDF_TYPE, @foaf.Person)
+
+      subject.get_by_type("http://xmlns.com/foaf/0.1/Person").should == [@ex.john, @ex.jane]
+    end
+
+    describe "find triples" do
+      it "should find subjects" do
+        subject.triples(:subject => @ex.john).size.should == 2
+        subject.triples(:subject => @ex.jane).size.should == 1
+      end
+      
+      it "should find predicates" do
+        subject.triples(:predicate => @foaf.knows).size.should == 3
+      end
+      
+      it "should find objects" do
+        subject.triples(:object => @ex.rick).size.should == 2
+      end
+      
+      it "should find object with regexp" do
+        subject.triples(:object => /rick/).size.should == 2
+      end
+      
+      it "should find with combinations" do
+        subject.triples(:subject => @ex.john, :object => @ex.rick).size.should == 1
+      end
+    end
+    
     describe "encodings" do
       it "should output NTriple" do
         nt = "<http://example.org/john> <http://xmlns.com/foaf/0.1/knows> <http://example.org/jane> .\n<http://example.org/john> <http://xmlns.com/foaf/0.1/knows> <http://example.org/rick> .\n<http://example.org/jane> <http://xmlns.com/foaf/0.1/knows> <http://example.org/rick> .\n"
@@ -201,17 +213,17 @@ HERE
     end
   end
 
-  describe "which are joined" do
+  describe "which are merged" do
     it "should be able to integrate another graph" do
       subject.add_triple(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new)
       g = Graph.new
-      g.join(subject)
+      g.merge!(subject)
       g.size.should == 1
     end
     
-    it "should not join with non graph" do
+    it "should not merge with non graph" do
       lambda do
-        h.join("")
+        h.merge!("")
       end.should raise_error
     end
   end

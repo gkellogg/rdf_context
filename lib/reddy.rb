@@ -28,6 +28,19 @@ module Reddy
     start top up
   )
 
+  NC_REGEXP = Regexp.new(
+    %{^
+      (?!\\\\u0301)             # &#x301; is a non-spacing acute accent.
+                                # It is legal within an XML Name, but not as the first character.
+      (  [a-zA-Z_]
+       | \\\\u[0-9a-fA-F]
+      )
+      (  [0-9a-zA-Z_\.-]
+       | \\\\u([0-9a-fA-F]{4})  # \u followed by a sequence of four hex digits
+      )*
+    $},
+    Regexp::EXTENDED)
+
   RDF_TYPE    = URIRef.new("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
   XML_LITERAL = Literal::Encoding.xmlliteral
 

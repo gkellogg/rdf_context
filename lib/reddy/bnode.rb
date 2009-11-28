@@ -4,7 +4,11 @@ module Reddy
     @@next_generated = "a"
     @@named_nodes = {}
     
-    # Create a new BNode, optionally accept a identifier for the BNode. Otherwise, generated sequentially
+    # Create a new BNode, optionally accept a identifier for the BNode.
+    # Otherwise, generated sequentially
+    #
+    # ==== Example
+    #  BNode.new("foo")
     def initialize(identifier = nil)
       if identifier != nil && self.valid_id?(identifier)
         # Generate a name if it's blank
@@ -16,6 +20,7 @@ module Reddy
       end
     end
 
+    # Return BNode identifier
     def to_s
       return self.identifier.to_s
     end
@@ -26,11 +31,9 @@ module Reddy
     # ==== Example
     #   b = BNode.new; b.to_n3  # => returns a string of the BNode in n3 form
     #
-    # ==== Returns
     # @return [String] The BNode in n3.
     #
     # @author Tom Morris
-
     def to_n3
       "_:#{self.identifier}"
     end
@@ -38,19 +41,15 @@ module Reddy
     ## 
     # Exports the BNode in N-Triples form.
     #
-    # ==== Example
-    #   b = BNode.new; b.to_ntriples  # => returns a string of the BNode in N-Triples form
-    #
-    # ==== Returns
-    # @return [String] The BNode in N-Triples.
-    #
-    # @author Tom Morris
-
+    # Syonym for to_n3
     def to_ntriples
       self.to_n3
     end
 
     # Output URI as resource reference for RDF/XML
+    #
+    # ==== Example
+    #   b = BNode.new("foo"); b.xml_args  # => [{"rdf:nodeID" => "foo"}]
     def xml_args
       [{"rdf:nodeID" => self.identifier}]
     end
@@ -70,6 +69,7 @@ module Reddy
       @identifier
     end
     
+    # Compare BNodes. BNodes are equivalent if their identifiers are equivalent
     def eql?(other)
       other.is_a?(self.class) && self.identifier == other.identifier
     end
@@ -78,7 +78,8 @@ module Reddy
     # Needed for uniq
     def hash; to_s.hash; end
     
-    # Start _identifier_ sequence from scratch
+    # Start _identifier_ sequence from scratch.
+    # Identifiers are created using String::succ on start valuie.
     def self.reset(init = "a")
       @@next_generated = init
       @@named_nodes = {}
@@ -86,7 +87,7 @@ module Reddy
 
     protected
     def valid_id?(name)
-      name =~ /^[a-zA-Z_][a-zA-Z0-9]*$/ || name.empty?
+      NC_REGEXP.match(name) || name.empty?
     end
   end
 end

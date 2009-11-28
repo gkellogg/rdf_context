@@ -7,10 +7,13 @@ module Reddy
     ## 
     # Creates a new parser for N3 (or Turtle).
     #
-    # @param [Hash] options
-    # _graph_:: Graph to parse into, otherwise a new Reddy::Graph instance is created
-    # _debug_:: Array to place debug messages
-    # _strict_:: Raise Error if true, continue with lax parsing, otherwise
+    # @param [Hash] options:: Options from
+    # <em>options[:graph]</em>:: Graph to parse into, otherwise a new Reddy::Graph instance is created
+    # <em>options[:debug]</em>:: Array to place debug messages
+    # <em>options[:type]</em>:: One of _rdfxml_, _html_, or _n3_
+    # <em>options[:strict]</em>:: Raise Error if true, continue with lax parsing, otherwise
+    #
+    # @author Gregg Kellogg
     def initialize(options = {})
       options = {:graph => Graph.new}.merge(options)
       BNode.reset # Start sequence anew
@@ -19,39 +22,51 @@ module Reddy
       @graph = options[:graph]
       @debug = options[:debug]
       @strict = options[:strict]
+      
+      return unless self == Parser
+      
+      # Create a delegate of a specific parser class
+      @deligate = case options[:type].to_s
+      when "n3", "ntriples", "turtle" then N3Parser.new(options)
+      when "rdfa", "html", "xhtml"    then RdfaParser.new(options)
+      when "xml", "rdf", "rdfxml"     then RdfXmlParser.new(options)
+      else
+        RdfXmlParser.new(options)
+        # raise ParserException.new("type option must be one of :rdfxml, :html, or :n3")
+      end
     end
     
     # Instantiate Parser and parse document
-    # _strict_:: Fail when error detected, otherwise just continue
-    # @param  [IO] stream the RDF IO stream, string, Nokogiri::HTML::Document or Nokogiri::XML::Document
-    # @param [String] uri the URI of the document
-    # @param [Hash] options
-    # _type_:: One of _rdfxml_, _html_, or _n3_
+    #
+    # @param  [IO, String] stream:: the RDF IO stream, string, Nokogiri::HTML::Document or Nokogiri::XML::Document
+    # @param [String] uri:: the URI of the document
+    # @param [Hash] options::  Options from
+    # <em>options[:debug]</em>:: Array to place debug messages
+    # <em>options[:type]</em>:: One of _rdfxml_, _html_, or _n3_
+    # <em>options[:strict]</em>:: Raise Error if true, continue with lax parsing, otherwise
+    # @return [Graph]:: Returns the graph containing parsed triples
+    # @raise [Error]:: Raises RdfError if _strict_
+    #
+    # @author Gregg Kellogg
     def self.parse(stream, uri = nil, options = {}, &block) # :yields: triple
-      parseClass = self unless self == Parser
-      parseClass ||= case options[:type].to_s
-      when "rdfxml" then RdfXmlParser
-      when "html"   then RdfaParser
-      when "n3"     then N3Parser
-      else
-        raise ParserException.new("type option must be one of :rdfxml, :html, or :n3")
-      end
-      parser = parseClass.new(:graph => @graph)
-      parser.parse(stream, uri, options, &block)
+      self.new(options).parse(stream, uri, options, &block)
     end
     
     # Parse RDF document from a string or input stream to closure or graph.
-    # @param  [IO] stream the RDF IO stream, string, Nokogiri::HTML::Document or Nokogiri::XML::Document
-    # @param [String] uri the URI of the document
-    # @param [Hash] options
-    # _strict_:: Fail when error detected, otherwise just continue
-    # @returns [Graph]
+    #
+    # Virtual Class, prototype for Parser subclass.
+    #
+    # @param  [IO, String] stream:: the RDF IO stream, string, Nokogiri::HTML::Document or Nokogiri::XML::Document
+    # @param [String] uri:: the URI of the document
+    # @param [Hash] options::  Options from
+    # <em>options[:debug]</em>:: Array to place debug messages
+    # <em>options[:strict]</em>:: Raise Error if true, continue with lax parsing, otherwise
+    # @return [Graph]:: Returns the graph containing parsed triples
+    # @raise [Error]:: Raises RdfError if _strict_
     #
     # @author Gregg Kellogg
-    # 
-    # Raises Reddy::RdfException or subclass
     def parse(stream, uri = nil, options = {}, &block) # :yields: triple
-      raise ParserException.new("virtual class, must instantiate sub-class of Reddy::Parser")
+      @deligate.parse(stream, uri, options, &block)
     end
     
     # Return N3 Parser instance
@@ -71,13 +86,25 @@ module Reddy
       end
     end
     
-    # Add debug event
+    # Add debug event to debug array, if specified
+    #
+    # @param [XML Node, any] node:: XML Node or string for showing context
+    # @param [String] message::
     def add_debug(node, message)
       puts "#{node_path(node)}: #{message}" if $DEBUG
       @debug << "#{node_path(node)}: #{message}" if @debug
     end
 
     # add a triple, object can be literal or URI or bnode
+    #
+    # @param [Nokogiri::XML::Node, any] node:: XML Node or string for showing context
+    # @param [URIRef, BNode] subject:: the subject of the triple
+    # @param [URIRef] predicate:: the predicate of the triple
+    # @param [URIRef, BNode, Literal] object:: the object of the triple
+    # @return [Array]:: An array of the triples (leaky abstraction? consider returning the graph instead)
+    # @raise [Error]:: Checks parameter types and raises if they are incorrect if parsing mode is _strict_.
+    #
+    # @author Gregg Kellogg
     def add_triple(node, subject, predicate, object)
       triple = Triple.new(subject, predicate, object)
       add_debug(node, "triple: #{triple}")
