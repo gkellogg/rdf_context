@@ -29,10 +29,30 @@ describe "N3 parser" do
       end
     end
 
+    it "should create named subject bnode" do
+      @parser.parse("_:anon <http://example.org/property> <http://example.org/resource2> .")
+      @parser.graph.should_not be_nil
+      @parser.graph.size.should == 1
+      triple = @parser.graph[0]
+      triple.subject.should be_a(BNode)
+      triple.subject.identifier.should =~ /anon/
+      triple.predicate.should == "http://example.org/property"
+      triple.object.should == "http://example.org/resource2"
+    end
+
+    it "should create named object bnode" do
+      @parser.parse("<http://example.org/resource2> <http://example.org/property> _:anon .")
+      @parser.graph.should_not be_nil
+      @parser.graph.size.should == 1
+      triple = @parser.graph[0]
+      triple.subject.should == "http://example.org/resource2"
+      triple.predicate.should == "http://example.org/property"
+      triple.object.should be_a(BNode)
+      triple.object.identifier.should =~ /anon/
+    end
+
     {
       "three uris"  => "<http://example.org/resource1> <http://example.org/property> <http://example.org/resource2> .",
-      "named subject bnode" => "_:anon <http://example.org/property> <http://example.org/resource2> .",
-      "named object bnode" => "<http://example.org/resource2> <http://example.org/property> _:anon .",
       "spaces and tabs throughout" => " 	 <http://example.org/resource3> 	 <http://example.org/property>	 <http://example.org/resource2> 	.	 ",
       "line ending with CR NL" => "<http://example.org/resource4> <http://example.org/property> <http://example.org/resource2> .\r\n",
       "literal escapes (1)" => '<http://example.org/resource7> <http://example.org/property> "simple literal" .',
@@ -43,7 +63,6 @@ describe "N3 parser" do
       "literal escapes (6)" => '<http://example.org/resource12> <http://example.org/property> "tab:\t" .',
       "Space is optional before final . (1)" => ['<http://example.org/resource13> <http://example.org/property> <http://example.org/resource2>.', '<http://example.org/resource13> <http://example.org/property> <http://example.org/resource2> .'],
       "Space is optional before final . (2)" => ['<http://example.org/resource14> <http://example.org/property> "x".', '<http://example.org/resource14> <http://example.org/property> "x" .'],
-      "Space is optional before final . (3)" => ['<http://example.org/resource15> <http://example.org/property> _:anon.', '<http://example.org/resource15> <http://example.org/property> _:anon .'],
 
       "XML Literals as Datatyped Literals (1)" => '<http://example.org/resource21> <http://example.org/property> ""^^<http://www.w3.org/2000/01/rdf-schema#XMLLiteral> .',
       "XML Literals as Datatyped Literals (2)" => '<http://example.org/resource22> <http://example.org/property> " "^^<http://www.w3.org/2000/01/rdf-schema#XMLLiteral> .',
@@ -96,7 +115,6 @@ describe "N3 parser" do
    dir_name = File.join(File.dirname(__FILE__), '..', 'test', 'n3_tests', 'n3p', '*.n3')
     Dir.glob(dir_name).each do |n3|    
       it n3 do
-        BNode.reset
         test_file(n3)
       end
     end
@@ -174,7 +192,7 @@ EOF
     n3_string = File.read(filepath)
     @parser.parse(n3_string, "file:#{filepath}")
     ntriples = @parser.graph.to_ntriples
-    ntriples.gsub!(/_\:bn[\d|\-]+/, '_:node1')
+    ntriples.gsub!(/_\:named_*/, '_:')
     ntriples = sort_ntriples(ntriples)
 
     nt_string = File.read(filepath.sub('.n3', '.nt'))

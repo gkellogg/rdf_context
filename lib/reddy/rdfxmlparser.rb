@@ -286,7 +286,7 @@ module Reddy
           end
 
           # For element e with possibly empty element content c.
-          n = BNode.new
+          n = @graph.bnode
           add_triple(child, subject, predicate, n)
 
           # Reification
@@ -319,7 +319,7 @@ module Reddy
 
           # For element event e with possibly empty nodeElementList l. Set s:=list().
           # For each element event f in l, n := bnodeid(identifier := generated-blank-node-id()) and append n to s to give a sequence of events.
-          s = element_nodes.map { BNode.new }
+          s = element_nodes.map { @graph.bnode }
           n = s.first || RDF_NS.send("nil")
           add_triple(child, subject, predicate, n)
           reify(id, child, subject, predicate, n, child_ec) if id
@@ -367,9 +367,9 @@ module Reddy
             if resourceAttr
               resource = URIRef.new(resourceAttr, ec.base)
             elsif nodeID
-              resource = BNode.new(nodeID)
+              resource = @graph.bnode(nodeID)
             else
-              resource = BNode.new
+              resource = @graph.bnode
             end
 
             # produce triples for attributes
@@ -435,14 +435,14 @@ module Reddy
         # The value of rdf:nodeID must match the XML Name production
         nodeID = nodeID_check(el, nodeID.value.rdf_escape)
         add_debug(el, "parse_subject, nodeID: '#{nodeID}")
-        BNode.new(nodeID)
+        @graph.bnode(nodeID)
       when about
         about = about.value.rdf_escape
         add_debug(el, "parse_subject, about: '#{about}'")
         URIRef.new(about, ec.base)
       else
         add_debug(el, "parse_subject, BNode")
-        BNode.new
+        @graph.bnode
       end
     end
     

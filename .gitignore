@@ -2,6 +2,7 @@
 .dotest/*
 .yardoc
 coverage/*
+doc/*
 rdoc/*
 rena_new_spec.html
 rena-*.gem

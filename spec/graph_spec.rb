@@ -9,26 +9,26 @@ describe "Graphs" do
   subject { Graph.new }
   it "should allow you to add one or more triples" do
     lambda do
-      subject.add_triple(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new)
+      subject.add_triple(subject.bnode, URIRef.new("http://xmlns.com/foaf/0.1/knows"), subject.bnode)
     end.should_not raise_error
   end
   
   it "should support << as an alias for add_triple" do
     lambda do
-      subject << Triple.new(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new)
+      subject << Triple.new(subject.bnode, URIRef.new("http://xmlns.com/foaf/0.1/knows"), subject.bnode)
     end.should_not raise_error
     subject.size.should == 1
   end
   
   it "should return bnode subjects" do
-    bn = BNode.new
-    subject.add_triple bn, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new
+    bn = subject.bnode
+    subject.add_triple(bn, URIRef.new("http://xmlns.com/foaf/0.1/knows"), bn)
     subject.subjects.should == [bn]
   end
   
   it "should be able to determine whether or not it has existing BNodes" do
     foaf = Namespace.new("http://xmlns.com/foaf/0.1/", "foaf")
-    subject << Triple.new(BNode.new('john'), foaf.knows, BNode.new('jane'))
+    subject << Triple.new(subject.bnode('john'), foaf.knows, subject.bnode('jane'))
     subject.has_bnode_identifier?('john').should be_true
     subject.has_bnode_identifier?('jane').should be_true
     subject.has_bnode_identifier?('jack').should_not be_true
@@ -46,7 +46,9 @@ describe "Graphs" do
   end
     
   it "should follow the specification as to output identical triples" do
-    pending
+    subject.add_triple(@ex.a, @ex.b, @ex.c)
+    subject.add_triple(@ex.a, @ex.b, @ex.c)
+    subject.size.should == 1
   end
   
   describe "with XML Literal objects" do
@@ -86,10 +88,10 @@ HERE
   
   describe "with bnodes" do
     subject {
-      a = BNode.new("a")
-      b = BNode.new("b")
-      
       g = Graph.new
+      a = g.bnode("a")
+      b = g.bnode("b")
+      
       g << Triple.new(a, @foaf.name, Literal.untyped("Manu Sporny"))
       g << Triple.new(a, @foaf.knows, b)
       g << Triple.new(b, @foaf.name, Literal.untyped("Ralph Swick"))
@@ -97,6 +99,11 @@ HERE
       g
     }
     
+    it "should return bnodes" do
+      subject.bnodes.keys.length.should == 2
+      subject.bnodes.values.should == [2, 2]
+    end
+
     it "should output RDF/XML" do
       rdfxml = <<-HERE
 <?xml version="1.0" encoding="utf-8"?>
@@ -126,6 +133,10 @@ HERE
       g
     }
 
+    it "should detect included triple" do
+      subject.contains?(subject[0]).should be_true
+    end
+    
     it "should tell you how large the graph is" do
       subject.size.should == 3
     end
@@ -215,7 +226,7 @@ HERE
 
   describe "which are merged" do
     it "should be able to integrate another graph" do
-      subject.add_triple(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new)
+      subject.add_triple(subject.bnode, URIRef.new("http://xmlns.com/foaf/0.1/knows"), subject.bnode)
       g = Graph.new
       g.merge!(subject)
       g.size.should == 1
@@ -225,6 +236,36 @@ HERE
       lambda do
         h.merge!("")
       end.should raise_error
+    end
+    
+    # One does not, in general, obtain the merge of a set of graphs by concatenating their corresponding
+    # N-Triples documents and constructing the graph described by the merged document. If some of the
+    # documents use the same node identifiers, the merged document will describe a graph in which some of the
+    # blank nodes have been 'accidentally' identified. To merge N-Triples documents it is necessary to check
+    # if the same nodeID is used in two or more documents, and to replace it with a distinct nodeID in each
+    # of them, before merging the documents.
+    it "should remap bnodes to avoid duplicate bnode identifiers" do
+      subject.add_triple(subject.bnode("a1"), URIRef.new("http://xmlns.com/foaf/0.1/knows"), subject.bnode("a2"))
+      g = Graph.new
+      g.add_triple(subject.bnode("a1"), URIRef.new("http://xmlns.com/foaf/0.1/knows"), subject.bnode("a2"))
+      g.merge!(subject)
+      g.size.should == 2
+      s1, s2 = g.triples.map(&:subject)
+      p1, p2 = g.triples.map(&:predicate)
+      o1, o2 = g.triples.map(&:object)
+      pending do
+        s1.should_not == s2
+        p1.should == p1
+        o1.should_not == o2
+      end
+    end
+
+    it "should remove duplicate triples" do
+      subject.add_triple(@ex.a, URIRef.new("http://xmlns.com/foaf/0.1/knows"), @ex.b)
+      g = Graph.new
+      g.add_triple(@ex.a, URIRef.new("http://xmlns.com/foaf/0.1/knows"), @ex.b)
+      g.merge!(subject)
+      pending {g.size.should == 1}
     end
   end
   
@@ -237,6 +278,16 @@ HERE
       f = Graph.new
       f.add_triple(URIRef.new("http://example.org/joe"), URIRef.new("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"), URIRef.new("http://xmlns.com/foaf/0.1/Person"))
       should_not be_equivalent_graph(f)
+    end
+    
+    it "should be true for equivalent graphs with different BNode identifiers" do
+      subject.add_triple(@ex.a, @foaf.knows, subject.bnode("a1"))
+      subject.add_triple(subject.bnode("a1"), @foaf.knows, @ex.a)
+
+      f = Graph.new
+      f.add_triple(@ex.a, @foaf.knows, subject.bnode("a2"))
+      f.add_triple(subject.bnode("a2"), @foaf.knows, @ex.a)
+      should be_equivalent_graph(f)
     end
   end
 end

@@ -50,6 +50,14 @@ module Reddy
 
     alias_method :==, :eql?
 
+    # Clone triple, keeping refernces to literals and URIRefs, but cloning BNodes
+    def clone
+      s = subject.is_a?(BNode) ? s.clone : s
+      p = predicate.is_a?(BNode) ? s.clone : s
+      o = object.is_a?(BNode) ? s.clone : s
+      Triple.new(s, p, o)
+    end
+    
     protected
 
     # Coerce a subject to the appropriate Reddy type.
@@ -62,12 +70,8 @@ module Reddy
         URIRef.new(subject.to_s)
       when URIRef, BNode
         subject
-      when String
-        if subject =~ /^\w+:\/\/\S+/ # does it smell like a URI?
-          URIRef.new subject
-        else
-          BNode.new subject
-        end
+      when /^\w+:\/\/\S+/ # does it smell like a URI?
+        URIRef.new subject
       else
         raise InvalidSubject, "Subject is not of a known class (#{subject.class}: #{subject.inspect})"
       end

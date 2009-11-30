@@ -1,4 +1,4 @@
-=== 0.1.6
+=== 0.2.0
 * API and RDoc cleanup
 * Removed Graph#each_with_subject, Graph#get_resource, Graph#has_bnode_identifier?
 * Added Graph#predicates and Graph#objects
@@ -6,7 +6,13 @@
 * Renamed Graph#bind o Graph#merge!
 * Graph#triples yields triples if a block is provided
 * Changed Namespace#short to Namespace#prefix
-
+* Change BNode to require a graph. Most uses go from graph.bnode, rather than BNode.new. This is required because bnodes are only equivalent within the same graph
+* Added identifier to Graph, defaults to BNode. This from Python librdf based on TriX recommendation, see: http://www.w3.org/2004/03/trix/
+* Only add triple to graph if it does not already exist in graph.
+* Added Graph#contains? to look for existance of triple.
+* Added Graph#eql? (and ===) to do simple check for graph equality. This version ignores BNodes (like Python librdf)
+* Prepend "named" to named BNodes to ensure no overlap between generated and named BNodes.
+* Added Graph#clone and Triple#clone
 === 0.1.5
 * Update RDFa tests to use Reddy RDF/XML parser.
 * All negative RDF/XML parser tests pass.

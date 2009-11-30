@@ -324,8 +324,6 @@ EOF
         #puts t.inspect
         specify "test #{t.about.uri.to_s}" do
           t.run_test do |rdf_string, parser|
-            # Special case BNode production for 'rdfms-syntax-incomplete'
-            BNode.reset("bn0") if t.about.uri.to_s =~ /rdfms-syntax-incomplete/
             parser.parse(rdf_string, t.about.uri.to_s, :strict => true, :debug => [])
           end
         end

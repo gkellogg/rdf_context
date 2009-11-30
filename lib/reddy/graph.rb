@@ -3,17 +3,38 @@ module Reddy
   #
   # Graphs store triples, and the namespaces associated with those triples, where defined
   class Graph
-    attr_accessor :triples, :nsbinding, :name
+    attr_accessor :triples, :nsbinding, :identifier
+    attr_accessor :next_generated, :named_nodes
 
-    # Create a Graph with the given type, name and options
+    # Create a Graph with the given store_type and identifier.
+    #
+    # The constructor accepts one argument, the 'store'
+    # that will be used to store the graph data (see the 'store'
+    # package for stores currently shipped with rdflib).
+    #
+    # Stores can be context-aware or unaware.  Unaware stores take up
+    # (some) less space but cannot support features that require
+    # context, such as true merging/demerging of sub-graphs and
+    # provenance.
+    #
+    # The Graph constructor can take an identifier which identifies the Graph
+    # by name.  If none is given, the graph is assigned a BNode for it's identifier.
+    # For more on named graphs, see: http://www.w3.org/2004/03/trix/
     #
     # @param [Hash] options:: Options
     # <em>options[:store_type]</em>:: storage type, currently only <tt>:memory</tt> is supported
-    # <em>options[:name]</em>:: Name for this graph
+    # <em>options[:identifier]</em>:: Identifier for this graph, Literal, BNode or URIRef
+    #
+    # @author Gregg Kellogg
     def initialize(options = {})
       @triples = []
       @nsbinding = {}
-      @name = options[:name]
+
+      # For BNode identifier generation
+      @next_generated = "a"
+      @named_nodes = {}
+      
+      @identifier = options[:identifier] || BNode.new(self)
     end
 
     # Number of Triples in the graph
@@ -55,7 +76,8 @@ module Reddy
     #
     # @author Tom Morris
     def add_triple(subject, predicate, object)
-      @triples += [ Triple.new(subject, predicate, object) ]
+      triple = Triple.new(subject, predicate, object)
+      @triples << triple unless contains?(triple)
     end
 
     ## 
@@ -201,13 +223,35 @@ module Reddy
     #
     # @param [BNode, String] bn:: BNode or identifier to find
     def has_bnode_identifier?(bn)
-      bn = BNode.new(bn) unless bn.is_a?(BNode)
+      bn = bnode(bn) unless bn.is_a?(BNode)
       triples do |triple|
         return true if triple.subject.eql?(bn) || triple.object.eql?(bn)
       end
       false
     end
 
+    # Check to see if this graph contains the specified triple
+    def contains?(triple)
+      triples {|t| return true if t == triple}
+      false
+    end
+    
+    # Get all BNodes with usage count used within graph
+    def bnodes
+      bn = {}
+      triples do |t|
+        if t.subject.is_a?(BNode)
+          bn[t.subject] ||= 0
+          bn[t.subject] += 1
+        end
+        if t.object.is_a?(BNode)
+          bn[t.object] ||= 0
+          bn[t.object] += 1
+        end
+      end
+      bn
+    end
+    
     # Get list of subjects having rdf:type == object
     #
     # @param [Resource, Regexp, String] object:: Type resource
@@ -216,9 +260,44 @@ module Reddy
     end
     
     # Merge a graph into this graph
+    #
+    # Fixme: rename bnodes when merging, remove duplicate triples
     def merge!(graph)
       raise GraphException.new("merge without a graph") unless graph.is_a?(Graph)
       @triples += graph.triples
     end
+    
+    # Clone the graph, including cloning each triple
+    def clone
+      g = Graph.new
+      triples {|t| g << t.clone}
+    end
+
+    # Two graphs are equal if each is an instance of the other, considering BNode equivalence.
+    # This is done by creating a new graph an substituting each permutation of BNode identifiers
+    # from self to other until every permutation is exhausted, or a textual equivalence is found
+    # after sorting each graph.
+    #
+    # We just follow Python librdf's lead and do a simple comparison
+    def eql? (other)
+      return false if !other.is_a?(Graph) || self.size != other.size
+      bn_self = bnodes.values.sort
+      bn_other = other.bnodes.values.sort
+      return false unless bn_self == bn_other
+      
+      # Check each triple to see if it's contained in the other graph
+      triples do |t|
+        next if t.subject.is_a?(BNode) || t.object.is_a?(BNode)
+        return false unless other.contains?(t)
+      end
+      true
+    end
+
+    alias_method :==, :eql?
+  end
+  
+  # Generate a BNode in this graph
+  def bnode(id = nil)
+    BNode.new(self, id)
   end
 end

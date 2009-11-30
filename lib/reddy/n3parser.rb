@@ -71,7 +71,7 @@ module Reddy
     end
 
     def process_anonnode(anonnode)
-      bnode = BNode.new
+      bnode = @graph.bnode
       properties = process_properties(anonnode.property_list)
       properties.each do |p|      
         predicate = process_node(p.verb)
@@ -145,7 +145,7 @@ module Reddy
     def build_uri(prefix, localname)
       prefix = '__local__' if prefix.nil?
       if (prefix=='_')
-        BNode.new(localname)
+        @graph.bnode(localname)
       else
         @graph.nsbinding[prefix].send(localname)
       end

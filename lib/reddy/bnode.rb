@@ -1,18 +1,32 @@
 module Reddy
   # The BNode class creates RDF blank nodes.
   class BNode
-    @@next_generated = "a"
-    @@named_nodes = {}
+    attr_reader :graph
     
     # Create a new BNode, optionally accept a identifier for the BNode.
-    # Otherwise, generated sequentially
+    # Otherwise, generated sequentially.
     #
-    # ==== Example
-    #  BNode.new("foo")
-    def initialize(identifier = nil)
+    # A BNode may have a bank (empty string) identifier, which will be equivalent to another
+    # blank identified BNode.
+    #
+    # BNodes only have meaning within a graph, and must be bound to a graph to be resolved.
+    # This can be done from the Graph as follows:
+    #  Graph.new.bnode(identifier)</tt>
+    # or
+    #  g = Graph.new
+    #  BNode.new(identifier, g)
+    #
+    # @param [Graph] graph:: Graph with which to bind BNode
+    # @param [String] identifier:: Legal NCName or nil for a named BNode
+    #
+    # @author Gregg Kellogg
+    def initialize(graph, identifier = nil)
+      raise BNodeException.new("BNode must be bound to a graph") unless graph.is_a?(Graph)
+      @graph = graph
       if identifier != nil && self.valid_id?(identifier)
-        # Generate a name if it's blank
-        @identifier = (@@named_nodes[identifier] ||= identifier.to_s.length > 0 ? identifier : self )
+        # Generate a name if it's blank. Always prepend "named" to avoid generation overlap
+        identifier = "named#{identifier}" unless identifier.match(/^named/)
+        @identifier = (@graph.named_nodes[identifier] ||= identifier.to_s.length > 0 ? identifier : self)
       else
         # Don't actually allocate the name until it's used, to save generation space
         # (and make checking test cases easier)
@@ -59,9 +73,8 @@ module Reddy
     def identifier
       return @identifier unless @identifier.is_a?(BNode)
       if @identifier.equal?(self)
-        # Generate from the sequence a..zzz, unless already taken
-        @@next_generated = @@next_generated.succ while @@named_nodes.has_key?(@@next_generated)
-        @identifier, @@next_generated = @@next_generated, @@next_generated.succ
+        # Generate from the sequence a..zzz
+        @identifier, @graph.next_generated = @graph.next_generated, @graph.next_generated.succ
       else
         # Previously allocated node
         @identifier = @identifier.identifier
@@ -69,22 +82,21 @@ module Reddy
       @identifier
     end
     
-    # Compare BNodes. BNodes are equivalent if their identifiers are equivalent
+    # Compare BNodes. BNodes are equivalent if they have the same identifier in the same graph
     def eql?(other)
-      other.is_a?(self.class) && self.identifier == other.identifier
+      other.class == self.class &&
+      other.graph.equal?(self.graph) &&
+      other.identifier == self.identifier
     end
     alias_method :==, :eql?
     
     # Needed for uniq
-    def hash; to_s.hash; end
+    def hash; (graph.identifier.to_s + self.to_s).hash; end
     
-    # Start _identifier_ sequence from scratch.
-    # Identifiers are created using String::succ on start valuie.
-    def self.reset(init = "a")
-      @@next_generated = init
-      @@named_nodes = {}
+    def inspect
+      "[bn:#{identifier},graph:#{graph.object_id}]"
     end
-
+    
     protected
     def valid_id?(name)
       NC_REGEXP.match(name) || name.empty?

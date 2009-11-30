@@ -16,7 +16,6 @@ module Reddy
     # @author Gregg Kellogg
     def initialize(options = {})
       options = {:graph => Graph.new}.merge(options)
-      BNode.reset # Start sequence anew
 
       # initialize the triplestore
       @graph = options[:graph]
