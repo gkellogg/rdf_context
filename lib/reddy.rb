@@ -19,6 +19,14 @@ end
 
 Dir.glob(File.join(File.dirname(__FILE__), 'reddy/**.rb')).each { |f| require f }
 
+# Include Storage types, but be tollerant of failure to load as dependencies might not be available
+Dir.glob(File.join(File.dirname(__FILE__), "reddy/store/**.rb")).each do |f|
+  begin
+    require f
+  rescue LoadError
+  end
+end
+
 module Reddy
   VERSION = File.read(File.join(File.dirname(__FILE__), "..", "VERSION")).chop  # Version in parent directory
   

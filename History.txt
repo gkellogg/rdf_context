@@ -15,6 +15,8 @@
 * Added Graph#clone and Triple#clone
 * Merge Graphs, replacing BNodes with new values from new graph.
 * Remove duplicate triples when adding or merging graphs
+* Added Abstract Store and List Store.
+* Delegate Graph methods to store. Currently only supports :list.
 
 === 0.1.5
 * Update RDFa tests to use Reddy RDF/XML parser.
