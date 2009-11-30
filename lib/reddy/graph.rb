@@ -76,8 +76,7 @@ module Reddy
     #
     # @author Tom Morris
     def add_triple(subject, predicate, object)
-      triple = Triple.new(subject, predicate, object)
-      @triples << triple unless contains?(triple)
+      self << Triple.new(subject, predicate, object)
     end
 
     ## 
@@ -91,7 +90,7 @@ module Reddy
     #
     # @author Tom Morris
     def << (triple)
-      @triples << triple
+      @triples << triple unless contains?(triple)
     end
     
     ## 
@@ -260,11 +259,22 @@ module Reddy
     end
     
     # Merge a graph into this graph
-    #
-    # Fixme: rename bnodes when merging, remove duplicate triples
     def merge!(graph)
       raise GraphException.new("merge without a graph") unless graph.is_a?(Graph)
-      @triples += graph.triples
+      
+      # Map BNodes from source Graph to new BNodes
+      bn = graph.bnodes
+      bn.keys.each {|k| bn[k] = self.bnode}
+      
+      graph.triples do |triple|
+        # If triple contains bnodes, remap to new values
+        if triple.subject.is_a?(BNode) || triple.object.is_a?(BNode)
+          triple = triple.clone
+          triple.subject = bn[triple.subject] if triple.subject.is_a?(BNode)
+          triple.object = bn[triple.object] if triple.object.is_a?(BNode)
+        end
+        self << triple
+      end
     end
     
     # Clone the graph, including cloning each triple

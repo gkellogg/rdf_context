@@ -52,10 +52,10 @@ module Reddy
 
     # Clone triple, keeping refernces to literals and URIRefs, but cloning BNodes
     def clone
-      s = subject.is_a?(BNode) ? s.clone : s
-      p = predicate.is_a?(BNode) ? s.clone : s
-      o = object.is_a?(BNode) ? s.clone : s
-      Triple.new(s, p, o)
+      s = subject.is_a?(BNode) ? subject.clone : subject
+      p = predicate.is_a?(BNode) ? predicate.clone : predicate
+      o = object.is_a?(BNode) ? object.clone : object
+      Triple.new(subject, predicate, object)
     end
     
     protected

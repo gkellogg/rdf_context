@@ -253,11 +253,9 @@ HERE
       s1, s2 = g.triples.map(&:subject)
       p1, p2 = g.triples.map(&:predicate)
       o1, o2 = g.triples.map(&:object)
-      pending do
-        s1.should_not == s2
-        p1.should == p1
-        o1.should_not == o2
-      end
+      s1.should_not == s2
+      p1.should == p1
+      o1.should_not == o2
     end
 
     it "should remove duplicate triples" do
@@ -265,7 +263,7 @@ HERE
       g = Graph.new
       g.add_triple(@ex.a, URIRef.new("http://xmlns.com/foaf/0.1/knows"), @ex.b)
       g.merge!(subject)
-      pending {g.size.should == 1}
+      g.size.should == 1
     end
   end
   
