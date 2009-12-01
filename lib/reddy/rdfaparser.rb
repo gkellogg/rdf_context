@@ -89,7 +89,7 @@ module Reddy
     # Parsing an RDFa document (this is *not* the recursive method)
     def parse_whole_document(doc, base)
       # find if the document has a base element
-      base_el = doc.xpath('/html:html/html:head/html:base', @namespace.xmlns_hash).first
+      base_el = doc.css('html>head>base').first
       if (base_el)
         base = base_el.attributes['href']
         # Strip any fragment from base

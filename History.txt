@@ -7,16 +7,18 @@
 * Graph#triples yields triples if a block is provided
 * Changed Namespace#short to Namespace#prefix
 * Change BNode to require a graph. Most uses go from graph.bnode, rather than BNode.new. This is required because bnodes are only equivalent within the same graph
-* Added identifier to Graph, defaults to BNode. This from Python librdf based on TriX recommendation, see: http://www.w3.org/2004/03/trix/
+* Added identifier to Graph, defaults to BNode. This from Python RDFlib based on TriX recommendation, see: http://www.w3.org/2004/03/trix/
 * Only add triple to graph if it does not already exist in graph.
 * Added Graph#contains? to look for existance of triple.
-* Added Graph#eql? (and ===) to do simple check for graph equality. This version ignores BNodes (like Python librdf)
+* Added Graph#eql? (and ===) to do simple check for graph equality. This version ignores BNodes (like Python RDFlib)
 * Prepend "named" to named BNodes to ensure no overlap between generated and named BNodes.
 * Added Graph#clone and Triple#clone
 * Merge Graphs, replacing BNodes with new values from new graph.
 * Remove duplicate triples when adding or merging graphs
 * Added Abstract Store and List Store.
 * Delegate Graph methods to store. Currently only supports :list.
+* Reduce dependence on HTML namespace in RDFa parser.
+* Add RDFa tests for HTML4 and HTML5
 
 === 0.1.5
 * Update RDFa tests to use Reddy RDF/XML parser.

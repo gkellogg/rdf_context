@@ -74,6 +74,7 @@ module Matchers
         "Query returned true (expected false)"
       end +
       "\n#{@expected}" +
+      "\n#{@info.input}" +
       "\nResults:\n#{@actual.to_ntriples}" +
       "\nDebug:\n#{@info.trace}"
     end

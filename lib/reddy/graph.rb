@@ -299,16 +299,19 @@ module Reddy
     # from self to other until every permutation is exhausted, or a textual equivalence is found
     # after sorting each graph.
     #
-    # We just follow Python librdf's lead and do a simple comparison
+    # We just follow Python RDFlib's lead and do a simple comparison
     def eql? (other)
+      #puts "eql? size #{self.size} vs #{other.size}"
       return false if !other.is_a?(Graph) || self.size != other.size
       bn_self = bnodes.values.sort
       bn_other = other.bnodes.values.sort
+      #puts "eql? bnodes '#{bn_self.to_sentence}' vs '#{bn_other.to_sentence}'"
       return false unless bn_self == bn_other
       
       # Check each triple to see if it's contained in the other graph
       triples do |t|
         next if t.subject.is_a?(BNode) || t.object.is_a?(BNode)
+        #puts "eql? contains '#{t.to_ntriples}'"
         return false unless other.contains?(t)
       end
       true

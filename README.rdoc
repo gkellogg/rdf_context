@@ -23,11 +23,11 @@ A simple RDF library for Ruby has been necessary for some time.
 
 Basic usage:
 
-require 'reddy'
-parser = Reddy::RdfXmlParser.new(stream, base_uri)
-parser.parse do |triple|
-  puts triple.to_ntriple
-end
+  require 'reddy'
+  parser = Reddy::RdfXmlParser.new(stream, base_uri)
+  parser.parse do |triple|
+    puts triple.to_ntriple
+  end
 
 == REQUIREMENTS:
 
