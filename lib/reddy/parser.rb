@@ -15,24 +15,10 @@ module Reddy
     #
     # @author Gregg Kellogg
     def initialize(options = {})
-      options = {:graph => Graph.new}.merge(options)
-
       # initialize the triplestore
       @graph = options[:graph]
       @debug = options[:debug]
       @strict = options[:strict]
-      
-      return unless self == Parser
-      
-      # Create a delegate of a specific parser class
-      @deligate = case options[:type].to_s
-      when "n3", "ntriples", "turtle" then N3Parser.new(options)
-      when "rdfa", "html", "xhtml"    then RdfaParser.new(options)
-      when "xml", "rdf", "rdfxml"     then RdfXmlParser.new(options)
-      else
-        RdfXmlParser.new(options)
-        # raise ParserException.new("type option must be one of :rdfxml, :html, or :n3")
-      end
     end
     
     # Instantiate Parser and parse document
@@ -48,7 +34,8 @@ module Reddy
     #
     # @author Gregg Kellogg
     def self.parse(stream, uri = nil, options = {}, &block) # :yields: triple
-      self.new(options).parse(stream, uri, options, &block)
+      parser = self.new(options)
+      parser.parse(stream, uri, options, &block)
     end
     
     # Parse RDF document from a string or input stream to closure or graph.
@@ -65,7 +52,25 @@ module Reddy
     #
     # @author Gregg Kellogg
     def parse(stream, uri = nil, options = {}, &block) # :yields: triple
-      @deligate.parse(stream, uri, options, &block)
+      if self.class == Parser
+        # Create a delegate of a specific parser class
+        @delegate ||= case options[:type].to_s
+        when "n3", "ntriples", "turtle" then N3Parser.new(options)
+        when "rdfa", "html", "xhtml"    then RdfaParser.new(options)
+        when "xml", "rdf", "rdfxml"     then RdfXmlParser.new(options)
+        else
+          RdfXmlParser.new(options)
+          # raise ParserException.new("type option must be one of :rdfxml, :html, or :n3")
+        end
+        @delegate.parse(stream, uri, options, &block)
+      else
+        # Common parser operations
+        @uri = Addressable::URI.parse(uri.to_s).to_s unless uri.nil?
+        @strict = options[:strict] if options.has_key?(:strict)
+        @debug = options[:debug] if options.has_key?(:debug)
+        
+        @graph ||= Graph.new(:identifier => @uri)
+      end
     end
     
     # Return N3 Parser instance

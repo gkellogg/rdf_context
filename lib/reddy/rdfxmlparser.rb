@@ -108,9 +108,7 @@ module Reddy
     #
     # @author Gregg Kellogg
     def parse(stream, uri = nil, options = {}, &block) # :yields: triple
-      @uri = Addressable::URI.parse(uri).to_s unless uri.nil?
-      @strict = options[:strict] if options.has_key?(:strict)
-      @debug = options[:debug] if options.has_key?(:debug)
+      super
 
       @doc = case stream
       when Nokogiri::XML::Document then stream

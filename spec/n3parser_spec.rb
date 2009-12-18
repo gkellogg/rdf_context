@@ -13,6 +13,15 @@ describe "N3 parser" do
       @parser.graph[0].object.to_s.should == "Tom Morris"
       @parser.graph.size.should == 1
     end
+    
+    it "should parse simple triple from class method" do
+      n3_string = "<http://example.org/> <http://xmlns.com/foaf/0.1/name> \"Tom Morris\" . "
+      graph = N3Parser.new(:strict => true).parse(n3_string)
+      graph[0].subject.to_s.should == "http://example.org/"
+      graph[0].predicate.to_s.should == "http://xmlns.com/foaf/0.1/name"
+      graph[0].object.to_s.should == "Tom Morris"
+      graph.size.should == 1
+    end
 
     # NTriple tests from http://www.w3.org/2000/10/rdf-tests/rdfcore/ntriples/test.nt
     describe "recognize blank lines" do

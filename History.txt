@@ -19,6 +19,7 @@
 * Delegate Graph methods to store. Currently only supports :list.
 * Reduce dependence on HTML namespace in RDFa parser.
 * Add RDFa tests for HTML4 and HTML5
+* Add ConjunctiveGraph and initial support for contexts
 
 === 0.1.5
 * Update RDFa tests to use Reddy RDF/XML parser.

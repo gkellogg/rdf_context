@@ -1,31 +1,32 @@
 module Reddy
   # List storage, most efficient, but slow storage model. Works well for basic parse and serialize.
   class ListStore < AbstractStore
-    # Created with graph that the store is attached to
-    def initialize(graph)
-      @graph = graph
+    def initialize
       @triples = []
     end
     
    ## 
     # Adds an extant triple to a graph.
-    # See Graph#store for details.
     #
-    # @author Tom Morris
-    def << (triple)
-      @triples << triple unless contains?(triple)
+    # _context_ and _quoted_ are ignored
+    def add_triple(triple, context, quoted = false)
+      @triples << triple unless contains?(triple, context)
     end
     
     # Remove a triple from the graph
     #
     # If the triple does not provide a context attribute, removes the triple
     # from all contexts.
-    def remove(triple)
-      @triples.delete(triple)
+    def remove(triple, context, quoted = false)
+      if triple
+        @triples.delete(triple)
+      else
+        @triples = []
+      end
     end
 
     # Check to see if this graph contains the specified triple
-    def contains?(triple)
+    def contains?(triple, context, quoted = false)
       !@triples.find_index(triple).nil?
     end
 

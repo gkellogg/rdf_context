@@ -51,6 +51,22 @@ describe "Graphs" do
     subject.size.should == 1
   end
   
+  it "should parse into existing graph" do
+    n3_string = "<http://example.org/> <http://xmlns.com/foaf/0.1/name> \"Gregg Kellogg\" . "
+    graph = subject.parse(n3_string, nil, :type => :n3)
+    graph.should == subject
+    graph.identifier.should be_a(BNode)
+    subject.size.should == 1
+    subject[0].subject.to_s.should == "http://example.org/"
+    subject[0].predicate.to_s.should == "http://xmlns.com/foaf/0.1/name"
+    subject[0].object.to_s.should == "Gregg Kellogg"
+  end
+  
+  it "should set identifier from URI" do
+    g = Graph.new(:identifier => "http://foo.bar")
+    g.identifier.should == "http://foo.bar"
+  end
+  
   describe "with XML Literal objects" do
     subject {
       dc = Namespace.new("http://purl.org/dc/elements/1.1/", "dc")

@@ -8,9 +8,8 @@ module Reddy
 
     # Create a Graph with the given store_type and identifier.
     #
-    # The constructor accepts one argument, the 'store'
-    # that will be used to store the graph data (see the 'store'
-    # package for stores currently shipped with rdflib).
+    # The constructor accepts a _store_ option,
+    # that will be used to store the graph data.
     #
     # Stores can be context-aware or unaware.  Unaware stores take up
     # (some) less space but cannot support features that require
@@ -19,15 +18,15 @@ module Reddy
     #
     # The Graph constructor can take an identifier which identifies the Graph
     # by name.  If none is given, the graph is assigned a BNode for it's identifier.
-    # For more on named graphs, see: http://www.w3.org/2004/03/trix/
+    # For more on named graphs, see: http://en.wikipedia.org/wiki/RDFLib
     #
     # @param [Hash] options:: Options
-    # <em>options[:store_type]</em>:: storage type, currently only <tt>:list</tt> is supported
+    # <em>options[:store]</em>:: storage, defaults to a new ListStore instance
     # <em>options[:identifier]</em>:: Identifier for this graph, Literal, BNode or URIRef
     #
     # @author Gregg Kellogg
     def initialize(options = {})
-      options[:store_type] ||= :list
+      options[:store] ||= ListStore.new
       @nsbinding = {}
 
       # For BNode identifier generation
@@ -35,16 +34,13 @@ module Reddy
       @named_nodes = {}
       
       @identifier = options[:identifier] || BNode.new(self)
-      
+
       # Instantiate triple store
-      case options[:store_type].to_s
-      when "list"
-        @store = ListStore.new(self)
-      else
-        raise GraphException.new("No store of type #{options[:store_type]}")
-      end
+      @store = options[:store] || ListStore.new(self)
     end
 
+    def context_aware?; @context_aware; end
+    
     # Data Store interface
 
     # Destroy the store identified by _configuration_ if supported
@@ -161,27 +157,27 @@ module Reddy
 
     # Number of Triples in the graph
     def size
-      @store.respond_to?(:size) ? @store.size : triples.size
+      @store.respond_to?(:size) ? @store.size(self) : triples.size
     end
 
     # List of distinct subjects in graph
     def subjects
-      @store.respond_to?(:subjects) ? @store.subjects : triples.map {|t| t.subject}.uniq
+      @store.respond_to?(:subjects) ? @store.subjects(self) : triples.map {|t| t.subject}.uniq
     end
     
     # List of distinct predicates in graph
     def predicates
-      @store.respond_to?(:predicates) ? @store.predicates : triples.map {|t| t.predicate}.uniq
+      @store.respond_to?(:predicates) ? @store.predicates(self) : triples.map {|t| t.predicate}.uniq
     end
     
     # List of distinct objects in graph
     def objects
-      @store.respond_to?(:objects) ? @store.objects : triples.map {|t| t.object}.uniq
+      @store.respond_to?(:objects) ? @store.objects(self) : triples.map {|t| t.object}.uniq
     end
     
     # Indexed statement in serialized graph triples. Equivalent to graph.triples[item] 
     def [] (item)
-      @store.respond_to?(:[]) ? @store[item] : triples[item]
+      @store.respond_to?(:item) ? @store.item(item, self) : triples[item]
     end
 
     # Adds a triple to a graph directly from the intended subject, predicate, and object.
@@ -192,31 +188,50 @@ module Reddy
     # @param [URIRef, BNode] subject:: the subject of the triple
     # @param [URIRef] predicate:: the predicate of the triple
     # @param [URIRef, BNode, Literal] object:: the object of the triple
-    # @return [Array]:: An array of the triples (leaky abstraction? consider returning the graph instead)
+    # @return [Graph]:: Returns the graph
     # @raise [Error]:: Checks parameter types and raises if they are incorrect.
-    #
-    # @author Tom Morris
     def add_triple(subject, predicate, object)
       self << Triple.new(subject, predicate, object)
+      self
     end
 
     ## 
-    # Adds an extant triple to a graph. Delegates to Store#<<.
+    # Adds an more extant triples to a graph. Delegates to Store.
     #
     # ==== Example
-    #   g = Graph.new; t = Triple.new(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new); g << t) # => results in the triple being added to g; returns an array of g's triples
+    #   g = Graph.new;
+    #   t = Triple.new(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new);
+    #   g << t
     #
     # @param [Triple] t:: the triple to be added to the graph
-    # @return [Array]:: An array of the triples (leaky abstraction? consider returning the graph instead)
+    # @return [Graph]:: Returns the graph
+    def << (triple)
+      @store.add_triple(triple, self)
+      self
+    end
+    
+    ## 
+    # Adds one or more extant triples to a graph. Delegates to Store.
     #
-    # @author Tom Morris
-    def << (triple); @store << triple; end
+    # ==== Example
+    #   g = Graph.new;
+    #   t1 = Triple.new(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new);
+    #   t2 = Triple.new(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new);
+    #   g.add_triples(t1, t2, ...)
+    #
+    # @param [Triple] triples:: one or more triples. Last element may be a hash for options
+    # <em>options[:context]</em>:: Graph context in which to deposit triples, defaults to default_context or self
+    # @return [Graph]:: Returns the graph
+    def add_triples(*triples)
+      triples.last.is_a?(Hash) ? options = triples.pop : {}
+      ctx = options[:context] || @default_context || self
+      triples.each {|t| @store.add_triple(t, ctx)}
+      self
+    end
     
     # Remove a triple from the graph. Delegates to store.
-    #
-    # If the triple does not provide a context attribute, removes the triple
-    # from all contexts.
-    def remove(triple); @store.remove(triple); end
+    # Nil matches all triples and thus empties the graph
+    def remove(triple); @store.remove(triple, self); end
     
     # Triples from graph, optionally matching subject, predicate, or object.
     # Delegates to Store#triples.
@@ -227,7 +242,7 @@ module Reddy
     # <em>options[:object]</em>:: If specified, limited to triples having the specified object. May be a Regexp
     # @return [Array]:: List of matched triples
     def triples(options = {}, &block) # :yields: triple
-      @store.triples(options, &block) || []
+      @store.triples(options.merge(:context => self), &block) || []
     end
     alias_method :find, :triples
 
@@ -245,13 +260,13 @@ module Reddy
 
     # Check to see if this graph contains the specified triple
     def contains?(triple)
-      @store.contains?(triple)
+      @store.contains?(triple, self)
     end
     
     # Get all BNodes with usage count used within graph
     def bnodes
       if @store.respond_to?(:bnodes?)
-        @store.bnodes
+        @store.bnodes(self)
       else
         bn = {}
         triples do |t|
@@ -325,4 +340,20 @@ module Reddy
     BNode.new(self, id)
   end
   
+  # Parse source into Graph.
+  #
+  # If Graph is context-aware, create a new context (Graph) and parse into that. Otherwise,
+  # merges results into a common Graph
+  #
+  # @param  [IO, String] stream:: the RDF IO stream, string, Nokogiri::HTML::Document or Nokogiri::XML::Document
+  # @param [String] uri:: the URI of the document
+  # @param [Hash] options:: Options from
+  # <em>options[:debug]</em>:: Array to place debug messages
+  # <em>options[:type]</em>:: One of _rdfxml_, _html_, or _n3_
+  # <em>options[:strict]</em>:: Raise Error if true, continue with lax parsing, otherwise
+  #
+  # @author Gregg Kellogg
+  def parse(stream, uri, options = {}, &block) # :yields: triple
+    Parser.parse(stream, uri, options.merge(:graph => self), &block)
+  end
 end

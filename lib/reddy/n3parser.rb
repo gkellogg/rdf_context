@@ -21,9 +21,7 @@ module Reddy
     #
     # @author Patrick Sinclair (metade)
     def parse(stream, uri = nil, options = {}, &block) # :yields: triple
-      @uri = Addressable::URI.parse(uri.to_s) unless uri.nil?
-      @strict = true #options[:strict] if options.has_key?(:strict)
-      @debug = options[:debug] if options.has_key?(:debug)
+      super
 
       @callback = block
       parser = N3GrammerParser.new
@@ -36,7 +34,6 @@ module Reddy
         raise ParserException.new(reason)
       end
       
-      @graph = Graph.new
       process_directives(document)
       process_statements(document)
       @graph

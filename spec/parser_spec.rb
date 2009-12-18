@@ -15,5 +15,15 @@ describe "RDF Parser" do
   it "should return Rdfa parser" do
     Parser.rdfa_parser.should be_a(RdfaParser)
   end
+
+  it "should parse with specified type" do
+    n3_string = "<http://example.org/> <http://xmlns.com/foaf/0.1/name> \"Gregg Kellogg\" . "
+    graph = Parser.parse(n3_string, nil, :type => :n3)
+    graph.size.should == 1
+    graph[0].subject.to_s.should == "http://example.org/"
+    graph[0].predicate.to_s.should == "http://xmlns.com/foaf/0.1/name"
+    graph[0].object.to_s.should == "Gregg Kellogg"
+  end
+  
 end
 

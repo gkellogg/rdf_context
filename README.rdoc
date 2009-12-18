@@ -10,12 +10,14 @@ A set of compliant RDF parsers:
 Reddy is an RDF library for Ruby.
 
 == FEATURES/PROBLEMS:
+Reddy parses RDF/XML, RDFa and N3-rdf into a Graph object. It also serializes RDF/XML and N-Triples from the Graph.
 
-* RDF/XML parser passes all positive W3C tests.
+* Fully compliant RDF/XML parser.
 * Fully compliant XHTML/RDFa 1.0 parser.
 * N3-rdf parser
 * N-Triples and RDF/XML serializer
-* RDFa tests use SPARQL for most tests due to Rasqal limitations. Other tests compare directly against N-triples
+* RDFa tests use SPARQL for most tests due to Rasqal limitations. Other tests compare directly against N-triples.
+* Graph serializes into RDF/XML and N-Triples.
 
 == SYNOPSIS:
 
@@ -24,10 +26,15 @@ A simple RDF library for Ruby has been necessary for some time.
 Basic usage:
 
   require 'reddy'
-  parser = Reddy::RdfXmlParser.new(stream, base_uri)
-  parser.parse do |triple|
+  parser = Reddy::RdfXmlParser.new
+  parser.parse(stream, base_uri) do |triple|
     puts triple.to_ntriple
   end
+
+or
+
+  graph = parser.parse(stream, base_uri)
+  graph.to_rdfxml
 
 == REQUIREMENTS:
 

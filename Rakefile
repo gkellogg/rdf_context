@@ -4,8 +4,16 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gemspec|
     gemspec.name = "reddy"
-    gemspec.summary = "RDFa parser written in pure Ruby."
-    gemspec.description = " Yields each triple, or generate in-memory graph"
+    gemspec.summary = "Reddy is an RDF library for Ruby."
+    gemspec.description = <<- DESCRIPTION
+      Reddy parses RDF/XML, RDFa and N3-rdf into a Graph object. It also serializes RDF/XML and N-Triples from the Graph.
+
+      * Fully compliant RDF/XML parser.
+      * Fully compliant XHTML/RDFa 1.0 parser.
+      * N3-rdf parser
+      * N-Triples and RDF/XML serializer
+      * Graph serializes into RDF/XML and N-Triples.
+    DESCRIPTION
     gemspec.email = "gregg@kellogg-assoc.com"
     gemspec.homepage = "http://github.com/tommorris/reddy"
     gemspec.authors = ["Tom Morris", "Gregg Kellogg"]
