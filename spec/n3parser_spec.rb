@@ -198,10 +198,22 @@ EOF
   end
   
   def test_file(filepath)
+    anon = "a"
+    anon_ctx = {}
     n3_string = File.read(filepath)
     @parser.parse(n3_string, "file:#{filepath}")
     ntriples = @parser.graph.to_ntriples
-    ntriples.gsub!(/_\:named_*/, '_:')
+    ntriples.gsub!(/_:nbn\d+[a-z]+N/, "_:")  # Normalize named BNodes
+    ntriples.gsub!(/_:bn\d+[a-z]+/) do |bn|
+      # Normalize anon BNodes
+      if anon_ctx[bn]
+        anon_ctx[bn]
+      else
+        anon_ctx[bn] = anon
+        anon = anon.succ
+      end
+      "_:#{anon_ctx[bn]}"
+    end
     ntriples = sort_ntriples(ntriples)
 
     nt_string = File.read(filepath.sub('.n3', '.nt'))

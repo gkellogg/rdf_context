@@ -66,7 +66,10 @@ module Reddy
         # look for xmlns
         element.namespaces.each do |attr_name,attr_value|
           abbr, suffix = attr_name.to_s.split(":")
-          mappings[suffix] = @graph.namespace(attr_value, suffix) if abbr == "xmlns"
+          if abbr == "xmlns"
+            mappings[suffix] = Namespace.new(attr_value, suffix)
+            @graph.bind(mappings[suffix])
+          end
         end
         mappings
       end
@@ -284,7 +287,7 @@ module Reddy
           end
 
           # For element e with possibly empty element content c.
-          n = @graph.bnode
+          n = BNode.new
           add_triple(child, subject, predicate, n)
 
           # Reification
@@ -317,7 +320,7 @@ module Reddy
 
           # For element event e with possibly empty nodeElementList l. Set s:=list().
           # For each element event f in l, n := bnodeid(identifier := generated-blank-node-id()) and append n to s to give a sequence of events.
-          s = element_nodes.map { @graph.bnode }
+          s = element_nodes.map { BNode.new }
           n = s.first || RDF_NS.send("nil")
           add_triple(child, subject, predicate, n)
           reify(id, child, subject, predicate, n, child_ec) if id
@@ -365,9 +368,9 @@ module Reddy
             if resourceAttr
               resource = URIRef.new(resourceAttr, ec.base)
             elsif nodeID
-              resource = @graph.bnode(nodeID)
+              resource = BNode.new(nodeID, @named_bnodes)
             else
-              resource = @graph.bnode
+              resource = BNode.new
             end
 
             # produce triples for attributes
@@ -433,14 +436,14 @@ module Reddy
         # The value of rdf:nodeID must match the XML Name production
         nodeID = nodeID_check(el, nodeID.value.rdf_escape)
         add_debug(el, "parse_subject, nodeID: '#{nodeID}")
-        @graph.bnode(nodeID)
+        BNode.new(nodeID, @named_bnodes)
       when about
         about = about.value.rdf_escape
         add_debug(el, "parse_subject, about: '#{about}'")
         URIRef.new(about, ec.base)
       else
         add_debug(el, "parse_subject, BNode")
-        @graph.bnode
+        BNode.new
       end
     end
     

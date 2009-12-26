@@ -1,28 +1,28 @@
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
 describe "Triples" do
-  before(:all) { @graph = Graph.new }
+  before(:all) { @graph = Graph.new(:store => ListStore.new) }
   it "should require that the subject is a URIRef or BNode" do
    lambda do
-     Triple.new(Literal.new("foo"), URIRef.new("http://xmlns.com/foaf/0.1/knows"), @graph.bnode)
+     Triple.new(Literal.new("foo"), URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new)
     end.should raise_error
   end
 
   it "should require that the predicate is a URIRef" do
     lambda do
-      Triple.new(@graph.bnode, @graph.bnode, @graph.bnode)
+      Triple.new(BNode.new, BNode.new, BNode.new)
     end.should raise_error
   end
 
   it "should require that the object is a URIRef, BNode, Literal or Typed Literal" do
     lambda do
-      Triple.new(@graph.bnode, URIRef.new("http://xmlns.com/foaf/0.1/knows"), [])
+      Triple.new(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), [])
     end.should raise_error
   end
 
   describe "with BNodes" do
     subject do
-      Triple.new(@graph.bnode, URIRef.new('http://xmlns.com/foaf/0.1/knows'), @graph.bnode)
+      Triple.new(BNode.new, URIRef.new('http://xmlns.com/foaf/0.1/knows'), BNode.new)
     end
 
     it "should have a subject" do
@@ -54,7 +54,7 @@ describe "Triples" do
     end
 
     it "should accept a BNode" do
-      node = @graph.bnode('a')
+      node = BNode.new('a')
       Triple.coerce_subject(node).should == node
     end
 
@@ -101,7 +101,7 @@ describe "Triples" do
     end
     
     it "should leave BNodes alone" do
-      ref = @graph.bnode()
+      ref = BNode.new()
       Triple.coerce_object(ref).should == ref
     end
     
@@ -115,14 +115,21 @@ describe "Triples" do
     
   end
   
+  describe "with wildcards" do
+    it "should accept nil" do
+      t = Triple.new(nil, nil, nil)
+      t.is_patern?.should be_true
+    end
+  end
+  
   describe "equivalence" do
     before(:all) do
       @test_cases = [
         Triple.new(URIRef.new("http://foo"),URIRef.new("http://bar"),URIRef.new("http://baz")),
         Triple.new(URIRef.new("http://foo"),URIRef.new("http://bar"),Literal.untyped("baz")),
         Triple.new(URIRef.new("http://foo"),"http://bar",Literal.untyped("baz")),
-        Triple.new(@graph.bnode("foo"),URIRef.new("http://bar"),Literal.untyped("baz")),
-        Triple.new(@graph.bnode,URIRef.new("http://bar"),Literal.untyped("baz")),
+        Triple.new(BNode.new("foo"),URIRef.new("http://bar"),Literal.untyped("baz")),
+        Triple.new(BNode.new,URIRef.new("http://bar"),Literal.untyped("baz")),
       ]
     end
     it "should be equal to itself" do
@@ -138,6 +145,27 @@ describe "Triples" do
       @test_cases.each do |triple|
         t = Triple.new(triple.subject, triple.predicate, triple.object)
         triple.should == t
+      end
+    end
+    
+    it "should be equal to paterns" do
+      @test_cases.each do |triple|
+        [
+          Triple.new(triple.subject, triple.predicate, triple.object),
+
+          Triple.new(nil, triple.predicate, triple.object),
+          Triple.new(triple.subject, nil, triple.object),
+          Triple.new(triple.subject, triple.predicate, nil),
+
+          Triple.new(nil, nil, triple.object),
+          Triple.new(triple.subject, nil, nil),
+          Triple.new(nil, triple.predicate, nil),
+
+          Triple.new(nil, nil, nil),
+        ].each do |t|
+          triple.should == t
+          t.should == triple
+        end
       end
     end
   end

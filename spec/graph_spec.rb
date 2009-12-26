@@ -4,39 +4,49 @@ describe "Graphs" do
   before(:all) do
     @ex = Namespace.new("http://example.org/", "ex")
     @foaf = Namespace.new("http://xmlns.com/foaf/0.1/", "foaf")
+    @bn_ctx = {}
   end
   
-  subject { Graph.new }
+  subject { Graph.new(:store => ListStore.new) }
   it "should allow you to add one or more triples" do
     lambda do
-      subject.add_triple(subject.bnode, URIRef.new("http://xmlns.com/foaf/0.1/knows"), subject.bnode)
+      subject.add_triple(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new)
     end.should_not raise_error
   end
   
   it "should support << as an alias for add_triple" do
     lambda do
-      subject << Triple.new(subject.bnode, URIRef.new("http://xmlns.com/foaf/0.1/knows"), subject.bnode)
+      subject << Triple.new(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new)
     end.should_not raise_error
     subject.size.should == 1
   end
   
   it "should return bnode subjects" do
-    bn = subject.bnode
+    bn = BNode.new
     subject.add_triple(bn, URIRef.new("http://xmlns.com/foaf/0.1/knows"), bn)
     subject.subjects.should == [bn]
   end
   
   it "should be able to determine whether or not it has existing BNodes" do
     foaf = Namespace.new("http://xmlns.com/foaf/0.1/", "foaf")
-    subject << Triple.new(subject.bnode('john'), foaf.knows, subject.bnode('jane'))
-    subject.has_bnode_identifier?('john').should be_true
-    subject.has_bnode_identifier?('jane').should be_true
-    subject.has_bnode_identifier?('jack').should_not be_true
+    john = BNode.new('john', @bn_ctx)
+    jane = BNode.new('jane', @bn_ctx)
+    jack = BNode.new('jack', @bn_ctx)
+    
+    subject << Triple.new(john, foaf.knows, jane)
+    subject.has_bnode_identifier?(john).should be_true
+    subject.has_bnode_identifier?(jane).should be_true
+    subject.has_bnode_identifier?(jack).should_not be_true
   end
   
-  it "should allow you to create and bind Namespace objects on-the-fly" do
-    subject.namespace("http://xmlns.com/foaf/0.1/", "foaf")
+  it "should allow you to create and bind Namespace objects" do
+    subject.bind(Namespace.new("http://xmlns.com/foaf/0.1/", "foaf")).should be_a(Namespace)
     subject.nsbinding["foaf"].uri.should == "http://xmlns.com/foaf/0.1/"
+  end
+  
+  it "should bind namespace" do
+    foaf = Namespace.new("http://xmlns.com/foaf/0.1/", "foaf")
+    subject.bind(foaf).should == foaf
   end
   
   it "should not allow you to bind things other than namespaces" do
@@ -62,16 +72,52 @@ describe "Graphs" do
     subject[0].object.to_s.should == "Gregg Kellogg"
   end
   
-  it "should set identifier from URI" do
-    g = Graph.new(:identifier => "http://foo.bar")
-    g.identifier.should == "http://foo.bar"
+  it "should add multiple triples" do
+    subject.add(Triple.new(@ex.a, @ex.b, @ex.c), Triple.new(@ex.a, @ex.b, @ex.d))
+    subject.size.should == 2
+  end
+
+  describe "with identifier" do
+    before(:all) { @identifier = URIRef.new("http://foo.bar") }
+    subject { Graph.new(:identifier => @identifier) }
+    
+    it "should retrieve identifier" do
+      subject.identifier.should == @identifier
+      subject.identifier.should == @identifier.to_s
+    end
+  end
+  
+  describe "with named store" do
+    before(:all) do
+      @identifier = URIRef.new("http://foo.bar")
+      @store = ListStore.new(:identifier => @identifier)
+    end
+    
+    subject {
+      g = Graph.new(:identifier => @identifier, :store => @store)
+      g.add_triple(@ex.john, @foaf.knows, @ex.jane)
+      g.add_triple(@ex.john, @foaf.knows, @ex.rick)
+      g.add_triple(@ex.jane, @foaf.knows, @ex.rick)
+      g.bind(@foaf)
+      g
+    }
+    
+    it "should retrieve identifier" do
+      subject.identifier.should == @identifier
+      subject.identifier.should == @identifier.to_s
+    end
+    
+    it "should be same as graph with same store and identifier" do
+      g = Graph.new(:store => @store)
+      subject.should == g
+    end
   end
   
   describe "with XML Literal objects" do
     subject {
       dc = Namespace.new("http://purl.org/dc/elements/1.1/", "dc")
       xhtml = Namespace.new("http://www.w3.org/1999/xhtml", "")
-      g = Graph.new
+      g = Graph.new(:store => ListStore.new)
       g << Triple.new(
         URIRef.new("http://www.w3.org/2006/07/SWD/RDFa/testsuite/xhtml1-testcases/0011.xhtml"),
         URIRef.new("http://purl.org/dc/elements/1.1/title"),
@@ -104,9 +150,9 @@ HERE
   
   describe "with bnodes" do
     subject {
-      g = Graph.new
-      a = g.bnode("a")
-      b = g.bnode("b")
+      g = Graph.new(:store => ListStore.new)
+      a = BNode.new("a")
+      b = BNode.new("b")
       
       g << Triple.new(a, @foaf.name, Literal.untyped("Manu Sporny"))
       g << Triple.new(a, @foaf.knows, b)
@@ -141,7 +187,7 @@ HERE
   
   describe "with triples" do
     subject {
-      g = Graph.new
+      g = Graph.new(:store => ListStore.new)
       g.add_triple(@ex.john, @foaf.knows, @ex.jane)
       g.add_triple(@ex.john, @foaf.knows, @ex.rick)
       g.add_triple(@ex.jane, @foaf.knows, @ex.rick)
@@ -161,8 +207,16 @@ HERE
       subject.subjects.should == [@ex.john.uri.to_s, @ex.jane.uri.to_s]
     end
     
-    it "should allow you to select one resource" do
-      subject.triples(:subject => @ex.john).size.should == 2
+    it "should return unique predicates" do
+      subject.predicates.should == [@foaf.knows.uri.to_s]
+    end
+    
+    it "should return unique objects" do
+      subject.objects.should == [@ex.jane.uri.to_s, @ex.rick.uri.to_s]
+    end
+    
+    it "should allow you to select resources" do
+      subject.triples(Triple.new(@ex.john, nil, nil)).size.should == 2
     end
 
     it "should allow iteration" do
@@ -176,7 +230,7 @@ HERE
 
     it "should allow iteration over a particular subject" do
       count = 0
-      subject.triples(:subject => @ex.john) do |t|
+      subject.triples(Triple.new(@ex.john, nil, nil)) do |t|
         count = count + 1
         t.class.should == Triple
         t.subject.should == @ex.john
@@ -190,27 +244,39 @@ HERE
 
       subject.get_by_type("http://xmlns.com/foaf/0.1/Person").should == [@ex.john, @ex.jane]
     end
+    
+    it "should remove a triple" do
+      subject.add(Triple.new(@ex.john, RDF_TYPE, @foaf.Person))
+      subject.size.should == 4
+      subject.remove(Triple.new(@ex.john, RDF_TYPE, @foaf.Person))
+      subject.size.should == 3
+    end
+
+    it "should remove all triples" do
+      subject.remove(Triple.new(nil, nil, nil))
+      subject.size.should == 0
+    end
 
     describe "find triples" do
       it "should find subjects" do
-        subject.triples(:subject => @ex.john).size.should == 2
-        subject.triples(:subject => @ex.jane).size.should == 1
+        subject.triples(Triple.new(@ex.john, nil, nil)).size.should == 2
+        subject.triples(Triple.new(@ex.jane, nil, nil)).size.should == 1
       end
       
       it "should find predicates" do
-        subject.triples(:predicate => @foaf.knows).size.should == 3
+        subject.triples(Triple.new(nil, @foaf.knows, nil)).size.should == 3
       end
       
       it "should find objects" do
-        subject.triples(:object => @ex.rick).size.should == 2
+        subject.triples(Triple.new(nil, nil, @ex.rick)).size.should == 2
       end
       
       it "should find object with regexp" do
-        subject.triples(:object => /rick/).size.should == 2
+        subject.triples(Triple.new(nil, nil, @ex.rick)).size.should == 2
       end
       
-      it "should find with combinations" do
-        subject.triples(:subject => @ex.john, :object => @ex.rick).size.should == 1
+      it "should find combinations" do
+        subject.triples(Triple.new(@ex.john, nil, @ex.rick)).size.should == 1
       end
     end
     
@@ -242,8 +308,8 @@ HERE
 
   describe "which are merged" do
     it "should be able to integrate another graph" do
-      subject.add_triple(subject.bnode, URIRef.new("http://xmlns.com/foaf/0.1/knows"), subject.bnode)
-      g = Graph.new
+      subject.add_triple(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new)
+      g = Graph.new(:store => ListStore.new)
       g.merge!(subject)
       g.size.should == 1
     end
@@ -261,9 +327,9 @@ HERE
     # if the same nodeID is used in two or more documents, and to replace it with a distinct nodeID in each
     # of them, before merging the documents.
     it "should remap bnodes to avoid duplicate bnode identifiers" do
-      subject.add_triple(subject.bnode("a1"), URIRef.new("http://xmlns.com/foaf/0.1/knows"), subject.bnode("a2"))
-      g = Graph.new
-      g.add_triple(subject.bnode("a1"), URIRef.new("http://xmlns.com/foaf/0.1/knows"), subject.bnode("a2"))
+      subject.add_triple(BNode.new("a1", @bn_ctx), URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new("a2", @bn_ctx))
+      g = Graph.new(:store => ListStore.new)
+      g.add_triple(BNode.new("a1", @bn_ctx), URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new("a2", @bn_ctx))
       g.merge!(subject)
       g.size.should == 2
       s1, s2 = g.triples.map(&:subject)
@@ -276,7 +342,7 @@ HERE
 
     it "should remove duplicate triples" do
       subject.add_triple(@ex.a, URIRef.new("http://xmlns.com/foaf/0.1/knows"), @ex.b)
-      g = Graph.new
+      g = Graph.new(:store => ListStore.new)
       g.add_triple(@ex.a, URIRef.new("http://xmlns.com/foaf/0.1/knows"), @ex.b)
       g.merge!(subject)
       g.size.should == 1
@@ -285,22 +351,22 @@ HERE
   
   describe "that can be compared" do
     it "should be true for empty graphs" do
-      should be_equivalent_graph(Graph.new)
+      should be_equivalent_graph(Graph.new(:store => ListStore.new))
     end
 
     it "should be false for different graphs" do
-      f = Graph.new
+      f = Graph.new(:store => ListStore.new)
       f.add_triple(URIRef.new("http://example.org/joe"), URIRef.new("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"), URIRef.new("http://xmlns.com/foaf/0.1/Person"))
       should_not be_equivalent_graph(f)
     end
     
     it "should be true for equivalent graphs with different BNode identifiers" do
-      subject.add_triple(@ex.a, @foaf.knows, subject.bnode("a1"))
-      subject.add_triple(subject.bnode("a1"), @foaf.knows, @ex.a)
+      subject.add_triple(@ex.a, @foaf.knows, BNode.new("a1", @bn_ctx))
+      subject.add_triple(BNode.new("a1", @bn_ctx), @foaf.knows, @ex.a)
 
-      f = Graph.new
-      f.add_triple(@ex.a, @foaf.knows, subject.bnode("a2"))
-      f.add_triple(subject.bnode("a2"), @foaf.knows, @ex.a)
+      f = Graph.new(:store => ListStore.new)
+      f.add_triple(@ex.a, @foaf.knows, BNode.new("a2", @bn_ctx))
+      f.add_triple(BNode.new("a2", @bn_ctx), @foaf.knows, @ex.a)
       should be_equivalent_graph(f)
     end
   end

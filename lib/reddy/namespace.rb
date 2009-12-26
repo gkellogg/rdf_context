@@ -50,11 +50,7 @@ module Reddy
 
     # Bind this namespace to a Graph
     def bind(graph)
-      if graph.class == Graph
-        graph.bind(self)
-      else
-        raise GraphException, "Can't bind namespace to graph of type #{graph.class}"
-      end
+      graph.bind(self)
     end
 
     # Compare namespaces

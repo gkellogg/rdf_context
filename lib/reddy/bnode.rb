@@ -1,7 +1,7 @@
 module Reddy
   # The BNode class creates RDF blank nodes.
   class BNode
-    attr_reader :graph
+    attr_reader :identifier
     
     # Create a new BNode, optionally accept a identifier for the BNode.
     # Otherwise, generated sequentially.
@@ -9,28 +9,21 @@ module Reddy
     # A BNode may have a bank (empty string) identifier, which will be equivalent to another
     # blank identified BNode.
     #
-    # BNodes only have meaning within a graph, and must be bound to a graph to be resolved.
-    # This can be done from the Graph as follows:
-    #  Graph.new.bnode(identifier)</tt>
-    # or
-    #  g = Graph.new
-    #  BNode.new(identifier, g)
+    # Identifiers only have meaning within a particular parsing context, and are used
+    # to lookup previoiusly defined BNodes using the same identifier. Names are *not* preserved
+    # within the underlying storage model.
     #
-    # @param [Graph] graph:: Graph with which to bind BNode
     # @param [String] identifier:: Legal NCName or nil for a named BNode
+    # @param [Hash] context:: Context used to store named BNodes
     #
     # @author Gregg Kellogg
-    def initialize(graph, identifier = nil)
-      raise BNodeException.new("BNode must be bound to a graph") unless graph.is_a?(Graph)
-      @graph = graph
+    def initialize(identifier = nil, context = {})
       if identifier != nil && self.valid_id?(identifier)
+        identifier = identifier.sub(/nbn\d+[a-z]+N/, '')  # creating a named BNode from a named BNode
         # Generate a name if it's blank. Always prepend "named" to avoid generation overlap
-        identifier = "named#{identifier}" unless identifier.match(/^named/)
-        @identifier = (@graph.named_nodes[identifier] ||= identifier.to_s.length > 0 ? identifier : self)
+        @identifier = context[identifier] ||= generate_bn_identifier(identifier)
       else
-        # Don't actually allocate the name until it's used, to save generation space
-        # (and make checking test cases easier)
-        @identifier = self
+        @identifier = generate_bn_identifier
       end
     end
 
@@ -45,7 +38,7 @@ module Reddy
     # ==== Example
     #   b = BNode.new; b.to_n3  # => returns a string of the BNode in n3 form
     #
-    # @return [String] The BNode in n3.
+    # @return [String]:: The BNode in n3.
     #
     # @author Tom Morris
     def to_n3
@@ -68,38 +61,41 @@ module Reddy
       [{"rdf:nodeID" => self.identifier}]
     end
     
-    # The identifier used used for this BNode. Not evaluated until this is called, which means
-    # that BNodes that are never used in a triple won't polute the sequence.
+    # The identifier used used for this BNode.
     def identifier
-      return @identifier unless @identifier.is_a?(BNode)
-      if @identifier.equal?(self)
-        # Generate from the sequence a..zzz
-        @identifier, @graph.next_generated = @graph.next_generated, @graph.next_generated.succ
-      else
-        # Previously allocated node
-        @identifier = @identifier.identifier
-      end
       @identifier
     end
     
-    # Compare BNodes. BNodes are equivalent if they have the same identifier in the same graph
+    # Compare BNodes. BNodes are equivalent if they have the same identifier
     def eql?(other)
       other.class == self.class &&
-      other.graph.equal?(self.graph) &&
       other.identifier == self.identifier
     end
     alias_method :==, :eql?
     
     # Needed for uniq
-    def hash; (graph.identifier.to_s + self.to_s).hash; end
+    def hash; self.to_s.hash; end
     
     def inspect
-      "[bn:#{identifier},graph:#{graph.object_id}]"
+      "[bn:#{identifier}]"
     end
     
     protected
     def valid_id?(name)
       NC_REGEXP.match(name) || name.empty?
+    end
+
+    # Generate a unique identifier (time with milliseconds plus generated increment)
+    def generate_bn_identifier(name = nil)
+      @@base ||= "bn#{(Time.now.to_f * 1000).to_i}"
+      @@next_generated ||= "a"
+      if name
+        bn = "n#{@@base}#{@@next_generated}N#{name}"
+      else
+        bn = "#{@@base}#{@@next_generated}"
+      end
+      @@next_generated = @@next_generated.succ
+      bn
     end
   end
 end

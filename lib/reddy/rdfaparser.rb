@@ -109,7 +109,7 @@ module Reddy
       element.namespaces.each do |attr_name,attr_value|
         begin
           abbr, suffix = attr_name.split(":")
-          mappings[suffix] = @graph.namespace(attr_value, suffix) if abbr == "xmlns"
+          mappings[suffix] = @graph.bind(Namespace.new(attr_value, suffix)) if abbr == "xmlns"
         rescue RdfException => e
           add_debug(element, "extract_mappings raised #{e.class}: #{e.message}")
           raise if @strict
@@ -191,7 +191,7 @@ module Reddy
           if element.name =~ /^(head|body)$/
             new_subject = URIRef.new(evaluation_context.base)
           elsif element.attributes['typeof']
-            new_subject = @graph.bnode
+            new_subject = BNode.new
           else
             # if it's null, it's null and nothing changes
             new_subject = evaluation_context.parent_object
@@ -213,7 +213,7 @@ module Reddy
           if element.name =~ /^(head|body)$/
             new_subject = URIRef.new(evaluation_context.base)
           elsif element.attributes['typeof']
-            new_subject = @graph.bnode
+            new_subject = BNode.new
           else
             # if it's null, it's null and nothing changes
             new_subject = evaluation_context.parent_object
@@ -251,7 +251,7 @@ module Reddy
       else
         # Incomplete triples and bnode creation [Step 8]
         add_debug(element, "step 8: valid: #{valid_rel_or_rev}, rels: #{rels}, revs: #{revs}")
-        current_object_resource = @graph.bnode if valid_rel_or_rev
+        current_object_resource = BNode.new if valid_rel_or_rev
       
         rels.each do |rel|
           # SPEC CONFUSION: we don't store the subject here?
@@ -367,7 +367,7 @@ module Reddy
       # consider the bnode situation
       if prefix == "_"
         # we force a non-nil name, otherwise it generates a new name
-        @graph.bnode(suffix || "")
+        BNode.new(suffix || "", @named_bnodes)
       elsif curie.to_s.empty?
         add_debug(nil, "curie_to_resource_or_bnode #{URIRef.new(subject)}")
         # Empty curie resolves to current subject (No, an empty curie should be ignored)

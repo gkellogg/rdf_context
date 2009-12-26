@@ -19,6 +19,7 @@ module Reddy
       @graph = options[:graph]
       @debug = options[:debug]
       @strict = options[:strict]
+      @named_bnodes = {}
     end
     
     # Instantiate Parser and parse document

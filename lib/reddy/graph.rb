@@ -3,10 +3,12 @@ module Reddy
   #
   # Graphs store triples, and the namespaces associated with those triples, where defined
   class Graph
-    attr_accessor :triples, :nsbinding, :identifier, :store
-    attr_accessor :next_generated, :named_nodes
+    attr_reader :triples
+    attr_reader :nsbinding
+    attr_reader :identifier
+    attr_reader :store
 
-    # Create a Graph with the given store_type and identifier.
+    # Create a Graph with the given store and identifier.
     #
     # The constructor accepts a _store_ option,
     # that will be used to store the graph data.
@@ -26,22 +28,22 @@ module Reddy
     #
     # @author Gregg Kellogg
     def initialize(options = {})
-      options[:store] ||= ListStore.new
       @nsbinding = {}
-
-      # For BNode identifier generation
-      @next_generated = "a"
-      @named_nodes = {}
-      
-      @identifier = options[:identifier] || BNode.new(self)
+      options[:store] ||= ListStore.new
 
       # Instantiate triple store
-      @store = options[:store] || ListStore.new(self)
+      @store = options[:store]
+      @identifier = options[:identifier] || BNode.new
     end
 
+    def inspect
+      "Graph[id=#{identifier},store=#{store.inspect}]"
+    end
+    
     def context_aware?; @context_aware; end
     
     # Data Store interface
+    def nsbinding; @store.nsbinding; end
 
     # Destroy the store identified by _configuration_ if supported
     def destroy(configuration = nil)
@@ -113,7 +115,7 @@ module Reddy
         # Add statements for each subject
         subjects.each do |s|
           xml.rdf(:Description, (s.is_a?(BNode) ? "rdf:nodeID" : "rdf:about") => s) do
-            triples(:subject => s) do |triple|
+            triples(Triple.new(s, nil, nil)) do |triple|
               xml_args = triple.object.xml_args
               if triple.object.is_a?(Literal) && triple.object.xmlliteral?
                 replace_text["__replace_with_#{triple.object.object_id}__"] = xml_args[0]
@@ -134,51 +136,38 @@ module Reddy
     end
     
     ## 
-    # Creates a new namespace given a URI and the prefix and binds it to the graph.
+    # Bind a namespace to the graph.
     #
     # ==== Example
-    #   g = Graph.new; g.namespace("http://xmlns.com/foaf/0.1/", "foaf") # => binds the Foaf namespace to g
+    #   g = Graph.new; g.bind(Namespace.new("http://xmlns.com/foaf/0.1/", "foaf")) # => binds the Foaf namespace to g
     #
-    # @param [String] uri:: the URI of the namespace
-    # @param [String] prefix:: the prefix name of the namespace
-    # @return [Namespace]:: The newly created namespace.
-    # @raise [Error]:: Checks validity of the desired shortname and raises if it is incorrect.
-    # @raise [Error]:: Checks that the newly created Namespace is of type Namespace and raises if it is incorrect.
-    # @author Tom Morris
-    def namespace(uri, prefix)
-      self.bind(Namespace.new(uri, prefix))
-    end
-
-    # Bind a namespace to the graph
+    # @param [String] namespace:: the namespace to bind
+    # @return [Namespace]:: The newly bound or pre-existing namespace.
     def bind(namespace)
       raise GraphException, "Can't bind #{namespace.inspect} as namespace" unless namespace.is_a?(Namespace)
-      @nsbinding["#{namespace.prefix}"] = namespace
+      @store.bind(namespace)
     end
 
+    # Namespace for prefix
+    def namespace(prefix); @store.namespace(prefix); end
+
+    # Prefix for namespace
+    def prefix(namespace); @store.prefix(namespace); end
+    
     # Number of Triples in the graph
-    def size
-      @store.respond_to?(:size) ? @store.size(self) : triples.size
-    end
+    def size; @store.size(self); end
 
     # List of distinct subjects in graph
-    def subjects
-      @store.respond_to?(:subjects) ? @store.subjects(self) : triples.map {|t| t.subject}.uniq
-    end
+    def subjects; @store.subjects(self); end
     
     # List of distinct predicates in graph
-    def predicates
-      @store.respond_to?(:predicates) ? @store.predicates(self) : triples.map {|t| t.predicate}.uniq
-    end
+    def predicates; @store.predicates(self); end
     
     # List of distinct objects in graph
-    def objects
-      @store.respond_to?(:objects) ? @store.objects(self) : triples.map {|t| t.object}.uniq
-    end
+    def objects; @store.objects(self); end
     
     # Indexed statement in serialized graph triples. Equivalent to graph.triples[item] 
-    def [] (item)
-      @store.respond_to?(:item) ? @store.item(item, self) : triples[item]
-    end
+    def [] (item); @store.item(item, self); end
 
     # Adds a triple to a graph directly from the intended subject, predicate, and object.
     #
@@ -191,7 +180,7 @@ module Reddy
     # @return [Graph]:: Returns the graph
     # @raise [Error]:: Checks parameter types and raises if they are incorrect.
     def add_triple(subject, predicate, object)
-      self << Triple.new(subject, predicate, object)
+      self.add(Triple.new(subject, predicate, object))
       self
     end
 
@@ -206,7 +195,7 @@ module Reddy
     # @param [Triple] t:: the triple to be added to the graph
     # @return [Graph]:: Returns the graph
     def << (triple)
-      @store.add_triple(triple, self)
+      @store.add(triple, self)
       self
     end
     
@@ -217,15 +206,15 @@ module Reddy
     #   g = Graph.new;
     #   t1 = Triple.new(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new);
     #   t2 = Triple.new(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new);
-    #   g.add_triples(t1, t2, ...)
+    #   g.add(t1, t2, ...)
     #
     # @param [Triple] triples:: one or more triples. Last element may be a hash for options
     # <em>options[:context]</em>:: Graph context in which to deposit triples, defaults to default_context or self
     # @return [Graph]:: Returns the graph
-    def add_triples(*triples)
-      triples.last.is_a?(Hash) ? options = triples.pop : {}
+    def add(*triples)
+      options = triples.last.is_a?(Hash) ? triples.pop : {}
       ctx = options[:context] || @default_context || self
-      triples.each {|t| @store.add_triple(t, ctx)}
+      triples.each {|t| @store.add(t, ctx)}
       self
     end
     
@@ -236,22 +225,18 @@ module Reddy
     # Triples from graph, optionally matching subject, predicate, or object.
     # Delegates to Store#triples.
     #
-    # @param [Hash] options:: List of options for matching triples
-    # <em>options[:subject]</em>:: If specified, limited to triples having the specified subject
-    # <em>options[:predicate]</em>:: If specified, limited to triples having the specified predicate
-    # <em>options[:object]</em>:: If specified, limited to triples having the specified object. May be a Regexp
+    # @param [Triple, nil] triple:: Triple to match, may be a patern triple or nil
     # @return [Array]:: List of matched triples
-    def triples(options = {}, &block) # :yields: triple
-      @store.triples(options.merge(:context => self), &block) || []
+    def triples(triple = Triple.new(nil, nil, nil), &block) # :yields: triple, context
+      @store.triples(triple, self, &block) || []
     end
     alias_method :find, :triples
 
     # Detect the presence of a BNode in the graph, either as a subject or an object
     #
-    # @param [BNode, String] bn:: BNode or identifier to find
+    # @param [BNode] bn:: BNode to find
     #
     def has_bnode_identifier?(bn)
-      bn = bnode(bn) unless bn.is_a?(BNode)
       triples do |triple|
         return true if triple.subject.eql?(bn) || triple.object.eql?(bn)
       end
@@ -265,29 +250,14 @@ module Reddy
     
     # Get all BNodes with usage count used within graph
     def bnodes
-      if @store.respond_to?(:bnodes?)
-        @store.bnodes(self)
-      else
-        bn = {}
-        triples do |t|
-          if t.subject.is_a?(BNode)
-            bn[t.subject] ||= 0
-            bn[t.subject] += 1
-          end
-          if t.object.is_a?(BNode)
-            bn[t.object] ||= 0
-            bn[t.object] += 1
-          end
-        end
-        bn
-      end
+      @store.bnodes(self)
     end
     
     # Get list of subjects having rdf:type == object
     #
     # @param [Resource, Regexp, String] object:: Type resource
     def get_by_type(object)
-      triples(:predicate => RDF_TYPE, :object => object).map {|t| t.subject}
+      triples(Triple.new(nil, RDF_TYPE, object)).map {|t| t.subject}
     end
     
     # Merge a graph into this graph
@@ -296,7 +266,7 @@ module Reddy
       
       # Map BNodes from source Graph to new BNodes
       bn = graph.bnodes
-      bn.keys.each {|k| bn[k] = self.bnode}
+      bn.keys.each {|k| bn[k] = BNode.new}
       
       graph.triples do |triple|
         # If triple contains bnodes, remap to new values
@@ -310,7 +280,7 @@ module Reddy
     end
     
     # Two graphs are equal if each is an instance of the other, considering BNode equivalence.
-    # This is done by creating a new graph an substituting each permutation of BNode identifiers
+    # This may be done by creating a new graph an substituting each permutation of BNode identifiers
     # from self to other until every permutation is exhausted, or a textual equivalence is found
     # after sorting each graph.
     #
@@ -335,15 +305,9 @@ module Reddy
     alias_method :==, :eql?
   end
   
-  # Generate a BNode in this graph
-  def bnode(id = nil)
-    BNode.new(self, id)
-  end
-  
   # Parse source into Graph.
   #
-  # If Graph is context-aware, create a new context (Graph) and parse into that. Otherwise,
-  # merges results into a common Graph
+  # Merges results into a common Graph
   #
   # @param  [IO, String] stream:: the RDF IO stream, string, Nokogiri::HTML::Document or Nokogiri::XML::Document
   # @param [String] uri:: the URI of the document
@@ -351,8 +315,7 @@ module Reddy
   # <em>options[:debug]</em>:: Array to place debug messages
   # <em>options[:type]</em>:: One of _rdfxml_, _html_, or _n3_
   # <em>options[:strict]</em>:: Raise Error if true, continue with lax parsing, otherwise
-  #
-  # @author Gregg Kellogg
+  # @return [Graph]:: Returns the graph containing parsed triples
   def parse(stream, uri, options = {}, &block) # :yields: triple
     Parser.parse(stream, uri, options.merge(:graph => self), &block)
   end

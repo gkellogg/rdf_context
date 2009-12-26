@@ -1,3 +1,9 @@
+=== 0.2.1
+* Added MemoryStore, a context-aware store based on Python RDFLib IOMemory
+* Add ConjunctiveGraph, a conjunction of all graphs in a context-aware store
+* Triple(nil, nil, nil) is wildcard, plus variations. No support for regular expressions.
+* BNodes not graph/store specific, generated using milli-second time and sequence.
+
 === 0.2.0
 * API and RDoc cleanup
 * Removed Graph#each_with_subject, Graph#get_resource, Graph#has_bnode_identifier?
@@ -19,7 +25,6 @@
 * Delegate Graph methods to store. Currently only supports :list.
 * Reduce dependence on HTML namespace in RDFa parser.
 * Add RDFa tests for HTML4 and HTML5
-* Add ConjunctiveGraph and initial support for contexts
 
 === 0.1.5
 * Update RDFa tests to use Reddy RDF/XML parser.

@@ -50,7 +50,7 @@ module Reddy
     def namespace(uri, prefix)
       uri = @uri if uri == '#'
       prefix = '__local__' if prefix == ''
-      @graph.namespace(uri, prefix)
+      @graph.bind(Namespace.new(uri, prefix))
     end
 
     def process_statements(document)
@@ -68,7 +68,7 @@ module Reddy
     end
 
     def process_anonnode(anonnode)
-      bnode = @graph.bnode
+      bnode = BNode.new
       properties = process_properties(anonnode.property_list)
       properties.each do |p|      
         predicate = process_node(p.verb)
@@ -142,7 +142,7 @@ module Reddy
     def build_uri(prefix, localname)
       prefix = '__local__' if prefix.nil?
       if (prefix=='_')
-        @graph.bnode(localname)
+        BNode.new(localname, @named_bnodes)
       else
         @graph.nsbinding[prefix].send(localname)
       end

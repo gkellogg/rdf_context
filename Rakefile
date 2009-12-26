@@ -5,8 +5,8 @@ begin
   Jeweler::Tasks.new do |gemspec|
     gemspec.name = "reddy"
     gemspec.summary = "Reddy is an RDF library for Ruby."
-    gemspec.description = <<- DESCRIPTION
-      Reddy parses RDF/XML, RDFa and N3-rdf into a Graph object. It also serializes RDF/XML and N-Triples from the Graph.
+    gemspec.description = <<-DESCRIPTION
+  Reddy parses RDF/XML, RDFa and N3-rdf into a Graph object. It also serializes RDF/XML and N-Triples from the Graph.
 
       * Fully compliant RDF/XML parser.
       * Fully compliant XHTML/RDFa 1.0 parser.

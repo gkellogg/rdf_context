@@ -1,13 +1,9 @@
 require File.join(File.dirname(__FILE__), 'spec_helper')
 describe "Blank nodes" do
-  before(:all) { @graph = Graph.new }
-  
-  it "should be bound to a Graph when created" do
-    lambda { BNode.new(nil) }.should raise_error(BNodeException,"BNode must be bound to a graph")
-  end
+  before(:all) { @context = {} }
   
   describe "which have custom identifiers" do
-    subject { BNode.new(@graph, "foo") }
+    subject { BNode.new("foo", @context) }
   
     it "should return identifier" do
       subject.identifier.should =~ /foo/
@@ -15,7 +11,7 @@ describe "Blank nodes" do
     end
 
     it "should be rejected if they are not acceptable" do
-      b = BNode.new(@graph, "4cake")
+      b = BNode.new("4cake", @context)
       b.identifier.should_not =~ /4cake/
     end
 
@@ -24,7 +20,7 @@ describe "Blank nodes" do
     end
 
     it "should be able to determine equality" do
-      other = BNode.new(@graph, subject.to_s)
+      other = BNode.new(subject.to_s, @context)
       should == other
     end
 
@@ -39,15 +35,15 @@ describe "Blank nodes" do
   end
 
   describe "which has a blank identifier" do
-    subject { BNode.new(@graph, "") }
-    it "should not be the same as an anonymous identifier" do should_not == BNode.new(@graph) end
-    it "should be the same as nother blank identifier" do should == BNode.new(@graph, "") end
+    subject { BNode.new("", @context) }
+    it "should not be the same as an anonymous identifier" do should_not == BNode.new end
+    it "should be the same as another blank identifier" do should == BNode.new("", @context) end
   end
 
   describe "which are anonymous" do
     subject { BNode.new(@graph)}
     it "should not be equivalent to another anonymous node" do
-      should_not == BNode.new(@graph)
+      should_not == BNode.new
     end
     
     it "should be equivalent it's clone" do
@@ -55,7 +51,7 @@ describe "Blank nodes" do
     end
     
     it "should create resource hash for RDF/XML anonymous bnode" do
-      b = BNode.new(@graph)
+      b = BNode.new
       b.xml_args.should == [{"rdf:nodeID" => b.identifier}]
     end
   end
