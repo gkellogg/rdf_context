@@ -24,6 +24,7 @@ Dir.glob(File.join(File.dirname(__FILE__), "reddy/store/**.rb")).each do |f|
   begin
     require f
   rescue LoadError
+    puts "Error loading #{f}: #{$!}"
   end
 end
 

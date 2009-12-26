@@ -8,6 +8,9 @@ module Reddy
     ##
     # Creates a new triple directly from the intended subject, predicate, and object.
     #
+    # Any or all of _subject_, _predicate_ or _object_ may be nil, to create a triple patern.
+    # A patern may not be added to a graph.
+    #
     # ==== Example
     #   Triple.new(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new) # => results in the creation of a new triple and returns it
     #
@@ -22,17 +25,23 @@ module Reddy
       @subject   = self.class.coerce_subject(subject)
       @predicate = self.class.coerce_predicate(predicate)
       @object    = self.class.coerce_object(object)
+      @patern = subject.nil? || predicate.nil? || object.nil?
     end
 
+    def is_patern?
+      @patern
+    end
+    
     # Serialize Triple to N-Triples
     def to_ntriples
+      raise RdfException.new("Can't serialize patern triple") if is_patern?
       @subject.to_ntriples + " " + @predicate.to_ntriples + " " + @object.to_ntriples + " ."
     end
     
     def to_s; self.to_ntriples; end
     
     def inspect
-      [@subject, @predicate, @object].inspect
+      [@subject, @predicate, @object, @patern].inspect
     end
 
     # Is the predicate of this statment rdf:type?
@@ -41,17 +50,19 @@ module Reddy
     end
 
     # Two triples are equal if their of their subjects, predicates and objects are equal.
+    # Or self or other is a patern and subject, predicate, object matches
     def eql? (other)
-      other.is_a?(self.class) &&
-      other.subject == self.subject &&
-      other.predicate == self.predicate &&
-      other.object == self.object
+      other.is_a?(Triple) &&
+      (other.subject == self.subject || other.subject.nil? || self.subject.nil?) &&
+      (other.predicate == self.predicate || other.predicate.nil? || self.predicate.nil?) &&
+      (other.object == self.object || other.object.nil? || self.object.nil?)
     end
 
     alias_method :==, :eql?
 
-    # Clone triple, keeping refernces to literals and URIRefs, but cloning BNodes
+    # Clone triple, keeping references to literals and URIRefs, but cloning BNodes
     def clone
+      raise RdfException.new("Can't clone patern triple") if is_patern?
       s = subject.is_a?(BNode) ? subject.clone : subject
       p = predicate.is_a?(BNode) ? predicate.clone : predicate
       o = object.is_a?(BNode) ? object.clone : object
@@ -69,6 +80,8 @@ module Reddy
       when Addressable::URI
         URIRef.new(subject.to_s)
       when URIRef, BNode
+        subject
+      when nil
         subject
       when /^\w+:\/\/\S+/ # does it smell like a URI?
         URIRef.new subject
@@ -89,6 +102,8 @@ module Reddy
         predicate
       when String
         URIRef.new predicate
+      when nil
+        predicate
       else
         raise InvalidPredicate, "Predicate should be a URI"
       end
@@ -113,6 +128,8 @@ module Reddy
       when Integer, Float
         Literal.build_from(object)
       when URIRef, BNode, Literal
+        object
+      when nil, regexp
         object
       else
         raise InvalidObject, "#{object.class}: #{object.inspect} is not a valid object"

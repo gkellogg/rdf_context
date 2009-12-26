@@ -50,7 +50,7 @@ module Reddy
     def namespace(uri, prefix)
       uri = @uri if uri == '#'
       prefix = '__local__' if prefix == ''
-      @graph.namespace(uri, prefix)
+      @graph.bind(Namespace.new(uri, prefix))
     end
 
     def process_statements(document)

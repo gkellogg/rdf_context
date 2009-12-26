@@ -1,7 +1,7 @@
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
 describe "Triples" do
-  before(:all) { @graph = Graph.new }
+  before(:all) { @graph = Graph.new(:store => ListStore.new) }
   it "should require that the subject is a URIRef or BNode" do
    lambda do
      Triple.new(Literal.new("foo"), URIRef.new("http://xmlns.com/foaf/0.1/knows"), @graph.bnode)
@@ -115,6 +115,13 @@ describe "Triples" do
     
   end
   
+  describe "with wildcards" do
+    it "should accept nil" do
+      t = Triple.new(nil, nil, nil)
+      t.is_patern?.should be_true
+    end
+  end
+  
   describe "equivalence" do
     before(:all) do
       @test_cases = [
@@ -138,6 +145,27 @@ describe "Triples" do
       @test_cases.each do |triple|
         t = Triple.new(triple.subject, triple.predicate, triple.object)
         triple.should == t
+      end
+    end
+    
+    it "should be equal to paterns" do
+      @test_cases.each do |triple|
+        [
+          Triple.new(triple.subject, triple.predicate, triple.object),
+
+          Triple.new(nil, triple.predicate, triple.object),
+          Triple.new(triple.subject, nil, triple.object),
+          Triple.new(triple.subject, triple.predicate, nil),
+
+          Triple.new(nil, nil, triple.object),
+          Triple.new(triple.subject, nil, nil),
+          Triple.new(nil, triple.predicate, nil),
+
+          Triple.new(nil, nil, nil),
+        ].each do |t|
+          triple.should == t
+          t.should == triple
+        end
       end
     end
   end

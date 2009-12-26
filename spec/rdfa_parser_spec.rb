@@ -22,7 +22,7 @@ describe "RDFa parser" do
     </html>
     EOF
 
-    @parser.parse(sampledoc, "http://rdfa.digitalbazaar.com/test-suite/test-cases/xhtml1/0001.xhtml")
+    @parser.parse(sampledoc, "http://rdfa.digitalbazaar.com/test-suite/test-cases/xhtml1/0001.xhtml", :strict => true)
     @parser.graph.size.should == 1
     
     @parser.graph.to_rdfxml.should be_valid_xml
@@ -46,7 +46,7 @@ describe "RDFa parser" do
     </html>
     EOF
 
-    @parser.parse(sampledoc, "http://rdfa.digitalbazaar.com/test-suite/test-cases/xhtml1/0011.xhtml")
+    @parser.parse(sampledoc, "http://rdfa.digitalbazaar.com/test-suite/test-cases/xhtml1/0011.xhtml", :strict => true)
     @parser.graph.size.should == 2
     
     xml = @parser.graph.to_rdfxml
@@ -77,7 +77,7 @@ describe "RDFa parser" do
     </html>
     EOF
 
-    @parser.parse(sampledoc, "http://rdfa.digitalbazaar.com/test-suite/test-cases/xhtml1/0011.xhtml")
+    @parser.parse(sampledoc, "http://rdfa.digitalbazaar.com/test-suite/test-cases/xhtml1/0011.xhtml", :strict => true)
     @parser.graph.size.should == 3
     
     xml = @parser.graph.to_rdfxml

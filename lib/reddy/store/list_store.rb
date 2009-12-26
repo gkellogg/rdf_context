@@ -1,15 +1,20 @@
 module Reddy
   # List storage, most efficient, but slow storage model. Works well for basic parse and serialize.
   class ListStore < AbstractStore
-    def initialize
+    def initialize(identifier = nil, configuration = {})
+      super
       @triples = []
     end
     
-   ## 
+    def inspect
+      "ListStore[id=#{identifier}, size=#{@triples.length}]"
+    end
+    
+    # 
     # Adds an extant triple to a graph.
     #
     # _context_ and _quoted_ are ignored
-    def add_triple(triple, context, quoted = false)
+    def add(triple, context, quoted = false)
       @triples << triple unless contains?(triple, context)
     end
     
@@ -26,7 +31,7 @@ module Reddy
     end
 
     # Check to see if this graph contains the specified triple
-    def contains?(triple, context, quoted = false)
+    def contains?(triple, context = nil)
       !@triples.find_index(triple).nil?
     end
 
@@ -34,23 +39,17 @@ module Reddy
     # Delegated from Graph. See Graph#triples for details.
     #
     # @author Gregg Kellogg
-    def triples(options = {})
-      subject = options[:subject]
-      predicate = options[:predicate]
-      object = options[:object]
+    def triples(triple, context = nil)
+      subject = triple.subject
+      predicate = triple.predicate
+      object = triple.object
+      
       if subject || predicate || object
-        @triples.select do |triple|
-          next if subject && triple.subject != subject
-          next if predicate && triple.predicate != predicate
-          case object
-          when Regexp
-            next unless object.match(triple.object.to_s)
-          when URIRef, BNode, Literal, String
-            next unless triple.object == object
-          end
+        @triples.select do |t|
+          next unless t == triple # Includes matching
             
-          yield triple if block_given?
-          triple
+          yield t if block_given?
+          t
         end.compact
       elsif block_given?
         @triples.each {|triple| yield triple}

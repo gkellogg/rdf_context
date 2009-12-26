@@ -136,7 +136,7 @@ module Reddy
       end
       
       def inspect
-        "<theReddy::TypeLiteral::Encoding::Null>"
+        "<Literal::Encoding::Null>"
       end
     end
 

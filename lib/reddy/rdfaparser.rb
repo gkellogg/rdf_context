@@ -109,7 +109,7 @@ module Reddy
       element.namespaces.each do |attr_name,attr_value|
         begin
           abbr, suffix = attr_name.split(":")
-          mappings[suffix] = @graph.namespace(attr_value, suffix) if abbr == "xmlns"
+          mappings[suffix] = @graph.bind(Namespace.new(attr_value, suffix)) if abbr == "xmlns"
         rescue RdfException => e
           add_debug(element, "extract_mappings raised #{e.class}: #{e.message}")
           raise if @strict

@@ -35,7 +35,7 @@ describe "Namespace" do
     # rdflib does this using graph.bind('prefix', namespace)
     g = Graph.new
     subject.bind(g)
-    puts g.nsbinding.inspect
+    #puts g.nsbinding.inspect
     should == g.nsbinding["foaf"]
   end
   

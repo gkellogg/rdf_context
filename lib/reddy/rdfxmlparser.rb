@@ -66,7 +66,10 @@ module Reddy
         # look for xmlns
         element.namespaces.each do |attr_name,attr_value|
           abbr, suffix = attr_name.to_s.split(":")
-          mappings[suffix] = @graph.namespace(attr_value, suffix) if abbr == "xmlns"
+          if abbr == "xmlns"
+            mappings[suffix] = Namespace.new(attr_value, suffix)
+            @graph.bind(mappings[suffix])
+          end
         end
         mappings
       end
