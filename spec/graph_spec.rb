@@ -330,7 +330,7 @@ HERE
       subject.add_triple(BNode.new("a1", @bn_ctx), URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new("a2", @bn_ctx))
       g = Graph.new(:store => ListStore.new)
       g.add_triple(BNode.new("a1", @bn_ctx), URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new("a2", @bn_ctx))
-      g.merge!(subject)
+     g.merge!(subject)
       g.size.should == 2
       s1, s2 = g.triples.map(&:subject)
       p1, p2 = g.triples.map(&:predicate)
