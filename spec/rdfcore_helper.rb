@@ -89,7 +89,7 @@ module RdfCoreHelper
     end
 
     def trace
-      @parser.debug.join("\n")
+      @parser.debug.to_a.join("\n")
     end
     
     def self.parse_test_cases

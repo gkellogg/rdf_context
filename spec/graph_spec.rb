@@ -330,7 +330,7 @@ HERE
       subject.add_triple(BNode.new("a1", @bn_ctx), URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new("a2", @bn_ctx))
       g = Graph.new(:store => ListStore.new)
       g.add_triple(BNode.new("a1", @bn_ctx), URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new("a2", @bn_ctx))
-     g.merge!(subject)
+      g.merge!(subject)
       g.size.should == 2
       s1, s2 = g.triples.map(&:subject)
       p1, p2 = g.triples.map(&:predicate)
@@ -350,24 +350,41 @@ HERE
   end
   
   describe "that can be compared" do
-    it "should be true for empty graphs" do
-      should be_equivalent_graph(Graph.new(:store => ListStore.new))
-    end
+    {
+      "ListStore" => :list_store,
+      "MemoryStore" => :memory_store
+    }.each_pair do |t, s|
+      describe "using #{t}" do
+        subject { Graph.new(:store => s)}
+        
+        it "should be true for empty graphs" do
+          subject.should == Graph.new(:store => s)
+        end
 
-    it "should be false for different graphs" do
-      f = Graph.new(:store => ListStore.new)
-      f.add_triple(URIRef.new("http://example.org/joe"), URIRef.new("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"), URIRef.new("http://xmlns.com/foaf/0.1/Person"))
-      should_not be_equivalent_graph(f)
-    end
+        it "should be false for different graphs" do
+          f = Graph.new(:store => s)
+          f.add_triple(URIRef.new("http://example.org/joe"), URIRef.new("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"), URIRef.new("http://xmlns.com/foaf/0.1/Person"))
+          subject.should_not == f
+        end
     
-    it "should be true for equivalent graphs with different BNode identifiers" do
-      subject.add_triple(@ex.a, @foaf.knows, BNode.new("a1", @bn_ctx))
-      subject.add_triple(BNode.new("a1", @bn_ctx), @foaf.knows, @ex.a)
+        it "should be true for equivalent graphs with different BNode identifiers" do
+          subject.add_triple(@ex.a, @foaf.knows, BNode.new("a1", @bn_ctx))
+          subject.add_triple(BNode.new("a1", @bn_ctx), @foaf.knows, @ex.a)
 
-      f = Graph.new(:store => ListStore.new)
-      f.add_triple(@ex.a, @foaf.knows, BNode.new("a2", @bn_ctx))
-      f.add_triple(BNode.new("a2", @bn_ctx), @foaf.knows, @ex.a)
-      should be_equivalent_graph(f)
+          f = Graph.new(:store => s)
+          f.add_triple(@ex.a, @foaf.knows, BNode.new("a2", @bn_ctx))
+          f.add_triple(BNode.new("a2", @bn_ctx), @foaf.knows, @ex.a)
+          subject.should == f
+        end
+    
+        it "should be true for graphs with literals" do
+          subject.add_triple(@ex.a, @foaf.knows, Literal.untyped("foo"))
+
+          f = Graph.new(:store => s)
+          f.add_triple(@ex.a, @foaf.knows, Literal.untyped("foo"))
+          subject.should == f
+        end
+      end
     end
   end
 end

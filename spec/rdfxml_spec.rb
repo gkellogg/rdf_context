@@ -203,8 +203,7 @@ EOF
 </rdf:RDF>
     EOF
     graph = @parser.parse(sampledoc, "http://example.com", :strict => true)
-    graph[1].predicate.to_s.should == "http://www.w3.org/1999/02/22-rdf-syntax-ns#_1"
-    graph[2].predicate.to_s.should == "http://www.w3.org/1999/02/22-rdf-syntax-ns#_2"
+    graph.predicates.should include("http://www.w3.org/1999/02/22-rdf-syntax-ns#_1", "http://www.w3.org/1999/02/22-rdf-syntax-ns#_2")
   end
   
   # # when we have decent Unicode support, add http://www.w3.org/2000/10/rdf-tests/rdfcore/rdfms-rdf-id/error005.rdf
@@ -319,8 +318,8 @@ EOF
     # Negative parser tests should raise errors.
     describe "positive parser tests" do
       positive_tests.each do |t|
-        #next unless t.about.uri.to_s =~ /rdfms-seq-representation/
-        #next unless t.name =~ /1/
+        #next unless t.about.uri.to_s =~ /rdfms-rdf-names-use/
+        #next unless t.name =~ /11/
         #puts t.inspect
         specify "test #{t.about.uri.to_s}" do
           t.run_test do |rdf_string, parser|

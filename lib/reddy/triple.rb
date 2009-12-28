@@ -69,6 +69,11 @@ module Reddy
       Triple.new(subject, predicate, object)
     end
     
+    # For indexes
+    def hash
+      [subject, predicate, object].hash
+    end
+    
     protected
 
     # Coerce a subject to the appropriate Reddy type.

@@ -29,10 +29,15 @@ module Reddy
     # @author Gregg Kellogg
     def initialize(options = {})
       @nsbinding = {}
-      options[:store] ||= ListStore.new
 
       # Instantiate triple store
-      @store = options[:store]
+      @store = case options[:store]
+      when AbstractStore  then options[:store]
+      when :list_store    then ListStore.new
+      when :memory_store  then MemoryStore.new
+      else                     MemoryStore.new
+      end
+      
       @identifier = options[:identifier] || BNode.new
     end
 
@@ -115,7 +120,7 @@ module Reddy
         # Add statements for each subject
         subjects.each do |s|
           xml.rdf(:Description, (s.is_a?(BNode) ? "rdf:nodeID" : "rdf:about") => s) do
-            triples(Triple.new(s, nil, nil)) do |triple|
+            triples(Triple.new(s, nil, nil)) do |triple, context|
               xml_args = triple.object.xml_args
               if triple.object.is_a?(Literal) && triple.object.xmlliteral?
                 replace_text["__replace_with_#{triple.object.object_id}__"] = xml_args[0]
@@ -237,7 +242,7 @@ module Reddy
     # @param [BNode] bn:: BNode to find
     #
     def has_bnode_identifier?(bn)
-      triples do |triple|
+      triples do |triple, context|
         return true if triple.subject.eql?(bn) || triple.object.eql?(bn)
       end
       false
@@ -257,7 +262,7 @@ module Reddy
     #
     # @param [Resource, Regexp, String] object:: Type resource
     def get_by_type(object)
-      triples(Triple.new(nil, RDF_TYPE, object)).map {|t| t.subject}
+      triples(Triple.new(nil, RDF_TYPE, object)).map {|t, ctx| t.subject}
     end
     
     # Merge a graph into this graph
@@ -268,7 +273,7 @@ module Reddy
       bn = graph.bnodes
       bn.keys.each {|k| bn[k] = BNode.new}
       
-      graph.triples do |triple|
+      graph.triples do |triple, context|
         # If triple contains bnodes, remap to new values
         if triple.subject.is_a?(BNode) || triple.object.is_a?(BNode)
           triple = triple.clone
@@ -294,7 +299,7 @@ module Reddy
       return false unless bn_self == bn_other
       
       # Check each triple to see if it's contained in the other graph
-      triples do |t|
+      triples do |t, ctx|
         next if t.subject.is_a?(BNode) || t.object.is_a?(BNode)
         #puts "eql? contains '#{t.to_ntriples}'"
         return false unless other.contains?(t)

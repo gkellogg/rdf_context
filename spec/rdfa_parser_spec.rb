@@ -50,8 +50,7 @@ describe "RDFa parser" do
     @parser.graph.size.should == 2
     
     xml = @parser.graph.to_rdfxml
-    xml.should be_valid_xml
-    
+
     # Ensure that enclosed literal is also valid
     xml.should include("E = mc<sup xmlns=\"http://www.w3.org/1999/xhtml\">2</sup>: The Most Urgent Problem of Our Time")
   end

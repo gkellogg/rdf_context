@@ -47,6 +47,22 @@ describe "Store" do
           subject.contains?(Triple.new(@ex.john, @foaf.knows, @ex.jane), @ctx).should be_true
         end
         
+        it "should contain different triple paterns" do
+          [
+            Triple.new(URIRef.new("http://foo"),URIRef.new("http://bar"),URIRef.new("http://baz")),
+            Triple.new(URIRef.new("http://foo"),URIRef.new("http://bar"),Literal.untyped("baz")),
+            Triple.new(URIRef.new("http://foo"),"http://bar",Literal.untyped("baz")),
+            Triple.new(BNode.new("foo"),URIRef.new("http://bar"),Literal.untyped("baz")),
+            Triple.new(BNode.new,URIRef.new("http://bar"),Literal.untyped("baz")),
+            Triple.new(URIRef.new("http://foo"),URIRef.new("http://bar"),Literal.typed(5, "http://www.w3.org/2001/XMLSchema#int")),
+            Triple.new(URIRef.new("http://foo"),URIRef.new("http://bar"),Literal.typed("gregg", "http://www.w3.org/2001/XMLSchema#string")),
+            Triple.new(URIRef.new("http://foo"),URIRef.new("http://bar"),"gregg"),
+          ].each do |t|
+            subject.add(t, @ctx)
+            subject.contains?(t, @ctx)
+          end
+        end
+        
         it "should tell you how large the store is" do
           subject.size.should == 3
         end

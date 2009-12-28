@@ -303,6 +303,10 @@ module Reddy
       else false
       end
     end
+    
+    def hash
+      [@contents, @encoding, @lang].hash
+    end
 
     # Output literal in N3 format
     def to_n3

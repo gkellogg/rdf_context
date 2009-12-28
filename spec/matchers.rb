@@ -34,6 +34,9 @@ module Matchers
       "Unsorted Results:\n#{@actual.to_ntriples}" +
       (@info.respond_to?(:trace) ? "\nDebug:\n#{@info.trace}" : "")
     end
+    def negative_failure_message
+      "Graphs do not differ\n"
+    end
   end
   
   def be_equivalent_graph(expected, info = "")

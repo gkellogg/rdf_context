@@ -50,7 +50,6 @@ module Reddy
       "  cspo: #{@cspo.inspect}\n" +
       "  cpos: #{@cpos.inspect}\n" +
       "  cosp: #{@cosp.inspect}\n" +
-      "  cspo: #{@cspo.inspect}\n" +
       "  spo: #{@spo.inspect}\n" +
       "  pos: #{@pos.inspect}\n" +
       "  osp: #{@osp.inspect}\n" +
@@ -61,17 +60,17 @@ module Reddy
   # Add a triple to the store
   # Add to default context, if context is nil
   def add(triple, context, quoted = false)
-    subject, predicate, object = triple.subject, triple.predicate, triple.object
     context = context.identifier if context.respond_to?(:identifier)
     context ||= @identifier
     return unless triples(triple, context).empty?
     
     # Assign keys for new identifiers
-    si = @reverse[subject] || gen_key(subject)
-    pi = @reverse[predicate] || gen_key(predicate)
-    oi = @reverse[object] || gen_key(object)
-    ci = @reverse[context] || gen_key(context)
+    si = resource_to_int(triple.subject) || gen_key(triple.subject)
+    pi = resource_to_int(triple.predicate) || gen_key(triple.predicate)
+    oi = resource_to_int(triple.object) || gen_key(triple.object)
+    ci = resource_to_int(context) || gen_key(context)
     
+    #puts "add: #{si}, #{pi}, #{oi}, #{ci}" if $DEBUG
     set_nested_index(@cspo, ci, si, pi, oi)
     set_nested_index(@cpos, ci, pi, oi, si)
     set_nested_index(@cosp, ci, oi, si, pi)
@@ -81,6 +80,7 @@ module Reddy
       set_nested_index(@pos, pi, oi, si, ci)
       set_nested_index(@osp, oi, si, pi, ci)
     end
+    #dump if $DEBUG
   end
   
   # Remove a triple from the context and store
@@ -91,7 +91,7 @@ module Reddy
     # Iterate over all matching triples and contexts
     triples(triple, context) do |t, cg|
       si, pi, oi = triple_to_int(t)
-      ci = @reverse[cg]
+      ci = resource_to_int(cg)
       #puts "remove: si=#{si}, pi=#{pi}, oi=#{oi}, ci=#{ci}"
       
       # Remove triple from context
@@ -116,7 +116,7 @@ module Reddy
       pos = @pos
       osp = @osp
     else
-      ci = @reverse[context]
+      ci = resource_to_int(context)
       return [] unless ci
       spo = @cspo[ci]
       pos = @cpos[ci]
@@ -136,7 +136,7 @@ module Reddy
         if v.is_a?(Hash)
           # keys are contexts
           v.keys.each do |ci|
-            yield t, @forward[ci]
+            yield t, int_to_resource(ci)
           end
         else
           #puts "ctx: #{ctx}"
@@ -148,6 +148,7 @@ module Reddy
     
     if si # subject is given
       if spo.has_key?(si)
+        #puts "spo[#{si}] = #{spo[si].inspect}" if $DEBUG
         if pi # subject+predicate is given
           if spo[si].has_key?(pi)
             if oi # subject+predicate+object is given
@@ -157,19 +158,21 @@ module Reddy
               spo[si][pi].each_pair do |oi, value|
                 results << result(value, si, pi, oi, context, &block)
               end
+              oi = nil
             end
           end
         elsif triple.predicate.nil? # subject given, predicate unbound
-          #puts "spo[#{si}] = #{spo[si].inspect}"
           spo[si].keys.each do |pi|
+            #puts "spo[#{si}][#{pi}] = #{spo[si][pi].inspect}" if $DEBUG
             if oi # object is given
               results << result(spo[si][pi][oi], si, pi, oi, context, &block) if spo[si][pi].has_key?(oi)
             else # object unbound
               #puts "spo[#{si}][#{pi}] = #{spo[si][pi].inspect}"
               spo[si][pi].each_pair do |oi, value|
-                #puts "spo[#{si}][#{pi}][#{oi}] = #{spo[si][pi][oi].inspect}"
+                #puts "spo[#{si}][#{pi}][#{oi}] = #{spo[si][pi][oi].inspect}" if $DEBUG
                 results << result(value, si, pi, oi, context, &block)
               end
+              oi = nil
             end
           end
         end
@@ -190,6 +193,7 @@ module Reddy
               results << result(value, si, pi, oi, context, &block)
             end
           end
+          oi = nil
         end
       end
     elsif !triple.predicate.nil?
@@ -205,8 +209,11 @@ module Reddy
     elsif !triple.object.nil?
       # Subject+predicate unspecified, object specified but not found, skip
     else # subject+predicate+object unbound
+      #puts "spo = #{spo.inspect}"
       spo.keys.each do |si|
+        #puts "spo[#{si}] = #{spo[si].inspect}"
         spo[si].keys.each do |pi|
+          #puts "spo[#{si}][#{pi}] = #{spo[si][pi].inspect}"
           spo[si][pi].each_pair do |oi, value|
             #puts "spo[#{si}][#{pi}][#{oi}] = #{spo[si][pi][oi].inspect}"
             results << result(value, si, pi, oi, context, &block)
@@ -217,6 +224,25 @@ module Reddy
     results
   end
   
+  # Check to see if this store contains the specified triple
+  #
+  # Note, if triple contains a Literal object, need to wild-card
+  # and check each result individually due to variation in literal
+  # comparisons
+  def contains?(triple, context = nil)
+    #puts "contains? #{triple}"
+    object = triple.object
+    if object.is_a?(Literal)
+      triple = Triple.new(triple.subject, triple.predicate, nil)
+      triples(triple, context) do |t, cg|
+        return true if t.object == object
+      end
+      false
+    else
+      !triples(triple, context).empty?
+    end
+  end
+
   def size(context = nil)
     context = context.identifier if context.respond_to?(:identifier)
     context = nil if context == @identifier
@@ -224,7 +250,7 @@ module Reddy
     if context.nil?
       spo = @spo
     else
-      ci = @reverse[context]
+      ci = resource_to_int(context)
       return 0 unless ci
       spo = @cspo[ci]
       return 0 unless spo.is_a?(Hash)
@@ -242,9 +268,9 @@ module Reddy
     if triple
       si, pi, oi = triple_to_int(triple)
       value = @spo[si][pi][oi]
-      (value && value.keys.map {|ci| @forward[ci]}) || []
+      (value && value.keys.map {|ci| int_to_resource(ci)}) || []
     else
-      @cspo.keys.map {|ci| @forward[ci]}
+      @cspo.keys.map {|ci| int_to_resource(ci)}
     end
   end
   
@@ -254,17 +280,18 @@ module Reddy
   def gen_key(resource)
     begin i = rand((@forward.size + 1) * 4) end while @forward.has_key?(i)
     @forward[i] = resource
-    @reverse[resource] = i
+    @reverse[resource.hash] = i
   end
   
   def set_nested_index(index, *keys)
     ndx = index
-    keys.each do |key|
-      ndx[key] ||= key == keys.last ? 1 : {}
+    keys.each_index do |i|
+      key = keys[i]
+      ndx[key] ||= i == (keys.length - 1) ? 1 : {}
       ndx = ndx[key]
     end
     
-    #puts("set_nested_index: #{index.inspect}")
+    #puts("set_nested_index: #{index.inspect}, keys: #{keys.inspect}") if $DEBUG
   end
   
   # Remove context from the list of contexts in a nested index.
@@ -294,10 +321,13 @@ module Reddy
     Triple.new(@forward[si], @forward[pi], @forward[oi])
   end
   
+  def int_to_resource(i); @forward[i]; end
+  
   # Translate a triple into integer subject, predicate and object
   def triple_to_int(triple)
-    [@reverse[triple.subject], @reverse[triple.predicate], @reverse[triple.object]]
+    [@reverse[triple.subject.hash], @reverse[triple.predicate.hash], @reverse[triple.object.hash]]
   end
+  def resource_to_int(resource); @reverse[resource.hash]; end
   
   def unique_subjects(context=nil)
     context = context.identifier if context.respond_to?(:identifier)
