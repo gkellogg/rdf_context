@@ -18,7 +18,7 @@ module Reddy
     
     # Default (sub-optimal) implemenations of interfaces
     def inspect
-      "#{self.class}[id=#{identifier}]"
+      "#{self.class}[identifier=#{identifier}]"
     end
 
     # Bind namespace to store, returns bound namespace

@@ -135,7 +135,7 @@ module RdfaHelper
       rdfa_string = input
       
       # Run
-      @parser = RdfaParser::RdfaParser.new
+      @parser = RdfaParser::RdfaParser.new(:graph => Graph.new(:store => :list_store))
       yield(rdfa_string, @parser)
 
       query_string = results

@@ -1,12 +1,12 @@
 begin
   require 'spec'
-  require 'activesupport'
+  require 'active_support'
 rescue LoadError
   require 'rubygems' unless ENV['NO_RUBYGEMS']
   gem 'rspec'
   require 'spec'
-  gem 'activesupport'
-  require 'activesupport'
+  gem 'active_support'
+  require 'active_support'
 end
 
 ActiveSupport::XmlMini.backend = 'Nokogiri'

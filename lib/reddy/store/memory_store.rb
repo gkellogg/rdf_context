@@ -128,7 +128,7 @@ module Reddy
     
     results = []
     si, pi, oi = triple_to_int(triple)
-    #puts "triples: si=#{si}, pi=#{pi}, oi=#{oi}, ci=#{ci}"
+    puts "triples: si=#{si}, pi=#{pi}, oi=#{oi}, ci=#{ci}" if $DEBUG
 
     def result(v, si, pi, oi, ctx)
       t = int_to_triple(si, pi, oi)
@@ -209,13 +209,13 @@ module Reddy
     elsif !triple.object.nil?
       # Subject+predicate unspecified, object specified but not found, skip
     else # subject+predicate+object unbound
-      #puts "spo = #{spo.inspect}"
+      puts "spo = #{spo.inspect}" if $DEBUG
       spo.keys.each do |si|
-        #puts "spo[#{si}] = #{spo[si].inspect}"
+        puts "spo[#{si}] = #{spo[si].inspect}" if $DEBUG
         spo[si].keys.each do |pi|
-          #puts "spo[#{si}][#{pi}] = #{spo[si][pi].inspect}"
+          puts "spo[#{si}][#{pi}] = #{spo[si][pi].inspect}" if $DEBUG
           spo[si][pi].each_pair do |oi, value|
-            #puts "spo[#{si}][#{pi}][#{oi}] = #{spo[si][pi][oi].inspect}"
+            puts "spo[#{si}][#{pi}][#{oi}] = #{spo[si][pi][oi].inspect}" if $DEBUG
             results << result(value, si, pi, oi, context, &block)
           end
         end

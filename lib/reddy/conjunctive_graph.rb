@@ -11,22 +11,23 @@ module Reddy
   # naming purposes ) which could be referenced to indicate conjunctive queries (queries made across the
   # entire conjunctive graph) or appear as nodes in asserted statements. In this latter case, such
   # statements could be interpreted as being made about the entire 'known' universe.
-  #
-  # A ConjunctiveGraph has a _default_graph_ and a _default_context_
   class ConjunctiveGraph < Graph
-    attr_reader :default_context
-    attr_reader :default_graph
-  
     # Store for ConjunctiveGraph must support contexts.
     def initialize(options = {})
       unless options[:store] && options[:store].context_aware?
         raise GraphException.new("Conjuective Graph requires store supporting contexts")
       end
     
-      super(:identifier => options[:store].identifier)
+      super(:identifier => options[:store].identifier, :store => options[:store])
       @context_aware = true
     end
-  
+
+    # The  default_context is a Graph having an _identifier_ the same as the
+    # _identifier_ of the _store_.
+    def default_context
+      @@default_context = Graph.new(:identifier => @store.identifier, :store => @store)
+    end
+    
     # Parse source into a new context.
     #
     # Create a new context (Graph) and parse into that.

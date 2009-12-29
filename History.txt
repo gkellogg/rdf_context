@@ -5,6 +5,8 @@
 * BNodes not graph/store specific, generated using milli-second time and sequence.
 * Graph(:store) may be one of :list_store or :memory_store, which will instanciate appropriate store
 * Graph#contains? iterates over triples if object is a literal to allow for fuzzy matching.
+* Change gem name to "gkellogg-reddy" to allow publishing to Github.
+* ConjunctiveGraph tests.
 
 === 0.2.0
 * API and RDoc cleanup
