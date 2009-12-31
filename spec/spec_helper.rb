@@ -5,7 +5,7 @@ rescue LoadError
   require 'rubygems' unless ENV['NO_RUBYGEMS']
   gem 'rspec'
   require 'spec'
-  gem 'active_support'
+  gem 'activesupport'
   require 'active_support'
 end
 

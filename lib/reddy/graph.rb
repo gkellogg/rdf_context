@@ -35,7 +35,7 @@ module Reddy
       when AbstractStore  then options[:store]
       when :list_store    then ListStore.new
       when :memory_store  then MemoryStore.new
-      else                     MemoryStore.new
+      else                     ListStore.new
       end
       
       @identifier = options[:identifier] || BNode.new

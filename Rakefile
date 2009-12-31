@@ -3,7 +3,7 @@ begin
   gem 'jeweler'
   require 'jeweler'
   Jeweler::Tasks.new do |gemspec|
-    gemspec.name = "gkellogg-reddy"
+    gemspec.name = "reddy"
     gemspec.summary = "Reddy is an RDF library for Ruby."
     gemspec.description = <<-DESCRIPTION
     Reddy parses RDF/XML, RDFa and N3-rdf into a Graph object. It also serializes RDF/XML and N-Triples from the Graph.
@@ -27,7 +27,7 @@ begin
     gemspec.add_dependency('nokogiri', '>= 1.3.3')
     gemspec.add_dependency('builder', '>= 2.1.2')
     gemspec.add_development_dependency('rspec')
-    gemspec.add_development_dependency('active_support', '>= 2.3.0')
+    gemspec.add_development_dependency('activesupport', '>= 2.3.0')
     gemspec.extra_rdoc_files     = %w(README.rdoc History.txt)
   end
   Jeweler::GemcutterTasks.new
