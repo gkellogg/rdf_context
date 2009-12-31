@@ -2,8 +2,8 @@
 require 'rubygems'
 require File.expand_path(File.dirname(__FILE__) + "/../lib/reddy")
 require 'getoptlong'
+include Reddy
 class Parse
-  include Reddy
   def parse(file, base_uri)
     puts "Parse: #{file}" if $quiet
     parser = case file

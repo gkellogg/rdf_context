@@ -19,6 +19,19 @@ EOF
     statement.object.to_s.should == XML_NS.uri.to_s + "NotRDF"
   end
   
+  it "should parse simple doc without a base URI" do
+        sampledoc = <<-EOF;
+    <?xml version="1.0" ?>
+    <NotRDF />
+    EOF
+        graph = @parser.parse(sampledoc, nil, :strict => true)
+        graph.size.should == 1
+        statement = graph[0]
+        statement.subject.class.should == BNode
+        statement.predicate.to_s.should == RDF_TYPE.to_s
+        statement.object.to_s.should == XML_NS.uri.to_s + "NotRDF"
+  end
+  
   it "should trigger parsing on XML documents with multiple RDF nodes" do
     sampledoc = <<-EOF;
 <?xml version="1.0" ?>

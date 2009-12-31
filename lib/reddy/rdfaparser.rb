@@ -188,7 +188,7 @@ module Reddy
         # SPEC CONFUSION: not sure what "If no URI is provided by a resource attribute" means, I assume 
         # it means that new_subject is still null
         if new_subject.nil?
-          if element.name =~ /^(head|body)$/
+          if element.name =~ /^(head|body)$/ && evaluation_context.base
             new_subject = URIRef.new(evaluation_context.base)
           elsif element.attributes['typeof']
             new_subject = BNode.new

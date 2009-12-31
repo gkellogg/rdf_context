@@ -28,6 +28,24 @@ describe "RDFa parser" do
     @parser.graph.to_rdfxml.should be_valid_xml
   end
 
+  it "should parse simple doc without a base URI" do
+    sampledoc = <<-EOF;
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN" "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd">
+    <html xmlns="http://www.w3.org/1999/xhtml"
+          xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <body>
+    	<p>This photo was taken by <span class="author" about="_:photo" property="dc:creator">Mark Birbeck</span>.</p>
+    </body>
+    </html>
+    EOF
+
+    @parser.parse(sampledoc, nil, :strict => true)
+    @parser.graph.size.should == 1
+    
+    @parser.graph.to_rdfxml.should be_valid_xml
+  end
+
   it "should parse XML Literal and generate valid XML" do
     sampledoc = <<-EOF
     <?xml version="1.0" encoding="UTF-8"?>

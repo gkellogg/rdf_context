@@ -54,7 +54,7 @@ module Reddy
       def extract_from_element(el)
         b = el.attribute_with_ns("base", XML_NS.uri.to_s)
         lang = el.attribute_with_ns("lang", XML_NS.uri.to_s)
-        self.base = URIRef.new(b, self.base)
+        self.base = URIRef.new(b, self.base) if b
         self.language = lang if lang
         self.uri_mappings.merge!(extract_mappings(el))
       end
