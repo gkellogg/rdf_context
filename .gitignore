@@ -4,6 +4,7 @@
 coverage/*
 doc/*
 rdoc/*
+pkg/*
 rena_new_spec.html
 rena-*.gem
 /*.gemspec
