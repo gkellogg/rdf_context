@@ -1,3 +1,6 @@
+require File.join(File.dirname(__FILE__), 'store', 'list_store')
+require File.join(File.dirname(__FILE__), 'store', 'memory_store')
+
 module Reddy
   # A simple graph to hold triples.
   #

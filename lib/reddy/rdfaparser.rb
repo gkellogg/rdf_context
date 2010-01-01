@@ -1,3 +1,5 @@
+require File.join(File.dirname(__FILE__), 'parser')
+
 module Reddy
   ##
   # An RDFa parser in Ruby

@@ -10,15 +10,14 @@ describe "Memory Store" do
   subject { MemoryStore.new(@identifier) }
   it_should_behave_like "Store"
   it_should_behave_like "Context Aware Store"
-end
 
-describe "Memory Store with context" do
-  before(:all) do
-      @identifier = URIRef.new("http://identifier")
-      @ctx = URIRef.new("http://context")
+
+  describe "with context" do
+    before(:all) do
+        @ctx = URIRef.new("http://context")
+    end
+
+    it_should_behave_like "Store"
+    it_should_behave_like "Context Aware Store"
   end
-  
-  subject { MemoryStore.new(@identifier) }
-  it_should_behave_like "Store"
-  it_should_behave_like "Context Aware Store"
 end

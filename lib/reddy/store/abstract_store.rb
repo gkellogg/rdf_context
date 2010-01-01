@@ -58,7 +58,5 @@ module Reddy
     def predicates(context = nil); triples(Triple.new(nil, nil, nil), context).map {|t| t.predicate}.uniq; end
     def objects(context = nil); triples(Triple.new(nil, nil, nil), context).map {|t| t.object}.uniq; end
     def item(item, context = nil) triples(Triple.new(nil, nil, nil), context)[item]; end
-    def self.context_aware?; false; end
-    def self.formula_aware?; false; end
   end
 end

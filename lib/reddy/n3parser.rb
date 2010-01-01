@@ -1,4 +1,5 @@
 require 'treetop'
+require File.join(File.dirname(__FILE__), 'parser')
 
 Treetop.load(File.join(File.dirname(__FILE__), "n3_grammar"))
 

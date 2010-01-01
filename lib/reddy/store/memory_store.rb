@@ -1,3 +1,5 @@
+require File.join(File.dirname(__FILE__), 'abstract_store')
+
 module Reddy
   # An integer-key-optimized-context-aware-in-memory store.
   #
@@ -15,7 +17,7 @@ module Reddy
   # specified context.
   # 
   # Based on Python RdfLib IOMemory
-  class MemoryStore < AbstractStore
+  class MemoryStore < Reddy::AbstractStore
     attr_accessor :default_context
     
     # Supports contexts

@@ -1,5 +1,5 @@
-#require 'ruby-debug'
 require 'xml'
+require File.join(File.dirname(__FILE__), 'parser')
 
 module Reddy
   class RdfXmlParser < Parser
