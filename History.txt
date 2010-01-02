@@ -1,3 +1,7 @@
+=== 0.2.2
+* Added AbstractSqlStore and SQLite3Store
+* Store contexts are always graphs
+
 === 0.2.1
 * Added MemoryStore, a context-aware store based on Python RDFLib IOMemory
 * Add ConjunctiveGraph, a conjunction of all graphs in a context-aware store

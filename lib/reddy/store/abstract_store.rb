@@ -12,13 +12,13 @@ module Reddy
     end
     
     # Interfaces that must be implemented
-#    def triples(triple, context = nil); raise StoreException, "not implemented"; end
-#    def add(triple, context = nil, quoted = false); raise StoreException, "not implemented"; end
-#    def remove(triple, context = nil); raise StoreException, "not implemented"; end
+    def triples(triple, context = nil); raise StoreException, "not implemented"; end
+    def add(triple, context = nil, quoted = false); raise StoreException, "not implemented"; end
+    def remove(triple, context = nil); raise StoreException, "not implemented"; end
     
     # Default (sub-optimal) implemenations of interfaces
     def inspect
-      "#{self.class}[identifier=#{identifier}]"
+      "#{self.class}[identifier=#{identifier.inspect}]"
     end
 
     # Bind namespace to store, returns bound namespace

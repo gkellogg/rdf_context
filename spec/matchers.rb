@@ -2,30 +2,32 @@ require 'rdf/redland'
 
 module Matchers
   class BeEquivalentGraph
-    def initialize(expected, info)
-      @expected = case expected
-      when Graph then expected
-      when Array then N3Parser.parse(expected.join("\n"), info.about, :strict => true)
-      when String then N3Parser.parse(expected, info.about, :strict => true)
-      when Parser then expected.graph
-      else nil
+    def normalize(graph)
+      case graph
+      when Graph then graph
+      when Parser then graph.graph
+      else
+        triples = [graph].flatten.join("\n")
+        N3Parser.parse(graph.to_s, @info.about, :strict => true)
       end
-      @info = info
     end
+    
+    def initialize(expected, info)
+      @info = info
+      @expected = normalize(expected)
+    end
+
     def matches?(actual)
-      @actual = case actual
-      when Graph then actual
-      when Array then N3Parser.parse(actual.join("\n"), @info.about, :strict => true)
-      when String then N3Parser.parse(actual, @info.about, :strict => true)
-      when Parser then actual.graph
-      else nil
-      end
+      @actual = normalize(actual)
       @actual == @expected
     end
+
     def failure_message_for_should
       info = @info.respond_to?(:information) ? @info.information : ""
       if @actual.size != @expected.size
         "Graph entry count differs:\nexpected: #{@expected.size}\nactual:   #{@actual.size}"
+      elsif @actual.identifier != @expected.identifier
+        "Graph identifiers differ:\nexpected: #{@expected.identifier}\nactual:   #{@actual.identifier}"
       else
         "Graph differs\n"
       end +

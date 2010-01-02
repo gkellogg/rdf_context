@@ -45,7 +45,12 @@ module Reddy
     end
 
     def inspect
-      "Graph[id=#{identifier},store=#{store.inspect}]"
+      "#{self.class}[id=#{identifier},store=#{store.inspect}]"
+    end
+    
+    # Hash of graph, based on graph type and identifier
+    def hash
+      [self.class.to_s, self.identifier].hash
     end
     
     def context_aware?; @context_aware; end
@@ -296,6 +301,8 @@ module Reddy
     def eql? (other)
       #puts "eql? size #{self.size} vs #{other.size}"
       return false if !other.is_a?(Graph) || self.size != other.size
+      return false unless other.identifier.to_s == identifier.to_s
+      
       bn_self = bnodes.values.sort
       bn_other = other.bnodes.values.sort
       #puts "eql? bnodes '#{bn_self.to_sentence}' vs '#{bn_other.to_sentence}'"

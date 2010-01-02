@@ -108,7 +108,7 @@ describe "Graphs" do
     end
     
     it "should be same as graph with same store and identifier" do
-      g = Graph.new(:store => @store)
+      g = Graph.new(:store => @store, :identifier => @identifier)
       subject.should == g
     end
   end
@@ -358,11 +358,11 @@ HERE
         subject { Graph.new(:store => s)}
         
         it "should be true for empty graphs" do
-          subject.should == Graph.new(:store => s)
+          subject.should == Graph.new(:store => s, :identifier => subject.identifier)
         end
 
         it "should be false for different graphs" do
-          f = Graph.new(:store => s)
+          f = Graph.new(:store => s, :identifier => subject.identifier)
           f.add_triple(URIRef.new("http://example.org/joe"), URIRef.new("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"), URIRef.new("http://xmlns.com/foaf/0.1/Person"))
           subject.should_not == f
         end
@@ -371,7 +371,7 @@ HERE
           subject.add_triple(@ex.a, @foaf.knows, BNode.new("a1", @bn_ctx))
           subject.add_triple(BNode.new("a1", @bn_ctx), @foaf.knows, @ex.a)
 
-          f = Graph.new(:store => s)
+          f = Graph.new(:store => s, :identifier => subject.identifier)
           f.add_triple(@ex.a, @foaf.knows, BNode.new("a2", @bn_ctx))
           f.add_triple(BNode.new("a2", @bn_ctx), @foaf.knows, @ex.a)
           subject.should == f
@@ -380,7 +380,7 @@ HERE
         it "should be true for graphs with literals" do
           subject.add_triple(@ex.a, @foaf.knows, Literal.untyped("foo"))
 
-          f = Graph.new(:store => s)
+          f = Graph.new(:store => s, :identifier => subject.identifier)
           f.add_triple(@ex.a, @foaf.knows, Literal.untyped("foo"))
           subject.should == f
         end

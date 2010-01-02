@@ -26,7 +26,8 @@ describe "ConjunctiveGraph" do
     count = 0
     subject.triples do |t, ctx|
       t.should == t
-      ctx.should == @identifier
+      ctx.should be_a(Graph)
+      ctx.identifier.should == @identifier
       count += 1
     end
     count.should == 1
@@ -40,7 +41,7 @@ describe "ConjunctiveGraph" do
     count = 0
     subject.triples do |t, ctx|
       t.should == t
-      ctx.should == g.identifier
+      ctx.should == g
       count += 1
     end
     count.should == 1

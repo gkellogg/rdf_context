@@ -111,6 +111,31 @@ shared_examples_for "Store" do
     end
   end
 
+  describe "with typed triples" do
+    before(:each) do
+      subject.add(Triple.new(@ex.john, RDF_TYPE, @foaf.Person), @ctx)
+      subject.add(Triple.new(@ex.jane, RDF_TYPE, @foaf.Person), @ctx)
+      subject.add(Triple.new(@ex.rick, RDF_TYPE, @foaf.Person), @ctx)
+      subject.add(Triple.new(@ex.john, @foaf.knows, @ex.jane), @ctx)
+      subject.add(Triple.new(@ex.john, @foaf.knows, @ex.jane), @ctx)
+      subject.add(Triple.new(@ex.john, @foaf.knows, @ex.rick), @ctx)
+      subject.add(Triple.new(@ex.jane, @foaf.knows, @ex.rick), @ctx)
+      subject.bind(@foaf)
+      subject.bind(@ex)
+    end
+    
+    it "should find subjects by type" do
+      count = 0
+      subject.triples(Triple.new(nil, RDF_TYPE, nil), @ctx) do |triple, ctx|
+        count += 1
+        [@ex.john, @ex.jane, @ex.rick].should include(triple.subject)
+        triple.predicate.should == RDF_TYPE
+        triple.object.should == @foaf.Person
+      end
+      count.should == 3
+    end
+  end
+  
   it "should remove a triple" do
     subject.add(Triple.new(@ex.john, RDF_TYPE, @foaf.Person), @ctx)
     subject.size(@ctx).should == 1
@@ -127,10 +152,10 @@ shared_examples_for "Context Aware Store" do
   end
 
   describe "is context aware" do
-    before(:all) do
+    before(:each) do
       @triple = Triple.new(@ex.a, @ex.b, @ex.c)
-      @ctx1 = URIRef.new("http://new1.ctx")
-      @ctx2 = URIRef.new("http://new2.ctx")
+      @ctx1 = Graph.new(:identifier => URIRef.new("http://new1.ctx"), :store => subject)
+      @ctx2 = Graph.new(:identifier => URIRef.new("http://new2.ctx"), :store => subject)
     end
     
     it "should add triple to default context" do
@@ -138,7 +163,7 @@ shared_examples_for "Context Aware Store" do
       found = false
       subject.triples(@triple, nil) do |triple, context|
         @triple.should == @triple
-        context.should == @identifier
+        context.should == Graph.new(:store => subject, :identifier => subject.identifier)
         found = true
       end
       found.should be_true
@@ -149,11 +174,19 @@ shared_examples_for "Context Aware Store" do
       subject.add(@triple, @ctx2)
       subject.triples(@triple, @ctx1).length.should == 1
       subject.triples(@triple, @ctx2).length.should == 1
+      
       found = 0
       subject.triples(@triple, nil) do |triple, context|
         found += 1
       end
       found.should == 2
+    end
+    
+    it "should return contexts" do
+      subject.add(@triple, @ctx1)
+      subject.add(@triple, @ctx2)
+      subject.contexts.should include(@ctx1, @ctx2)
+      subject.contexts.length.should == 2
     end
     
     it "should remove from specific context" do
@@ -187,6 +220,7 @@ shared_examples_for "Context Aware Store" do
       subject.add(@triple, @ctx2)
       #subject.dump
       subject.remove(Triple.new(nil, nil, nil), @ctx2)
+      subject.contexts.should include(@ctx1)
       subject.contexts.should_not include(@ctx2)
       #subject.dump
       subject.triples(@triple, @ctx1).length.should == 1
