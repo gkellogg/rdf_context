@@ -484,8 +484,7 @@ module RdfContext
         raise InvalidPredicate.new(warn) if @strict
         return false
       end
-      !CORE_SYNTAX_TERMS.include?(attr.uri.to_s) &&
-      attr.namespace.href != XML_NS.uri.to_s
+      !CORE_SYNTAX_TERMS.include?(attr.uri.to_s) && attr.namespace && attr.namespace.href != XML_NS.uri.to_s
     end
     
     # Check Node Element name

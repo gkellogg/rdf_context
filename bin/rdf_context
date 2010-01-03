@@ -7,7 +7,7 @@ class Parse
   def parse(file, base_uri)
     puts "Parse: #{file}" if $quiet
     parser = case file
-    when /\.nt$/ then N3Parser.new
+    when /\.(nt|n3)$/ then N3Parser.new
     when /\.x?html/ then RdfaParser.new
     else RdfXmlParser.new
     end

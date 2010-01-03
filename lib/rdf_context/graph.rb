@@ -119,6 +119,17 @@ module RdfContext
       )
       rdf_attrs = extended_bindings.values.inject({}) { |hash, ns| hash.merge(ns.xmlns_attr => ns.uri.to_s)}
       uri_bindings = extended_bindings.values.inject({}) { |hash, ns| hash.merge(ns.uri.to_s => ns.prefix)}
+      
+      # Add bindings for predicates not already having bindings
+      tmp_ns = "ns0"
+      predicates.each do |p|
+        unless uri_bindings.has_key?(p.base)
+          uri_bindings[p.base] = tmp_ns
+          rdf_attrs["xmlns:#{tmp_ns}"] = p.base
+          tmp_ns = tmp_ns.succ
+        end
+      end
+      
       xml.instruct!
       xml.rdf(:RDF, rdf_attrs) do
         # Add statements for each subject

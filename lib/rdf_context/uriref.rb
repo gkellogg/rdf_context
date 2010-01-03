@@ -36,13 +36,25 @@ module RdfContext
       return URIRef.new(input_uri, self.to_s)
     end
     
+    # short_name of URI for creating QNames.
+    #   "#{base]{#short_name}}" == uri
     def short_name
-      if @uri.fragment()
-        return @uri.fragment()
+      @short_name ||= if @uri.fragment()
+        @uri.fragment()
       elsif @uri.path.split("/").last.class == String and @uri.path.split("/").last.length > 0
-        return @uri.path.split("/").last
+        @uri.path.split("/").last
       else
-        return false
+        false
+      end
+    end
+    
+    # base of URI for creating QNames.
+    #   "#{base]{#short_name}}" == uri
+    def base
+      @base ||= begin
+        uri_base = @uri.to_s
+        sn = short_name.to_s
+        uri_base[0, uri_base.length - sn.length]
       end
     end
   
@@ -64,13 +76,12 @@ module RdfContext
   
     # Output URI as QName using URI binding
     def to_qname(uri_binding = {})
-      uri_base = @uri.to_s
-      sn = short_name.to_s
-      uri_base = uri_base[0, uri_base.length - sn.length]
+      sn = self.short_name
+      uri_base = self.base
       if uri_binding.has_key?(uri_base)
         "#{uri_binding[uri_base]}:#{sn}"
       else
-        raise ParserException, "Couldn't find QName for #{@uri}"
+        raise ParserException, "Couldn't find QName for #{@uri}, base: #{uri_base}"
       end
     end
     
