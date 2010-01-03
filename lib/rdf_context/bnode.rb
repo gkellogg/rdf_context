@@ -1,4 +1,4 @@
-module Reddy
+module RdfContext
   # The BNode class creates RDF blank nodes.
   class BNode
     attr_reader :identifier

@@ -111,7 +111,7 @@ describe "URI References" do
 #     thread = Thread.new { s.start }
 #     graph = a.load_graph
 #     s.shutdown
-#     graph.class.should == Reddy::Graph
+#     graph.class.should == RdfContext::Graph
 #     graph.size.should == 1
 #   end
 end

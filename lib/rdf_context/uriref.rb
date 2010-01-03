@@ -1,6 +1,6 @@
 require 'net/http'
 
-module Reddy
+module RdfContext
   class URIRef
     attr_accessor :uri
     
@@ -89,7 +89,7 @@ module Reddy
 
 #    def load_graph
 #      get = Net::HTTP.start(@uri.host, @uri.port) {|http| [:xml, http.get(@uri.path)] }
-#      return Reddy::RdfXmlParser.new(get[1].body, @uri.to_s).graph if get[0] == :xml
+#      return RdfContext::RdfXmlParser.new(get[1].body, @uri.to_s).graph if get[0] == :xml
 #    end
   end
 end

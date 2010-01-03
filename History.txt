@@ -1,3 +1,6 @@
+=== 0.4.2
+* Released as RdfContext gem
+
 === 0.2.2
 * Added AbstractSqlStore and SQLite3Store
 * Store contexts are always graphs
@@ -35,9 +38,9 @@
 * Add RDFa tests for HTML4 and HTML5
 
 === 0.1.5
-* Update RDFa tests to use Reddy RDF/XML parser.
+* Update RDFa tests to use RdfContext RDF/XML parser.
 * All negative RDF/XML parser tests pass.
-* Add Reddy::Parser, super-class of other parsers and move common code.
+* Add RdfContext::Parser, super-class of other parsers and move common code.
 * Change N3Parser to use same new/parse logic as other parsers.
 * Remove debug array by default, and add in calls to tests.
 === 0.1.4

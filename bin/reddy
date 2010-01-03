@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby -s
 require 'rubygems'
-require File.expand_path(File.dirname(__FILE__) + "/../lib/reddy")
+require File.expand_path(File.dirname(__FILE__) + "/../lib/rdf_context")
 require 'getoptlong'
 class Parse
-  include Reddy
+  include RdfContext
   def parse(file, base_uri)
     puts "Parse: #{file}" if $quiet
     parser = case file

@@ -1,6 +1,6 @@
 require File.join(File.dirname(__FILE__), 'abstract_store')
 
-module Reddy
+module RdfContext
   # An integer-key-optimized-context-aware-in-memory store.
   #
   # Uses nested dictionaries to store triples and context. Each triple

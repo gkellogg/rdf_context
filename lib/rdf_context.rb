@@ -1,6 +1,4 @@
-#$:.unshift(File.dirname(__FILE__)) unless $:.include?(File.dirname(__FILE__)) || $:.include?(File.expand_path(File.dirname(__FILE__)))
-
-$:.unshift(File.dirname('reddy'))
+$:.unshift(File.dirname(__FILE__)) unless $:.include?(File.dirname(__FILE__)) || $:.include?(File.expand_path(File.dirname(__FILE__)))
 
 begin
   require 'nokogiri'
@@ -17,10 +15,10 @@ rescue LoadError
   require 'treetop'
 end
 
-Dir.glob(File.join(File.dirname(__FILE__), 'reddy/**.rb')).each { |f| require f }
+Dir.glob(File.join(File.dirname(__FILE__), 'rdf_context/**.rb')).each { |f| require f }
 
 # Include Storage types, but be tollerant of failure to load as dependencies might not be available
-Dir.glob(File.join(File.dirname(__FILE__), "reddy/store/**.rb")).each do |f|
+Dir.glob(File.join(File.dirname(__FILE__), "rdf_context/store/**.rb")).each do |f|
   begin
     require f
   rescue LoadError
@@ -28,7 +26,7 @@ Dir.glob(File.join(File.dirname(__FILE__), "reddy/store/**.rb")).each do |f|
   end
 end
 
-module Reddy
+module RdfContext
   VERSION = File.read(File.join(File.dirname(__FILE__), "..", "VERSION")).chop  # Version in parent directory
   
   LINK_TYPES = %w(

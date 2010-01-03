@@ -1,7 +1,7 @@
 require 'sqlite3'
 require File.join(File.dirname(__FILE__), 'abstract_sql_store')
 
-module Reddy
+module RdfContext
   # SQLite3 store context-ware and formula-aware implementation.
   # It stores it's triples in the following partitions:
   # - Asserted non rdf:type statements

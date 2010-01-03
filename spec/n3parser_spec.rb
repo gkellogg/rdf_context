@@ -1,5 +1,5 @@
 require File.join(File.dirname(__FILE__), 'spec_helper')
-include Reddy
+include RdfContext
 
 describe "N3 parser" do
   before(:each) { @parser = N3Parser.new(:strict => true) }
@@ -143,33 +143,33 @@ describe "N3 parser" do
   
   it "should throw an exception when presented with a BNode as a predicate" do
     n3doc = "_:a _:b _:c ."
-    lambda { @parser.parse(n3doc) }.should raise_error(Reddy::Triple::InvalidPredicate)
+    lambda { @parser.parse(n3doc) }.should raise_error(RdfContext::Triple::InvalidPredicate)
   end
 
   it "should create BNodes" do
     n3doc = "_:a a _:c ."
     @parser.parse(n3doc)
-    @parser.graph[0].subject.class.should == Reddy::BNode
-    @parser.graph[0].object.class.should == Reddy::BNode
+    @parser.graph[0].subject.class.should == RdfContext::BNode
+    @parser.graph[0].object.class.should == RdfContext::BNode
   end
   
   it "should create URIRefs" do
     n3doc = "<http://example.org/joe> <http://xmlns.com/foaf/0.1/knows> <http://example.org/jane> ."
     @parser.parse(n3doc)
-    @parser.graph[0].subject.class.should == Reddy::URIRef
-    @parser.graph[0].object.class.should == Reddy::URIRef
+    @parser.graph[0].subject.class.should == RdfContext::URIRef
+    @parser.graph[0].object.class.should == RdfContext::URIRef
   end
   
   it "should create literals" do
     n3doc = "<http://example.org/joe> <http://xmlns.com/foaf/0.1/name> \"Joe\"."
     @parser.parse(n3doc)
-    @parser.graph[0].object.class.should == Reddy::Literal
+    @parser.graph[0].object.class.should == RdfContext::Literal
   end
   
   it "should create typed literals" do
     n3doc = "<http://example.org/joe> <http://xmlns.com/foaf/0.1/name> \"Joe\"^^<http://www.w3.org/2001/XMLSchema#string> ."
     @parser.parse(n3doc)
-    @parser.graph[0].object.class.should == Reddy::Literal
+    @parser.graph[0].object.class.should == RdfContext::Literal
   end
   
   it "should map <#> to document uri" do

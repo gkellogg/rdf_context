@@ -1,6 +1,6 @@
 require File.join(File.dirname(__FILE__), "graph.rb")
 
-module Reddy
+module RdfContext
   # ConjunctiveGraph - The top level container for all named Graphs sharing a _Store_
   #
   # A ConjuctiveGraph is a graph that can contain other graphs. Graphs are kept distinct

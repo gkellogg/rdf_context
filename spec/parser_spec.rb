@@ -1,5 +1,5 @@
 require File.join(File.dirname(__FILE__), 'spec_helper')
-include Reddy
+include RdfContext
 
 # w3c test suite: http://www.w3.org/TR/rdf-testcases/
 

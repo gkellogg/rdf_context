@@ -1,5 +1,5 @@
 require File.join(File.dirname(__FILE__), 'spec_helper')
-include Reddy
+include RdfContext
 
 # w3c test suite: http://www.w3.org/TR/rdf-testcases/
 
@@ -183,7 +183,7 @@ xmlns:ex="http://www.example.org/" xml:lang="en" xml:base="http://www.example.or
 <http://example.org/triples/#triple1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate> <http://example.org/stuff/1.0/prop> .
 <http://example.org/triples/#triple1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#object> \"blah\" .
 EOF
-    tc = RdfCoreHelper::TestCase.new([])
+    tc = RdfXMLHelper::TestCase.new([])
     tc.about = "http://example.com"
     tc.parser = @parser
 
@@ -278,7 +278,7 @@ EOF
 <http://www.w3.org/2000/10/rdf-tests/rdfcore/amp-in-url/test001.nt> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/10/rdf-tests/rdfcore/testSchema#NT-Document> .
 <http://www.w3.org/2000/10/rdf-tests/rdfcore/amp-in-url/test001.rdf> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/10/rdf-tests/rdfcore/testSchema#RDF-XML-Document> .
 EOF
-    tc = RdfCoreHelper::TestCase.new([])
+    tc = RdfXMLHelper::TestCase.new([])
     tc.about = "http://www.w3.org/2000/10/rdf-tests/rdfcore/xmlbase/Manifest.rdf#test001"
     tc.parser = @parser
     graph = @parser.parse(sampledoc, tc.about, :strict => true)
@@ -317,8 +317,8 @@ EOF
 
   # W3C Test suite from http://www.w3.org/2000/10/rdf-tests/rdfcore/
   describe "w3c rdfcore tests" do
-    require 'rdfcore_helper'
-    include RdfCoreHelper
+    require 'rdfxml_helper'
+    include RdfXMLHelper
     
     def self.positive_tests
       RdfCoreHelper::TestCase.positive_parser_tests rescue []

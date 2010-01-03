@@ -1,7 +1,7 @@
 require 'xml'
 require File.join(File.dirname(__FILE__), 'parser')
 
-module Reddy
+module RdfContext
   class RdfXmlParser < Parser
     CORE_SYNTAX_TERMS = %w(RDF ID about parseType resource nodeID datatype).map {|n| "http://www.w3.org/1999/02/22-rdf-syntax-ns##{n}"}
     OLD_TERMS = %w(aboutEach aboutEachPrefix bagID).map {|n| "http://www.w3.org/1999/02/22-rdf-syntax-ns##{n}"}
@@ -456,7 +456,7 @@ module Reddy
           if @id_mapping[id] && @id_mapping[id] == uri
             warn = "ID addtribute '#{id}' may only be defined once for the same URI"
             add_debug(el, warn)
-            raise Reddy::ParserException.new(warn) if @strict
+            raise RdfContext::ParserException.new(warn) if @strict
           end
           
           @id_mapping[id] = uri
@@ -468,7 +468,7 @@ module Reddy
         warn = "ID addtribute '#{id}' must be a NCName"
         add_debug(el, "ID addtribute '#{id}' must be a NCName")
         add_debug(el, warn)
-        raise Reddy::ParserException.new(warn) if @strict
+        raise RdfContext::ParserException.new(warn) if @strict
         nil
       end
     end
@@ -480,7 +480,7 @@ module Reddy
         nodeID
       else
         add_debug(el, "nodeID addtribute '#{nodeID}' must be an XML Name")
-        raise Reddy::ParserException.new("nodeID addtribute '#{nodeID}' must be a NCName") if @strict
+        raise RdfContext::ParserException.new("nodeID addtribute '#{nodeID}' must be a NCName") if @strict
         nil
       end
     end

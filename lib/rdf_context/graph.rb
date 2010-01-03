@@ -1,7 +1,7 @@
 require File.join(File.dirname(__FILE__), 'store', 'list_store')
 require File.join(File.dirname(__FILE__), 'store', 'memory_store')
 
-module Reddy
+module RdfContext
   # A simple graph to hold triples.
   #
   # Graphs store triples, and the namespaces associated with those triples, where defined

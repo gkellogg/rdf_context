@@ -1,4 +1,4 @@
-module Reddy
+module RdfContext
   # Abstract storage module, superclass of other storage classes
   class AbstractStore
     attr_reader :nsbinding, :identifier

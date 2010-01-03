@@ -1,4 +1,4 @@
-module Reddy
+module RdfContext
   class RdfException < RuntimeError; end
   class ParserException < RdfException; end
   class GraphException < RdfException; end

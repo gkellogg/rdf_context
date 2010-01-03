@@ -304,7 +304,7 @@ describe "Literals: " do
   # TODO: refactor based on new interface
   # describe "Languages" do
   #   it "should be inspectable" do
-  #     literal = Reddy::Literal.new("foo", "en")
+  #     literal = RdfContext::Literal.new("foo", "en")
   #     lang = literal.lang
   #     lang.to_s == "en"
   #     lang.hash.class.should == Fixnum

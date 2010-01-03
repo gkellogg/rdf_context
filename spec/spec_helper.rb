@@ -13,10 +13,10 @@ ActiveSupport::XmlMini.backend = 'Nokogiri'
 
 $:.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $:.unshift File.dirname(__FILE__)
-require 'reddy'
+require 'rdf_context'
 require 'matchers'
 
-include Reddy
+include RdfContext
 
 Spec::Runner.configure do |config|
   config.include(Matchers)

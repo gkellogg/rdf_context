@@ -1,4 +1,4 @@
-module Reddy
+module RdfContext
   # An RDF Triple, or statement.
   #
   # Statements are composed of _subjects_, _predicates_ and _objects_.
@@ -76,7 +76,7 @@ module Reddy
     
     protected
 
-    # Coerce a subject to the appropriate Reddy type.
+    # Coerce a subject to the appropriate RdfContext type.
     # 
     # @param[URI, URIRef, String] subject:: If a String looks like a URI, a URI is created, otherwise a BNode.
     # @raise[InvalidSubject]:: If subject can't be intuited.
@@ -95,7 +95,7 @@ module Reddy
       end
     end
 
-    # Coerce a predicate to the appropriate Reddy type.
+    # Coerce a predicate to the appropriate RdfContext type.
     # 
     # @param[URI, URIRef, String] subject:: If a String looks like a URI, a URI is created
     # @raise[InvalidSubject]:: If subject can't be predicate.
@@ -116,7 +116,7 @@ module Reddy
       raise InvalidPredicate, "Couldn't make a URIRef: #{e.message}"
     end
 
-    # Coerce a object to the appropriate Reddy type.
+    # Coerce a object to the appropriate RdfContext type.
     # 
     # @param[URI, URIRef, String, Integer, Float, BNode, Literal] object:: If a String looks like a URI, a URI is created, otherwise an untyped Literal.
     # @raise[InvalidSubject]:: If subject can't be predicate.

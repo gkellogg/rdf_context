@@ -1,6 +1,6 @@
 require File.join(File.dirname(__FILE__), 'uriref')
 
-module Reddy
+module RdfContext
   module TermUtils
     TERM_INSTANTIATION_DICT = {
         'U' => URIRef,

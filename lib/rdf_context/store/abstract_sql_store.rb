@@ -1,7 +1,7 @@
 require File.join(File.dirname(__FILE__), 'abstract_store')
 require 'digest/sha1'
 
-module Reddy
+module RdfContext
   # SQL-92 formula-aware implementation of an RDF Store.
   # It stores it's triples in the following partitions:
   # - Asserted non rdf:type statements

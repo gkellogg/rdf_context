@@ -1,5 +1,5 @@
-module Reddy
-  # From Reddy
+module RdfContext
+  # From RdfContext
   class Namespace
     attr_accessor :prefix, :uri, :fragment
  

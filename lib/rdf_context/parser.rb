@@ -1,5 +1,5 @@
-module Reddy
-  # Generic Reddy Parser class
+module RdfContext
+  # Generic RdfContext Parser class
   class Parser
     attr_reader :debug
     attr_accessor :doc, :graph
@@ -8,7 +8,7 @@ module Reddy
     # Creates a new parser for N3 (or Turtle).
     #
     # @param [Hash] options:: Options from
-    # <em>options[:graph]</em>:: Graph to parse into, otherwise a new Reddy::Graph instance is created
+    # <em>options[:graph]</em>:: Graph to parse into, otherwise a new RdfContext::Graph instance is created
     # <em>options[:debug]</em>:: Array to place debug messages
     # <em>options[:type]</em>:: One of _rdfxml_, _html_, or _n3_
     # <em>options[:strict]</em>:: Raise Error if true, continue with lax parsing, otherwise

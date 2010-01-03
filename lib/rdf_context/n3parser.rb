@@ -3,7 +3,7 @@ require File.join(File.dirname(__FILE__), 'parser')
 
 Treetop.load(File.join(File.dirname(__FILE__), "n3_grammar"))
 
-module Reddy
+module RdfContext
   class Parser; end
   class N3Parser < Parser
 
@@ -18,7 +18,7 @@ module Reddy
     # <em>options[:debug]</em>:: Array to place debug messages
     # <em>options[:strict]</em>:: Abort or proceed on error
     # @return [Graph]
-    # @raise Reddy::RdfException or subclass
+    # @raise RdfContext::RdfException or subclass
     #
     # @author Patrick Sinclair (metade)
     def parse(stream, uri = nil, options = {}, &block) # :yields: triple

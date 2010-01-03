@@ -1,16 +1,20 @@
-= reddy
+= RdfContext
+
+Context-sensitive RDF Graphs, including a ConjunctiveGraph.
 
 A set of compliant RDF parsers:
 * N3-rdf
 * RDF/XML
 * RDFa
 
+Multiple datastores may be attached to a Graph, including Memory, List and SQLite3
+
 == DESCRIPTION:
 
-Reddy is an RDF library for Ruby.
+RdfContext is an RDF library for Ruby.
 
 == FEATURES:
-Reddy parses RDF/XML, RDFa and N3-rdf into a Graph object. It also serializes RDF/XML and N-Triples from the Graph.
+RdfContext parses RDF/XML, RDFa and N3-rdf into a Graph object. It also serializes RDF/XML and N-Triples from the Graph.
 
 * Fully compliant RDF/XML parser.
 * Fully compliant XHTML/RDFa 1.0 parser.
@@ -20,39 +24,73 @@ Reddy parses RDF/XML, RDFa and N3-rdf into a Graph object. It also serializes RD
 * Graph serializes into RDF/XML and N-Triples.
 * ConjunctiveGraph, named Graphs and contextual storage modules.
 
-Install with 'gem install gkellogg-reddy'
+RdfContext is based, in part, on Tom Morris' Reddy gem.
 
-== SYNOPSIS:
+Install with 'gem install rdf_context'
 
-A simple RDF library for Ruby has been necessary for some time.
+== Usage:
+=== Graphs
+Instantiate a graph using Graph.new. A Graph may take an :identifier (defaults to a BNode) and
+a :store (defaults to :list_store)
 
-Basic usage:
+  use RdfContext
+  g = Graph.new(:store => :list_store, :identifier => URIRef.new("http://example.com"))
+  g = Graph.new(:store => SQLite3Store.new(:path => "store.db"),
+                :identifier => URIRef.new("http://example.com"))
 
-  require 'reddy'
-  parser = Reddy::RdfXmlParser.new
-  parser.parse(stream, base_uri) do |triple|
-    puts triple.to_ntriple
-  end
+  g.add(Triple.new(subject, predicate, object))
+  
+Graphs also store namespace associations, and can serialize graphs to RDF/XML or N-triples
 
-or
+  g.bind(Namespace.new("http://example.com", "ex"))
+  g.namespace("ex")
+  g.prefix("http://example.com")
+  
+  g.to_rdfxml
+  g.to_ntriples
 
-  graph = parser.parse(stream, base_uri)
-  graph.to_rdfxml
+Instantiate an existing graph from a datastore
 
-== REQUIREMENTS:
+  s = SQLIte3Store.new(:path => "store.db")
+  g = Graph.new(:store => s, :identifier => "http://example.com/context")
+
+=== Parsers
+Instantiate a parser and parse source, specifying type and base-URL
+
+  use RdfContext
+  p = Parser.new
+  graph = p.parse(input, "http://example.com", :type => :rdfxml)
+
+or, instantiate a type-specific parser:
+
+  p = RdfaParser.new
+  graph = p.parse(input, "http://example.com")
+
+or, parse directly into a graph
+
+  g = Graph.new(:identifier => "http://example.com", :store => :sqlite3_store)
+  g.parse(input, "http://example.com", :type => :rdfxml)
+
+=== Data Stores
+ListStore:: simple non-context aware datastore based on Array
+MemoryStore:: context aware datastore using multiple hashes to optimize triple lookkup
+SQLite3Store:: context aware datastore using a SQLite3 database to create a persistent storage model
+
+== Dependencies:
 
 * Addressable
 * Treetop
 * Whatlanguage
 * nokogiri
-* facets
+* builder
 
 === For testing
 * Redland/Rasqal
+* ActiveSupport
 
 == INSTALL:
 
-* (sudo gem install reddy)
+* sudo gem install rdf_context
 
 == TODO:
 * Testing
@@ -63,10 +101,8 @@ or
   * N3 grammar tests?
   * RDFa updates for new tests and non XHTML representations.
 * Graphs
-  * Pluggable storage modules
-  * Contexts
   * n3 serialization
-  * Graph operations from Redland
+* Reasoner/inference engine
 * SPARQL
 * RDFS logic and RDF entailment tests
 * Ruby objects
@@ -77,8 +113,9 @@ or
 
 (The MIT License)
 
-Copyright (c) 2008 Tom Morris and contributors
 Copyright (c) 2009 Gregg Kellogg
+
+Copyright (c) 2008 Tom Morris and contributors
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
@@ -101,7 +138,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 == FEEDBACK
 
-* tom@tommorris.org or gregg@kellogg-assoc.com
-* github.com/tommorris/reddy or github.com/gkellogg/reddy
-* tommorris.lighthouseapp.com for bug reports
+* gregg@kellogg-assoc.com
+* gemcutter.org/rdf_context
+* github.com/gkellogg/rdf_context
+* gkellogg.lighthouseapp.com for bug reports
 * public-rdf-ruby mailing list on w3.org

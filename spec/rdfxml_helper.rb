@@ -1,6 +1,6 @@
 require 'matchers'
 
-module RdfCoreHelper
+module RdfXMLHelper
   # Class representing test cases in format http://www.w3.org/2000/10/rdf-tests/rdfcore/testSchema#
   class TestCase
     include Matchers

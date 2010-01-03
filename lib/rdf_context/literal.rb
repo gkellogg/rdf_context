@@ -1,4 +1,4 @@
-module Reddy
+module RdfContext
   # An RDF Literal, with value, encoding and language elements.
   class Literal
     class Encoding
