@@ -15,8 +15,6 @@ module RdfContext
     #
     # @param [String] identifier:: Legal NCName or nil for a named BNode
     # @param [Hash] context:: Context used to store named BNodes
-    #
-    # @author Gregg Kellogg
     def initialize(identifier = nil, context = {})
       if identifier != nil && self.valid_id?(identifier)
         identifier = identifier.sub(/nbn\d+[a-z]+N/, '')  # creating a named BNode from a named BNode

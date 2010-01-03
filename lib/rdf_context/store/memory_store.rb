@@ -88,6 +88,8 @@ module RdfContext
     end
   
     # Remove a triple from the context and store
+    #
+    # if subject, predicate and object are nil and context is not nil, the context is removed
     def remove(triple, context = nil)
       context = nil if context == @identifier || (context.respond_to?(:identifier) && context.identifier == @identifier)
     
@@ -110,7 +112,7 @@ module RdfContext
     end
   
     # A generator over all matching triples
-    def triples(triple, context = nil, &block)
+    def triples(triple, context = nil, &block) # :yields: triple, context
       context = nil if context == @identifier || (context.respond_to?(:identifier) && context.identifier == @identifier)
     
       if context.nil?
@@ -133,19 +135,20 @@ module RdfContext
       puts "triples: si=#{si}, pi=#{pi}, oi=#{oi}, ci=#{ci}" if $DEBUG
 
       def result(v, si, pi, oi, ctx)
-        t = int_to_triple(si, pi, oi)
+        triple = int_to_triple(si, pi, oi)
         if block_given?
           if v.is_a?(Hash)
             # keys are contexts
             v.keys.each do |ci|
-              yield t, int_to_resource(ci)
+              context = int_to_resource(ci)
+              yield triple, context
             end
           else
             #puts "ctx: #{ctx}"
-            yield t, ctx
+            yield triple, ctx
           end
         end
-        t
+        triple
       end
     
       if si # subject is given

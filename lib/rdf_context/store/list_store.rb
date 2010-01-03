@@ -39,8 +39,6 @@ module RdfContext
 
     # Triples from graph, optionally matching subject, predicate, or object.
     # Delegated from Graph. See Graph#triples for details.
-    #
-    # @author Gregg Kellogg
     def triples(triple, context = nil)
       subject = triple.subject
       predicate = triple.predicate
@@ -49,8 +47,10 @@ module RdfContext
       if subject || predicate || object
         @triples.select do |t|
           next unless t == triple # Includes matching
-            
-          yield t if block_given?
+          
+          if block_given?
+            yield t
+          end
           t
         end.compact
       elsif block_given?

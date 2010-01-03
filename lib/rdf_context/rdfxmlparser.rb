@@ -108,8 +108,6 @@ module RdfContext
     # <em>options[:strict]</em>:: Raise Error if true, continue with lax parsing, otherwise
     # @return [Graph]:: Returns the graph containing parsed triples
     # @raise [Error]:: Raises RdfError if _strict_
-    #
-    # @author Gregg Kellogg
     def parse(stream, uri = nil, options = {}, &block) # :yields: triple
       super
 
@@ -162,8 +160,6 @@ module RdfContext
     # @param [EvaluationContext] ec:: Evaluation context
     # @return [URIRef] subject:: The subject found for the node
     # @raise [RdfException]:: Raises Exception if _strict_
-    #
-    # @author Gregg Kellogg
     def nodeElement(el, ec)
       # subject
       subject = ec.subject || parse_subject(el, ec)

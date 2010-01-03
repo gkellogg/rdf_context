@@ -57,7 +57,8 @@ module RdfContext
       @db.close
     end
     
-    # Add a triple to the store of triples.
+    # Add a triple to the store
+    # Add to default context, if context is nil
     def add(triple, context = nil, quoted = false)
       context ||= @identifier
       executeSQL("SET AUTOCOMMIT=0") if @autocommit_default
@@ -77,7 +78,9 @@ module RdfContext
       executeSQL(addCmd, params)
     end
     
-    # Remove a triple from the store
+    # Remove a triple from the context and store
+    #
+    # if subject, predicate and object are nil and context is not nil, the context is removed
     def remove(triple, context = nil)
       if context
         if triple.subject == nil && triple.predicate.nil? && triple.object.nil?
@@ -129,9 +132,7 @@ module RdfContext
       end
     end
     
-    # A generator over all the triples matching pattern. Pattern can
-    # be any objects for comparing against nodes in the store, for
-    # example, RegExLiteral, Date? DateRange?
+    # A generator over all the triples matching pattern.
     # 
     # quoted table::                <id>_quoted_statements
     # asserted rdf:type table::     <id>_type_statements
@@ -141,7 +142,7 @@ module RdfContext
     # class membership columns: member,klass,context termComb
     # 
     # FIXME:  These union all selects *may* be further optimized by joins
-    def triples(triple, context = nil)
+    def triples(triple, context = nil)  # :yields: triple, context
       parameters = []
       
       if triple.predicate == RDF_TYPE
@@ -495,7 +496,8 @@ module RdfContext
       results
     end
     
-    #Namespace persistence interface implementation
+    # Namespace persistence interface implementation
+    #
     # Bind namespace to store, returns bound namespace
     def bind(namespace)
       executeSQL("INSERT INTO #{namespace_binds} VALUES (?, ?)", namespace.prefix, namespace.uri)
@@ -530,7 +532,7 @@ module RdfContext
       namespaces
     end
     
-    #Transactional interfaces
+    # Transactional interfaces
     def commit; @db.commit; end
 
     def rollback; @db.rollback; end

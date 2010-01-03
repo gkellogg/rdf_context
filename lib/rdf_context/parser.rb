@@ -12,8 +12,6 @@ module RdfContext
     # <em>options[:debug]</em>:: Array to place debug messages
     # <em>options[:type]</em>:: One of _rdfxml_, _html_, or _n3_
     # <em>options[:strict]</em>:: Raise Error if true, continue with lax parsing, otherwise
-    #
-    # @author Gregg Kellogg
     def initialize(options = {})
       # initialize the triplestore
       @graph = options[:graph]
@@ -32,8 +30,6 @@ module RdfContext
     # <em>options[:strict]</em>:: Raise Error if true, continue with lax parsing, otherwise
     # @return [Graph]:: Returns the graph containing parsed triples
     # @raise [Error]:: Raises RdfError if _strict_
-    #
-    # @author Gregg Kellogg
     def self.parse(stream, uri = nil, options = {}, &block) # :yields: triple
       parser = self.new(options)
       parser.parse(stream, uri, options, &block)
@@ -50,8 +46,6 @@ module RdfContext
     # <em>options[:strict]</em>:: Raise Error if true, continue with lax parsing, otherwise
     # @return [Graph]:: Returns the graph containing parsed triples
     # @raise [Error]:: Raises RdfError if _strict_
-    #
-    # @author Gregg Kellogg
     def parse(stream, uri = nil, options = {}, &block) # :yields: triple
       if self.class == Parser
         # Create a delegate of a specific parser class
@@ -108,8 +102,6 @@ module RdfContext
     # @param [URIRef, BNode, Literal] object:: the object of the triple
     # @return [Array]:: An array of the triples (leaky abstraction? consider returning the graph instead)
     # @raise [Error]:: Checks parameter types and raises if they are incorrect if parsing mode is _strict_.
-    #
-    # @author Gregg Kellogg
     def add_triple(node, subject, predicate, object)
       triple = Triple.new(subject, predicate, object)
       add_debug(node, "triple: #{triple}")

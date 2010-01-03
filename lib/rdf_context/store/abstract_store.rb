@@ -12,7 +12,9 @@ module RdfContext
     end
     
     # Interfaces that must be implemented
-    def triples(triple, context = nil); raise StoreException, "not implemented"; end
+    def triples(triple, context = nil)  # :yields: triple, context
+      raise StoreException, "not implemented"
+    end
     def add(triple, context = nil, quoted = false); raise StoreException, "not implemented"; end
     def remove(triple, context = nil); raise StoreException, "not implemented"; end
     

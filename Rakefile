@@ -69,7 +69,7 @@ Rake::RDocTask.new do |rdoc|
   end
 
   rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "rdfa_parser #{version}"
+  rdoc.title = "rdf_context #{version}"
   rdoc.rdoc_files.include('README*', "History.txt")
   rdoc.rdoc_files.include('lib/**/*.rb')
 end

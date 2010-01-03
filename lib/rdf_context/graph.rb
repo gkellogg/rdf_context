@@ -28,8 +28,6 @@ module RdfContext
     # @param [Hash] options:: Options
     # <em>options[:store]</em>:: storage, defaults to a new ListStore instance
     # <em>options[:identifier]</em>:: Identifier for this graph, Literal, BNode or URIRef
-    #
-    # @author Gregg Kellogg
     def initialize(options = {})
       @nsbinding = {}
 
@@ -108,8 +106,6 @@ module RdfContext
     # Exports the graph to RDF in RDF/XML form.
     #
     # @return [String]:: The RDF/XML graph
-    #
-    # @author Gregg Kellogg
     def to_rdfxml
       replace_text = {}
       rdfxml = ""
