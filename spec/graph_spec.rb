@@ -76,6 +76,11 @@ describe "Graphs" do
     subject.add(Triple.new(@ex.a, @ex.b, @ex.c), Triple.new(@ex.a, @ex.b, @ex.d))
     subject.size.should == 2
   end
+  
+  it "should freeze when destroyed" do
+    subject.destroy
+    subject.frozen?.should be_true
+  end
 
   describe "with identifier" do
     before(:all) { @identifier = URIRef.new("http://foo.bar") }

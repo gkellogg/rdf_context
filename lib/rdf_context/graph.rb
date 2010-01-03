@@ -72,8 +72,8 @@ module RdfContext
     #
     # Might be necessary for stores that require opening a connection to a
     # database or acquiring some resource.
-    def open(configuration, create=false)
-      @store.open(configuration, create)
+    def open(configuration = {})
+      @store.open(configuration)
     end
 
     # Close the graph store

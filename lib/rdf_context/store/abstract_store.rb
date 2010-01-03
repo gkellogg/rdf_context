@@ -11,6 +11,10 @@ module RdfContext
       @identifier = identifier || BNode.new
     end
     
+    def context_aware?; false; end
+    def formula_aware?; false; end
+    def transaction_aware?; false; end
+
     # Interfaces that must be implemented
     def triples(triple, context = nil)  # :yields: triple, context
       raise StoreException, "not implemented"
@@ -22,6 +26,11 @@ module RdfContext
     def inspect
       "#{self.class}[identifier=#{identifier.inspect}]"
     end
+    
+    def destroy(configuration = {}); end
+    def open(configuration = {}); end
+    def commit; end
+    def rollback; end
 
     # Bind namespace to store, returns bound namespace
     def bind(namespace)

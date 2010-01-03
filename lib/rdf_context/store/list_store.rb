@@ -25,11 +25,7 @@ module RdfContext
     # If the triple does not provide a context attribute, removes the triple
     # from all contexts.
     def remove(triple, context, quoted = false)
-      if triple
-        @triples.delete(triple)
-      else
-        @triples = []
-      end
+      @triples.delete(triple)
     end
 
     # Check to see if this graph contains the specified triple

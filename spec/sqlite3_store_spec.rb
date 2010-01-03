@@ -6,7 +6,6 @@ describe "SQLite3 Store" do
     Dir.mkdir(File.dirname(__FILE__) + "/tmp")
     @dbfile = File.join(File.dirname(__FILE__), "tmp", "sqlite3.db")
     @identifier = URIRef.new("http://identifier")
-    @ctx = @identifier
   end
   
   before(:each) do
@@ -30,12 +29,31 @@ describe "SQLite3 Store" do
     File.exists?(@dbfile).should be_false
   end
 
-  describe "with context" do
-    before(:all) do
-        @ctx = URIRef.new("http://context")
-    end
-
-    it_should_behave_like "Store"
-    it_should_behave_like "Context Aware Store"
+  it "should close db" do
+    subject.close
+  end
+  
+  it "should find contexts with type" do
+    triple = Triple.new("http://foo", RDF_TYPE, "http://baz")
+    subject.add(triple, nil)
+    subject.contexts(triple).length.should == 1
+  end
+  
+  it "should find triples with typed literal" do
+    triple = Triple.new("http://foo", RDF_TYPE, Literal.build_from(1.1))
+    subject.add(triple, nil)
+    subject.contexts(triple).length.should == 1
+  end
+  
+  it "should find triples with untyped literal and lang" do
+    triple = Triple.new("http://foo", RDF_TYPE, Literal.untyped("foo", "en-US"))
+    subject.add(triple, nil)
+    subject.contexts(triple).length.should == 1
+  end
+  
+  it "should find contexts patern triple" do
+    triple = Triple.new("http://foo", RDF_TYPE, "http://baz")
+    subject.add(triple, nil)
+    subject.contexts(Triple.new(nil, nil, nil)).length.should == 1
   end
 end

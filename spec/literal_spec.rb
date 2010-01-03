@@ -290,25 +290,22 @@ describe "Literals: " do
     end
   end
   
-#  it "build_from_language" do
-#    english = Literal.build_from_language("Have a nice day")
-#    english.encoding.should == "en"
-#    
-#    french = Literal.build_from_language("Bonjour, madame. Parlez vous francais?")
-#    french.encoding.should == "fr"
-#    
-#    german = Literal.build_from_language("Achtung")
-#    german.encoding.should == "de"
-#  end
-
-  # TODO: refactor based on new interface
-  # describe "Languages" do
-  #   it "should be inspectable" do
-  #     literal = RdfContext::Literal.new("foo", "en")
-  #     lang = literal.lang
-  #     lang.to_s == "en"
-  #     lang.hash.class.should == Fixnum
-  #   end    
-  # end
+  describe "Encodings" do
+    specify "integer" do
+      Literal::Encoding.integer.should == Literal::Encoding.new("http://www.w3.org/2001/XMLSchema#int")
+    end
+    specify "float" do
+      Literal::Encoding.float.should == Literal::Encoding.new("http://www.w3.org/2001/XMLSchema#float")
+    end
+    specify "string" do
+      Literal::Encoding.string.should == Literal::Encoding.new("http://www.w3.org/2001/XMLSchema#string")
+    end
+    specify "xmlliteral" do
+      Literal::Encoding.xmlliteral.should == Literal::XMLLiteral.new("http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral")
+    end
+    specify "null" do
+      Literal::Encoding.the_null_encoding.should == Literal::Null.new(nil)
+    end
+  end
   
 end

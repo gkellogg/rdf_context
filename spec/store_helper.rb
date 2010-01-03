@@ -9,8 +9,8 @@ shared_examples_for "Store" do
   end
 
   it "should allow you to add a triple" do
-    subject.add(Triple.new(@ex.a, @ex.b, @ex.c), @ctx)
-    subject.add(Triple.new(@ex.a, @ex.b, @ex.d), @ctx)
+    subject.add(Triple.new(@ex.a, @ex.b, @ex.c), nil)
+    subject.add(Triple.new(@ex.a, @ex.b, @ex.d), nil)
     subject.size.should == 2
   end
   
@@ -23,16 +23,38 @@ shared_examples_for "Store" do
     subject.identifier.should == @identifier
   end
   
+  describe "namespaces" do
+    before(:each) do
+      subject.bind(@ex)
+    end
+    
+    it "should return namespace by prefix" do
+      subject.namespace(@ex.prefix).should == @ex
+    end
+    
+    it "should return prefix by uri" do
+      subject.prefix(@ex.uri).should == @ex.prefix
+    end
+    
+    it "should bind namespace" do
+      subject.bind(@foaf).should == @foaf
+    end
+    
+    it "should return all namespaces" do
+      subject.nsbinding.should == { @ex.prefix => @ex}
+    end
+  end
+
   describe "with triples" do
     before(:each) do
-      subject.add(Triple.new(@ex.john, @foaf.knows, @ex.jane), @ctx)
-      subject.add(Triple.new(@ex.john, @foaf.knows, @ex.rick), @ctx)
-      subject.add(Triple.new(@ex.jane, @foaf.knows, @ex.rick), @ctx)
+      subject.add(Triple.new(@ex.john, @foaf.knows, @ex.jane), nil)
+      subject.add(Triple.new(@ex.john, @foaf.knows, @ex.rick), nil)
+      subject.add(Triple.new(@ex.jane, @foaf.knows, @ex.rick), nil)
       subject.bind(@foaf)
     end
     
     it "should detect included triple" do
-      subject.contains?(Triple.new(@ex.john, @foaf.knows, @ex.jane), @ctx).should be_true
+      subject.contains?(Triple.new(@ex.john, @foaf.knows, @ex.jane), nil).should be_true
     end
     
     it "should contain different triple paterns" do
@@ -46,8 +68,8 @@ shared_examples_for "Store" do
         Triple.new(URIRef.new("http://foo"),URIRef.new("http://bar"),Literal.typed("gregg", "http://www.w3.org/2001/XMLSchema#string")),
         Triple.new(URIRef.new("http://foo"),URIRef.new("http://bar"),"gregg"),
       ].each do |t|
-        subject.add(t, @ctx)
-        subject.contains?(t, @ctx)
+        subject.add(t, nil)
+        subject.contains?(t, nil)
       end
     end
     
@@ -56,12 +78,12 @@ shared_examples_for "Store" do
     end
     
     it "should allow you to select resources" do
-      subject.triples(Triple.new(@ex.john, nil, nil), @ctx).size.should == 2
+      subject.triples(Triple.new(@ex.john, nil, nil), nil).size.should == 2
     end
     
     it "should allow iteration" do
       count = 0
-      subject.triples(Triple.new(nil, nil, nil), @ctx) do |t, context|
+      subject.triples(Triple.new(nil, nil, nil), nil) do |t, context|
         count = count + 1
         t.class.should == Triple
       end
@@ -70,7 +92,7 @@ shared_examples_for "Store" do
     
     it "should allow iteration over a particular subject" do
       count = 0
-      subject.triples(Triple.new(@ex.john, nil, nil), @ctx) do |t, context|
+      subject.triples(Triple.new(@ex.john, nil, nil), nil) do |t, context|
         count = count + 1
         t.class.should == Triple
       end
@@ -79,7 +101,7 @@ shared_examples_for "Store" do
     
     it "should allow iteration over a particular predicate" do
       count = 0
-      subject.triples(Triple.new(nil, @foaf.knows, nil), @ctx) do |t, context|
+      subject.triples(Triple.new(nil, @foaf.knows, nil), nil) do |t, context|
         count = count + 1
         t.class.should == Triple
       end
@@ -88,7 +110,7 @@ shared_examples_for "Store" do
     
     it "should allow iteration over a particular object" do
       count = 0
-      subject.triples(Triple.new(nil, nil, @ex.jane), @ctx) do |t, context|
+      subject.triples(Triple.new(nil, nil, @ex.jane), nil) do |t, context|
         count = count + 1
         t.class.should == Triple
       end
@@ -96,9 +118,9 @@ shared_examples_for "Store" do
     end
     
     it "should find combinations" do
-      subject.triples(Triple.new(@ex.john, @foaf.knows, nil), @ctx).length.should == 2
-      subject.triples(Triple.new(@ex.john, nil, @ex.jane), @ctx).length.should == 1
-      subject.triples(Triple.new(nil, @foaf.knows, @ex.jane), @ctx).length.should == 1
+      subject.triples(Triple.new(@ex.john, @foaf.knows, nil), nil).length.should == 2
+      subject.triples(Triple.new(@ex.john, nil, @ex.jane), nil).length.should == 1
+      subject.triples(Triple.new(nil, @foaf.knows, @ex.jane), nil).length.should == 1
     end
     
     it "should retrieve indexed item" do
@@ -113,20 +135,19 @@ shared_examples_for "Store" do
 
   describe "with typed triples" do
     before(:each) do
-      subject.add(Triple.new(@ex.john, RDF_TYPE, @foaf.Person), @ctx)
-      subject.add(Triple.new(@ex.jane, RDF_TYPE, @foaf.Person), @ctx)
-      subject.add(Triple.new(@ex.rick, RDF_TYPE, @foaf.Person), @ctx)
-      subject.add(Triple.new(@ex.john, @foaf.knows, @ex.jane), @ctx)
-      subject.add(Triple.new(@ex.john, @foaf.knows, @ex.jane), @ctx)
-      subject.add(Triple.new(@ex.john, @foaf.knows, @ex.rick), @ctx)
-      subject.add(Triple.new(@ex.jane, @foaf.knows, @ex.rick), @ctx)
+      subject.add(Triple.new(@ex.john, RDF_TYPE, @foaf.Person), nil)
+      subject.add(Triple.new(@ex.jane, RDF_TYPE, @foaf.Person), nil)
+      subject.add(Triple.new(@ex.rick, RDF_TYPE, @foaf.Person), nil)
+      subject.add(Triple.new(@ex.john, @foaf.knows, @ex.jane), nil)
+      subject.add(Triple.new(@ex.john, @foaf.knows, @ex.rick), nil)
+      subject.add(Triple.new(@ex.jane, @foaf.knows, @ex.rick), nil)
       subject.bind(@foaf)
       subject.bind(@ex)
     end
     
     it "should find subjects by type" do
       count = 0
-      subject.triples(Triple.new(nil, RDF_TYPE, nil), @ctx) do |triple, ctx|
+      subject.triples(Triple.new(nil, RDF_TYPE, nil), nil) do |triple, ctx|
         count += 1
         [@ex.john, @ex.jane, @ex.rick].should include(triple.subject)
         triple.predicate.should == RDF_TYPE
@@ -134,15 +155,19 @@ shared_examples_for "Store" do
       end
       count.should == 3
     end
+    
+    it "should remove types" do
+      subject.remove(Triple.new(nil, RDF_TYPE, nil), nil)
+      subject.size.should == 3
+    end
   end
   
   it "should remove a triple" do
-    subject.add(Triple.new(@ex.john, RDF_TYPE, @foaf.Person), @ctx)
-    subject.size(@ctx).should == 1
-    subject.remove(Triple.new(@ex.john, RDF_TYPE, @foaf.Person), @ctx)
-    subject.size(@ctx).should == 0
+    subject.add(Triple.new(@ex.john, RDF_TYPE, @foaf.Person), nil)
+    subject.size.should == 1
+    subject.remove(Triple.new(@ex.john, RDF_TYPE, @foaf.Person), nil)
+    subject.size.should == 0
   end
-
 end
 
 shared_examples_for "Context Aware Store" do
@@ -187,6 +212,11 @@ shared_examples_for "Context Aware Store" do
       subject.add(@triple, @ctx2)
       subject.contexts.should include(@ctx1, @ctx2)
       subject.contexts.length.should == 2
+    end
+    
+    it "should find contexts containing triple" do
+      subject.add(@triple, @ctx1)
+      subject.contexts(@triple).should == [@ctx1]
     end
     
     it "should remove from specific context" do

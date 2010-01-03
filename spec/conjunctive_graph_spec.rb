@@ -9,6 +9,12 @@ describe "ConjunctiveGraph" do
   
   subject { ConjunctiveGraph.new(:store => @store)}
   
+  it "should require store supporting contexts" do
+    lambda do
+      ConjunctiveGraph.new(:store => ListStore.new)
+    end.should raise_error(GraphException, "ConjunctiveGraph requires store supporting contexts")
+  end
+  
   it "should should have same identifier as store" do
     subject.identifier.should == @identifier
   end

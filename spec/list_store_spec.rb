@@ -3,8 +3,7 @@ require File.join(File.dirname(__FILE__), 'store_helper')
 
 describe "List Store" do
   before(:all) do
-      @identifier = URIRef.new("http://identifier")
-      @ctx = @identifier
+    @identifier = URIRef.new("http://identifier")
   end
   
   subject { ListStore.new(@identifier) }

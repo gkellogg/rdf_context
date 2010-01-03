@@ -149,11 +149,6 @@ module RdfContext
     end
   
     private
-    # Is the node rdf:RDF?
-    def is_rdf_root? (node)
-      node.name == "RDF" && node.namespace.href == RDF_NS.uri.to_s
-    end
-    
     # XML nodeElement production
     #
     # @param [XML Element] el:: XMl Element to parse

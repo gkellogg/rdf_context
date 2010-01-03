@@ -39,9 +39,6 @@ module RdfContext
       @bnodeCache = {}
       @uriCache = {}
       
-      @context_aware = true
-      @formula_aware = true
-      @transaction_aware = true
       @autocommit_default = true
       
       raise StoreException.new("Identifier must be nil or a URIRef") if identifier && !identifier.is_a?(URIRef)
@@ -51,6 +48,15 @@ module RdfContext
       
       @db = configuration.empty? ? nil : open(configuration)
     end
+
+    # Supports contexts
+    def context_aware?; true; end
+    
+    # Supports formulae
+    def formula_aware?; true; end
+
+    # Supports transactions
+    def transaction_aware?; true; end
     
     def close(commit_pending_transactions = false)
       @db.commit if commit_pending_transactions && @db.transaction_active?
@@ -525,9 +531,9 @@ module RdfContext
 
     # List of namespace bindings, as a hash
     def nsbinding
-      namespaces = []
+      namespaces = {}
       executeSQL("SELECT prefix, uri FROM #{namespace_binds}") do |row|
-        namespaces << Namespace.new(row[1], row[0])
+        namespaces[row[0]] = Namespace.new(row[1], row[0])
       end
       namespaces
     end
@@ -727,11 +733,11 @@ module RdfContext
     end
 
     def buildLitDTypeClause(obj,tableName)
-      "#{tableName}.objDatatype='#{obj.encoding.value}'" if obj.is_a?(Literal) && obj.encoding
+      ["#{tableName}.objDatatype='#{obj.encoding.value}'"] if obj.is_a?(Literal) && obj.encoding
     end
     
     def buildLitLanguageClause(obj,tableName)
-      "#{tableName}.objDatatype='#{obj.lang}'" if obj.is_a?(Literal) && obj.lang
+      ["#{tableName}.objDatatype='#{obj.lang}'"] if obj.is_a?(Literal) && obj.lang
     end
 
     # Stubs for Clause Functions that are overridden by specific implementations (MySQL vs SQLite for instance)

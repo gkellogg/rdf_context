@@ -321,11 +321,11 @@ EOF
     include RdfXMLHelper
     
     def self.positive_tests
-      RdfCoreHelper::TestCase.positive_parser_tests rescue []
+      RdfXMLHelper::TestCase.positive_parser_tests rescue []
     end
 
     def self.negative_tests
-      []#RdfCoreHelper::TestCase.negative_parser_tests rescue []
+      RdfXMLHelper::TestCase.negative_parser_tests rescue []
     end
     
     # Negative parser tests should raise errors.

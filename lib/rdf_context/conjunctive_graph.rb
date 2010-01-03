@@ -15,7 +15,7 @@ module RdfContext
     # Store for ConjunctiveGraph must support contexts.
     def initialize(options = {})
       unless options[:store] && options[:store].context_aware?
-        raise GraphException.new("Conjuective Graph requires store supporting contexts")
+        raise GraphException.new("ConjunctiveGraph requires store supporting contexts")
       end
     
       super(:identifier => options[:store].identifier, :store => options[:store])
