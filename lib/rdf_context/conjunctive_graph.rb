@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), "graph.rb")
+require File.join(File.dirname(__FILE__), "graph")
 
 module RdfContext
   # ConjunctiveGraph - The top level container for all named Graphs sharing a _Store_

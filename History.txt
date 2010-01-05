@@ -1,3 +1,6 @@
+=== 0.4.5
+* Order includes to remove platform dependencies on load requirements.
+
 === 0.4.4
 * Namespace usage cleanup
 * When serializing graph to RDF/XML, create namespaces as necessary.

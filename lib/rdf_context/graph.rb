@@ -1,3 +1,5 @@
+require File.join(File.dirname(__FILE__), 'namespace')
+require File.join(File.dirname(__FILE__), 'triple')
 require File.join(File.dirname(__FILE__), 'store', 'list_store')
 require File.join(File.dirname(__FILE__), 'store', 'memory_store')
 

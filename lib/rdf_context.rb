@@ -15,7 +15,7 @@ rescue LoadError
   require 'treetop'
 end
 
-Dir.glob(File.join(File.dirname(__FILE__), 'rdf_context/**.rb')).each { |f| require f }
+Dir.glob(File.join(File.dirname(__FILE__), 'rdf_context/**.rb')).sort.each { |f| require f }
 
 # Include Storage types, but be tollerant of failure to load as dependencies might not be available
 Dir.glob(File.join(File.dirname(__FILE__), "rdf_context/store/**.rb")).each do |f|
