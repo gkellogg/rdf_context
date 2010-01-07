@@ -4,13 +4,11 @@ require File.expand_path(File.dirname(__FILE__) + "/../lib/rdf_context")
 require 'getoptlong'
 class Parse
   include RdfContext
-  def parse(file, base_uri)
+  def parse(file, base_uri, store = nil)
     puts "Parse: #{file}" if $quiet
-    parser = case file
-    when /\.(nt|n3)$/ then N3Parser.new
-    when /\.x?html/ then RdfaParser.new
-    else RdfXmlParser.new
-    end
+    graph_opts = {:identifier => base_uri}
+    graph_opts[:store] = store if store
+    parser = Parser.new(:graph => Graph.new(graph_opts))
     parser.parse(File.read(file), base_uri, :strict => true)
     output = case $format
     when "xml"
@@ -34,12 +32,13 @@ end
 
 $verbose = false
 base_uri  = "http://example.com"
-
+store     = :list_store
 opts = GetoptLong.new(
   ["--verbose", GetoptLong::NO_ARGUMENT],
   ["--quiet", GetoptLong::NO_ARGUMENT],
   ["--debug", GetoptLong::NO_ARGUMENT],
   ["--format", GetoptLong::REQUIRED_ARGUMENT],
+  ["--store", GetoptLong::REQUIRED_ARGUMENT],
   ["--uri", GetoptLong::REQUIRED_ARGUMENT]
 )
 opts.each do |opt, arg|
@@ -49,11 +48,21 @@ opts.each do |opt, arg|
   when '--debug' then $DEBUG = true
   when '--format' then $format = arg
   when '--uri' then base_uri = arg
+  when '--store'
+    case arg
+    when /list/
+      store = :list_store
+    when /memory/
+      store = :memory_store
+    else
+      puts "Creating SQLite3 database '#{arg}'" unless File.exists?(arg)
+      store = RdfContext::SQLite3Store.new(RdfContext::URIRef.new("http://kellogg-assoc.com/rdf_context"), :path => arg)
+    end
   end
 end
 
 x = Parse.new
 ARGV.each do |test_file|
-  x.parse(test_file, base_uri)
+  x.parse(test_file, base_uri, store)
 end
 

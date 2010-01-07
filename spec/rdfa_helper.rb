@@ -36,7 +36,7 @@ module RdfaHelper
         next if statement.subject.is_a?(BNode)
         #next unless statement.subject.uri.to_s.match(/0001/)
         unless self.about
-          self.about = URI.parse(statement.subject.uri.to_s)
+          self.about = Addressable::URI.parse(statement.subject.uri.to_s)
           self.name = statement.subject.short_name
         end
         

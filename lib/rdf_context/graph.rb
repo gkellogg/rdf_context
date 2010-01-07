@@ -28,7 +28,7 @@ module RdfContext
     # For more on named graphs, see: http://en.wikipedia.org/wiki/RDFLib
     #
     # @param [Hash] options:: Options
-    # <em>options[:store]</em>:: storage, defaults to a new ListStore instance
+    # <em>options[:store]</em>:: storage, defaults to a new ListStore instance. May be symbol :list_store or :memory_store
     # <em>options[:identifier]</em>:: Identifier for this graph, Literal, BNode or URIRef
     def initialize(options = {})
       @nsbinding = {}
@@ -41,7 +41,7 @@ module RdfContext
       else                     ListStore.new
       end
       
-      @identifier = options[:identifier] || BNode.new
+      @identifier = Triple.coerce_subject(options[:identifier]) || BNode.new
     end
 
     def inspect
@@ -131,7 +131,7 @@ module RdfContext
           tmp_ns = tmp_ns.succ
         end
       end
-      
+
       xml.instruct!
       xml.rdf(:RDF, rdf_attrs) do
         # Add statements for each subject
@@ -139,11 +139,12 @@ module RdfContext
           xml.rdf(:Description, (s.is_a?(BNode) ? "rdf:nodeID" : "rdf:about") => s) do
             triples(Triple.new(s, nil, nil)) do |triple, context|
               xml_args = triple.object.xml_args
+              qname = triple.predicate.to_qname(uri_bindings)
               if triple.object.is_a?(Literal) && triple.object.xmlliteral?
                 replace_text["__replace_with_#{triple.object.object_id}__"] = xml_args[0]
                 xml_args[0] = "__replace_with_#{triple.object.object_id}__"
               end
-              xml.tag!(triple.predicate.to_qname(uri_bindings), *xml_args)
+              xml.tag!(qname, *xml_args)
             end
           end
         end
@@ -170,6 +171,9 @@ module RdfContext
       @store.bind(namespace)
     end
 
+    # List of namespace bindings, as a hash
+    def nsbinding; @store.nsbinding; end
+    
     # Namespace for prefix
     def namespace(prefix); @store.namespace(prefix); end
 

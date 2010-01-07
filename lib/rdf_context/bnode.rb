@@ -1,7 +1,7 @@
 module RdfContext
   # The BNode class creates RDF blank nodes.
   class BNode
-    attr_reader :identifier
+    attr_accessor :identifier
     
     # Create a new BNode, optionally accept a identifier for the BNode.
     # Otherwise, generated sequentially.

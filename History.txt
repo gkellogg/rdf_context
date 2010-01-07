@@ -1,5 +1,11 @@
 === 0.4.5
 * Order includes to remove platform dependencies on load requirements.
+* Fix XML Comparison matcher
+* Add --store option to bin/rdf_context. Let Parser#detect_format intuit file type.
+* Add Graph#contents as alias to store
+* Add ConjunctiveGraph#triples to return all triples from store, not just default context
+* Add Graph#nsbinding to retreive Store#nsbinding
+* Fix numerious SQLite3Store and AbstractSQLStore bugs. Add round-trip tests to Graph spec.
 
 === 0.4.4
 * Namespace usage cleanup

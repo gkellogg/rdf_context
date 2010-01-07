@@ -1,0 +1,194 @@
+<http://localhost:3000/releases/Matchbox%20Twenty-ep> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#Release> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep> <http://cmx.org/spec/terms#grid> "urn:GRid:A1-a0587-aaaaaaaaaa-b"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep> <http://cmx.org/spec/terms#creationDate> "2008-05-28T16:53:42Z"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#MasterRelease> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep> <http://purl.org/dc/elements/1.1/title> "ep"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep> <http://cmx.org/spec/terms#parentalWarning> "unspecified"@en-us .
+<http://localhost:3000/stylesheets/mobile.xslt> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#XSLT> .
+<http://localhost:3000/stylesheets/mobile.xslt> <http://purl.org/dc/elements/1.1/title> "Mobile Stylesheet"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep> <http://cmx.org/spec/terms#xslt> <http://localhost:3000/stylesheets/mobile.xslt> .
+<http://localhost:3000/stylesheets/settop.xslt> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#XSLT> .
+<http://localhost:3000/stylesheets/settop.xslt> <http://purl.org/dc/elements/1.1/title> "Set-top Stylesheet"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep> <http://cmx.org/spec/terms#xslt> <http://localhost:3000/stylesheets/settop.xslt> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/stylesheets/desktop> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#XSLT> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/stylesheets/desktop> <http://purl.org/dc/elements/1.1/title> "Mobile Stylesheet"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/stylesheets/desktop> <http://cmx.org/spec/terms#parentalWarning> "unspecified"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/stylesheets/desktop.xslt> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#Encoding> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/stylesheets/desktop.xslt> <http://cmx.org/spec/terms#format> "application/xslt+xml"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/stylesheets/desktop.xslt> <http://purl.org/dc/elements/1.1/title> "Mobile Stylesheet"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/stylesheets/desktop.xslt> <http://cmx.org/spec/terms#payloadHash> "e06f397e1340b9fa4793412d818e4ebf"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/stylesheets/desktop> <http://cmx.org/spec/terms#encoding> <http://localhost:3000/releases/Matchbox%20Twenty-ep/stylesheets/desktop.xslt> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep> <http://cmx.org/spec/terms#xslt> <http://localhost:3000/releases/Matchbox%20Twenty-ep/stylesheets/desktop> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep> <http://cmx.org/spec/terms#genre> "Alternative Rock"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep> <http://cmx.org/spec/terms#displayArtist> <http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Matchbox%20Twenty> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Matchbox%20Twenty> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#Contributor> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Matchbox%20Twenty> <http://cmx.org/spec/terms#keyName> "Matchbox Twenty"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Matchbox%20Twenty> <http://cmx.org/spec/terms#issued> "2008-05-28T15:15:00Z"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Matchbox%20Twenty> <http://purl.org/dc/elements/1.1/title> "Matchbox Twenty"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Matchbox%20Twenty> <http://cmx.org/spec/terms#expires> "2008-05-28T15:15:00Z"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Matchbox%20Twenty> <http://cmx.org/spec/terms#member> <http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Rob%20Thomas> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Matchbox%20Twenty> <http://cmx.org/spec/terms#member> <http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Kyle%20Cook> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Matchbox%20Twenty> <http://cmx.org/spec/terms#member> <http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Brian%20Yale> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Matchbox%20Twenty> <http://cmx.org/spec/terms#member> <http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Paul%20Doucette> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep> <http://cmx.org/spec/terms#releaseContributor> <http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Matchbox%20Twenty> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Rob%20Thomas> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#Contributor> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Rob%20Thomas> <http://cmx.org/spec/terms#keyName> "Thomas"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Rob%20Thomas> <http://purl.org/dc/elements/1.1/title> "Rob Thomas"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Rob%20Thomas> <http://cmx.org/spec/terms#namesBeforeKeyName> "Rob"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep> <http://cmx.org/spec/terms#releaseContributor> <http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Rob%20Thomas> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Brian%20Yale> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#Contributor> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Brian%20Yale> <http://cmx.org/spec/terms#keyName> "Yale"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Brian%20Yale> <http://purl.org/dc/elements/1.1/title> "Brian Yale"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Brian%20Yale> <http://cmx.org/spec/terms#namesBeforeKeyName> "Brian"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep> <http://cmx.org/spec/terms#releaseContributor> <http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Brian%20Yale> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Kyle%20Cook> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#Contributor> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Kyle%20Cook> <http://cmx.org/spec/terms#keyName> "Cook"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Kyle%20Cook> <http://purl.org/dc/elements/1.1/title> "Kyle Cook"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Kyle%20Cook> <http://cmx.org/spec/terms#namesBeforeKeyName> "Kyle"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep> <http://cmx.org/spec/terms#releaseContributor> <http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Kyle%20Cook> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Paul%20Doucette> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#Contributor> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Paul%20Doucette> <http://cmx.org/spec/terms#keyName> "Doucette"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Paul%20Doucette> <http://purl.org/dc/elements/1.1/title> "Paul Doucette"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Paul%20Doucette> <http://cmx.org/spec/terms#namesBeforeKeyName> "Paul"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep> <http://cmx.org/spec/terms#releaseContributor> <http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Paul%20Doucette> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Mick%20Jagger> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#Contributor> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Mick%20Jagger> <http://cmx.org/spec/terms#keyName> "Jagger"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Mick%20Jagger> <http://purl.org/dc/elements/1.1/title> "Mick Jagger"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Mick%20Jagger> <http://cmx.org/spec/terms#namesBeforeKeyName> "Mick"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep> <http://cmx.org/spec/terms#releaseContributor> <http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Mick%20Jagger> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Matt%20Serletic> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#Contributor> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Matt%20Serletic> <http://cmx.org/spec/terms#keyName> "Serletic"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Matt%20Serletic> <http://purl.org/dc/elements/1.1/title> "Matt Serletic"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Matt%20Serletic> <http://cmx.org/spec/terms#namesBeforeKeyName> "Matt"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep> <http://cmx.org/spec/terms#releaseContributor> <http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Matt%20Serletic> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Steve%20Lilywhite> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#Contributor> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Steve%20Lilywhite> <http://cmx.org/spec/terms#keyName> "Lilywhite"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Steve%20Lilywhite> <http://purl.org/dc/elements/1.1/title> "Steve Lilywhite"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Steve%20Lilywhite> <http://cmx.org/spec/terms#namesBeforeKeyName> "Steve"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep> <http://cmx.org/spec/terms#releaseContributor> <http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Steve%20Lilywhite> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Atlantic> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#Contributor> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Atlantic> <http://cmx.org/spec/terms#keyName> "Atlantic"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Atlantic> <http://purl.org/dc/elements/1.1/title> "Atlantic"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep> <http://cmx.org/spec/terms#releaseContributor> <http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Atlantic> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Ryan%20MacMillan> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#Contributor> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Ryan%20MacMillan> <http://cmx.org/spec/terms#keyName> "MacMillan"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Ryan%20MacMillan> <http://purl.org/dc/elements/1.1/title> "Ryan MacMillan"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Ryan%20MacMillan> <http://cmx.org/spec/terms#namesBeforeKeyName> "Ryan"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep> <http://cmx.org/spec/terms#releaseContributor> <http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Ryan%20MacMillan> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Matt%20Beck> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#Contributor> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Matt%20Beck> <http://cmx.org/spec/terms#keyName> "Beck"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Matt%20Beck> <http://purl.org/dc/elements/1.1/title> "Matt Beck"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Matt%20Beck> <http://cmx.org/spec/terms#namesBeforeKeyName> "Matt"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep> <http://cmx.org/spec/terms#releaseContributor> <http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Matt%20Beck> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/Disease> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#Creation> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/Disease> <http://cmx.org/spec/terms#creationDate> "2008-05-27T00:13:02Z"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/Disease> <http://cmx.org/spec/terms#rights> "2002 Bidnis, Inc./EMI Blackwood Music, Inc. (BMI), Jagged Music (ASCAP)"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/Disease> <http://cmx.org/spec/terms#iswc> "urn:ISWC:T-000000363-1"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/Disease> <http://purl.org/dc/elements/1.1/title> "Disease"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/Disease> <http://cmx.org/spec/terms#composerLyricist> <http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Rob%20Thomas> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/Disease> <http://cmx.org/spec/terms#composerLyricist> <http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Mick%20Jagger> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Disease> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#Production> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Disease> <http://cmx.org/spec/terms#creationDate> "2008-05-27T00:13:02Z"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Disease> <http://purl.org/dc/elements/1.1/title> "Disease"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Disease> <http://cmx.org/spec/terms#genre> "Alternative Rock"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Disease> <http://cmx.org/spec/terms#mainArtist> <http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Matchbox%20Twenty> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Disease> <http://cmx.org/spec/terms#embodiment> <http://localhost:3000/releases/Matchbox%20Twenty-ep/audio/Disease> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/Disease> <http://cmx.org/spec/terms#realization> <http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Disease> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Disease%20%28Acoustic%29> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#Production> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Disease%20%28Acoustic%29> <http://cmx.org/spec/terms#creationDate> "2008-05-27T00:13:10Z"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Disease%20%28Acoustic%29> <http://purl.org/dc/elements/1.1/title> "Disease (Acoustic)"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Disease%20%28Acoustic%29> <http://cmx.org/spec/terms#genre> "Alternative Rock"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Disease%20%28Acoustic%29> <http://cmx.org/spec/terms#performer> <http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Matchbox%20Twenty> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Disease%20%28Acoustic%29> <http://cmx.org/spec/terms#embodiment> <http://localhost:3000/releases/Matchbox%20Twenty-ep/audio/Disease%20%28Acoustic%29> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/Disease> <http://cmx.org/spec/terms#realization> <http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Disease%20%28Acoustic%29> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep> <http://cmx.org/spec/terms#creation> <http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/Disease> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/If%20You%27re%20Gone> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#Creation> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/If%20You%27re%20Gone> <http://cmx.org/spec/terms#creationDate> "2008-05-27T00:13:03Z"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/If%20You%27re%20Gone> <http://cmx.org/spec/terms#rights> "2000 EMI Blackwood Music, Inc./Bidnis, Inc. (BMI)"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/If%20You%27re%20Gone> <http://cmx.org/spec/terms#iswc> "urn:ISWC:T-000000371-1"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/If%20You%27re%20Gone> <http://purl.org/dc/elements/1.1/title> "If You're Gone"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/If%20You%27re%20Gone> <http://cmx.org/spec/terms#composerLyricist> <http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Rob%20Thomas> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/If%20You%27re%20Gone> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#Production> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/If%20You%27re%20Gone> <http://cmx.org/spec/terms#creationDate> "2008-05-27T00:13:03Z"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/If%20You%27re%20Gone> <http://purl.org/dc/elements/1.1/title> "If You're Gone"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/If%20You%27re%20Gone> <http://cmx.org/spec/terms#genre> "Alternative Rock"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/If%20You%27re%20Gone> <http://cmx.org/spec/terms#mainArtist> <http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Matchbox%20Twenty> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/If%20You%27re%20Gone> <http://cmx.org/spec/terms#embodiment> <http://localhost:3000/releases/Matchbox%20Twenty-ep/audio/If%20You%27re%20Gone> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/If%20You%27re%20Gone> <http://cmx.org/spec/terms#realization> <http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/If%20You%27re%20Gone> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/If%20You%27re%20Gone%20%28Live%29> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#Production> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/If%20You%27re%20Gone%20%28Live%29> <http://cmx.org/spec/terms#creationDate> "2008-05-27T00:13:11Z"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/If%20You%27re%20Gone%20%28Live%29> <http://purl.org/dc/elements/1.1/title> "If You're Gone (Live)"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/If%20You%27re%20Gone%20%28Live%29> <http://cmx.org/spec/terms#genre> "Alternative Rock"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/If%20You%27re%20Gone%20%28Live%29> <http://cmx.org/spec/terms#performer> <http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Matchbox%20Twenty> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/If%20You%27re%20Gone%20%28Live%29> <http://cmx.org/spec/terms#embodiment> <http://localhost:3000/releases/Matchbox%20Twenty-ep/audio/If%20You%27re%20Gone%20%28Live%29> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/If%20You%27re%20Gone> <http://cmx.org/spec/terms#realization> <http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/If%20You%27re%20Gone%20%28Live%29> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep> <http://cmx.org/spec/terms#creation> <http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/If%20You%27re%20Gone> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/Push> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#Creation> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/Push> <http://cmx.org/spec/terms#creationDate> "2008-05-27T00:13:06Z"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/Push> <http://cmx.org/spec/terms#rights> "1996 EMI Blackwood Music, Inc. (BMI)"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/Push> <http://cmx.org/spec/terms#iswc> "urn:ISWC:T-000000391-1"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/Push> <http://purl.org/dc/elements/1.1/title> "Push"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/Push> <http://cmx.org/spec/terms#composerLyricist> <http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Rob%20Thomas> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Push> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#Production> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Push> <http://cmx.org/spec/terms#creationDate> "2008-05-27T00:13:06Z"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Push> <http://purl.org/dc/elements/1.1/title> "Push"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Push> <http://cmx.org/spec/terms#genre> "Alternative Rock"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Push> <http://cmx.org/spec/terms#mainArtist> <http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Matchbox%20Twenty> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Push> <http://cmx.org/spec/terms#embodiment> <http://localhost:3000/releases/Matchbox%20Twenty-ep/audio/Push> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/Push> <http://cmx.org/spec/terms#realization> <http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Push> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Push%20%28Live%29> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#Production> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Push%20%28Live%29> <http://cmx.org/spec/terms#creationDate> "2008-05-27T00:13:11Z"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Push%20%28Live%29> <http://purl.org/dc/elements/1.1/title> "Push (Live)"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Push%20%28Live%29> <http://cmx.org/spec/terms#genre> "Alternative Rock"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Push%20%28Live%29> <http://cmx.org/spec/terms#performer> <http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Matchbox%20Twenty> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Push%20%28Live%29> <http://cmx.org/spec/terms#embodiment> <http://localhost:3000/releases/Matchbox%20Twenty-ep/audio/Push%20%28Live%29> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/Push> <http://cmx.org/spec/terms#realization> <http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Push%20%28Live%29> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep> <http://cmx.org/spec/terms#creation> <http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/Push> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/All%20I%20Need> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#Creation> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/All%20I%20Need> <http://cmx.org/spec/terms#issued> "2008-05-27T18:59:00Z"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/All%20I%20Need> <http://cmx.org/spec/terms#creationDate> "2008-05-27T18:59:00Z"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/All%20I%20Need> <http://cmx.org/spec/terms#iswc> "urn:ISWC:T-000000442-1"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/All%20I%20Need> <http://purl.org/dc/elements/1.1/title> "All I Need"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/All%20I%20Need> <http://cmx.org/spec/terms#expires> "2008-05-27T18:59:00Z"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/All%20I%20Need> <http://cmx.org/spec/terms#composerLyricist> <http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Rob%20Thomas> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/All%20I%20Need> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#Production> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/All%20I%20Need> <http://cmx.org/spec/terms#issued> "2008-05-27T18:57:00Z"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/All%20I%20Need> <http://cmx.org/spec/terms#creationDate> "2008-05-27T00:12:00Z"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/All%20I%20Need> <http://purl.org/dc/elements/1.1/title> "All I Need"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/All%20I%20Need> <http://cmx.org/spec/terms#expires> "2008-05-27T18:57:00Z"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/All%20I%20Need> <http://cmx.org/spec/terms#genre> "Alternative Rock"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/All%20I%20Need> <http://cmx.org/spec/terms#performer> <http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Matchbox%20Twenty> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/All%20I%20Need> <http://cmx.org/spec/terms#embodiment> <http://localhost:3000/releases/Matchbox%20Twenty-ep/audio/All%20I%20Need> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/All%20I%20Need> <http://cmx.org/spec/terms#realization> <http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/All%20I%20Need> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/All%20I%20Need%20%28Live%29> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#Production> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/All%20I%20Need%20%28Live%29> <http://cmx.org/spec/terms#creationDate> "2008-05-27T00:13:11Z"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/All%20I%20Need%20%28Live%29> <http://purl.org/dc/elements/1.1/title> "All I Need (Live)"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/All%20I%20Need%20%28Live%29> <http://cmx.org/spec/terms#genre> "Alternative Rock"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/All%20I%20Need%20%28Live%29> <http://cmx.org/spec/terms#performer> <http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Matchbox%20Twenty> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/All%20I%20Need%20%28Live%29> <http://cmx.org/spec/terms#embodiment> <http://localhost:3000/releases/Matchbox%20Twenty-ep/audio/All%20I%20Need%20%28Live%29> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/All%20I%20Need> <http://cmx.org/spec/terms#realization> <http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/All%20I%20Need%20%28Live%29> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep> <http://cmx.org/spec/terms#creation> <http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/All%20I%20Need> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/Suffer%20Me> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#Creation> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/Suffer%20Me> <http://cmx.org/spec/terms#creationDate> "2008-05-28T16:53:42Z"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/Suffer%20Me> <http://cmx.org/spec/terms#iswc> "urn:ISWC:T-000000589-1"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/Suffer%20Me> <http://purl.org/dc/elements/1.1/title> "Suffer Me"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/Suffer%20Me> <http://cmx.org/spec/terms#composerLyricist> <http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Rob%20Thomas> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Suffer%20Me> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#Production> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Suffer%20Me> <http://cmx.org/spec/terms#creationDate> "2008-05-27T00:13:09Z"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Suffer%20Me> <http://purl.org/dc/elements/1.1/title> "Suffer Me"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Suffer%20Me> <http://cmx.org/spec/terms#genre> "Alternative Rock"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Suffer%20Me> <http://cmx.org/spec/terms#performer> <http://localhost:3000/releases/Matchbox%20Twenty-ep/contributors/Matchbox%20Twenty> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Suffer%20Me> <http://cmx.org/spec/terms#embodiment> <http://localhost:3000/releases/Matchbox%20Twenty-ep/audio/Suffer%20Me> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/Suffer%20Me> <http://cmx.org/spec/terms#realization> <http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/Suffer%20Me> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep> <http://cmx.org/spec/terms#creation> <http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/Suffer%20Me> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/075678370120> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#Creation> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/075678370120> <http://cmx.org/spec/terms#creationDate> "2008-06-16T05:13:19Z"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/075678370120> <http://cmx.org/spec/terms#iswc> "urn:ISWC:T-000000612-1"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/075678370120> <http://purl.org/dc/elements/1.1/title> "075678370120"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/075678370120> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#Production> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/075678370120> <http://cmx.org/spec/terms#creationDate> "2008-06-16T05:13:20Z"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/075678370120> <http://purl.org/dc/elements/1.1/title> "075678370120"@en-us .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/075678370120> <http://cmx.org/spec/terms#embodiment> <http://localhost:3000/releases/Matchbox%20Twenty-ep/image/075678370120> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/075678370120> <http://cmx.org/spec/terms#realization> <http://localhost:3000/releases/Matchbox%20Twenty-ep/productions/075678370120> .
+<http://localhost:3000/releases/Matchbox%20Twenty-ep> <http://cmx.org/spec/terms#creation> <http://localhost:3000/releases/Matchbox%20Twenty-ep/creations/075678370120> .
+_:bn1262559423262d <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cmx.org/spec/terms#photoAlbum> .

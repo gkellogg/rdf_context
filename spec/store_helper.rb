@@ -162,6 +162,34 @@ shared_examples_for "Store" do
     end
   end
   
+  describe "triple round-trip" do
+    {
+      "UUU"   => Triple.new(RDF_NS.a, RDF_NS.b, RDF_NS.c),
+      "UUB"   => Triple.new(RDF_NS.a, RDF_NS.b, BNode.new),
+      "UUBn"  => Triple.new(RDF_NS.a, RDF_NS.b, BNode.new("foo")),
+      "BUU"   => Triple.new(BNode.new, RDF_NS.b, RDF_NS.c),
+      "BUB"   => Triple.new(BNode.new, RDF_NS.b, BNode.new),
+      "untyped" => Triple.new(RDF_NS.a, RDF_NS.b, "Gregg"),
+      "int"   => Triple.new(RDF_NS.a, RDF_NS.b, 1),
+      "float" => Triple.new(RDF_NS.a, RDF_NS.b, 1.1),
+      "xml"   => Triple.new(RDF_NS.a, RDF_NS.b,
+                        Literal.typed("foo <sup <sup xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">bar</sup> baz!", "http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral")),
+      "Dürst"         => Triple.new(RDF_NS.a, RDF_NS.b, Literal.untyped("Dürst")),
+      "lang"          => Triple.new(RDF_NS.a, RDF_NS.b, Literal.untyped("Gregg", "de-ch")),
+      "backslash:\\"  => Triple.new(RDF_NS.a, RDF_NS.b, "backslash:\\"),
+      "dquote:\""     => Triple.new(RDF_NS.a, RDF_NS.b, "dquote:\""),
+      "newline:\n"    => Triple.new(RDF_NS.a, RDF_NS.b, "newline:\n"),
+      "return:\r"     => Triple.new(RDF_NS.a, RDF_NS.b, "return:\r"),
+      "tab:\t"        => Triple.new(RDF_NS.a, RDF_NS.b, "tab:\t"),
+    }.each_pair do |desc, triple|
+      it "should retrieve #{desc}" do
+        subject.add(triple, nil)
+        subject.triples(triple, nil).should include(triple)
+        #subject.triples(Triple.new(nil, nil, nil), nil).should include(triple)
+      end
+    end
+  end
+
   it "should remove a triple" do
     subject.add(Triple.new(@ex.john, RDF_TYPE, @foaf.Person), nil)
     subject.size.should == 1

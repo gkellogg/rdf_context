@@ -126,20 +126,21 @@ module Matchers
     def matches?(actual)
       @actual = actual
 
-      a = "<foo>#{@actual}</foo>" unless @actual.index("<") == 0
-      e = "<foo>#{@expected}</foo>" unless @actual.index("<") == 0
+      a = @actual.index("<") == 0 ? @actual : "<foo>#{@actual}</foo>"
+      e = @expected.index("<") == 0 ? @expected : "<foo>#{@expected}</foo>"
       a_hash = ActiveSupport::XmlMini.parse(a)
       e_hash = ActiveSupport::XmlMini.parse(e)
       a_hash == e_hash
     rescue
+      puts $!
       @fault = $!.message
       false
     end
 
     def failure_message_for_should
       "#{@info + "\n" unless @info.empty?}" +
-      "#{@fault + "\n" unless @fault.nil?}" +
-      "Expected:\n#{@expected}\n" +
+      "Fault: #{@fault + "\n" if @fault}" +
+      "Expected:#{@expected}\n" +
       "Actual:#{@actual}"
     end
   end

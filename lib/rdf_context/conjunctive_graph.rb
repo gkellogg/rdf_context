@@ -28,6 +28,20 @@ module RdfContext
       @@default_context = Graph.new(:identifier => @store.identifier, :store => @store)
     end
     
+    # Contexts contained within the store
+    def contexts
+      @store.contexts
+    end
+    
+    # Triples across all contexts in store, optionally matching subject, predicate, or object.
+    # Delegates to Store#triples.
+    #
+    # @param [Triple, nil] triple:: Triple to match, may be a patern triple or nil
+    # @return [Array]:: List of matched triples
+    def triples(triple = Triple.new(nil, nil, nil), &block) # :yields: triple, context
+      @store.triples(triple, nil, &block) || []
+    end
+
     # Parse source into a new context.
     #
     # Create a new context (Graph) and parse into that.

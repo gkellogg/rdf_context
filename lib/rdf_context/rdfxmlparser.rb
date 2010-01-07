@@ -113,12 +113,12 @@ module RdfContext
 
       @doc = case stream
       when Nokogiri::XML::Document then stream
-      else   Nokogiri::XML.parse(stream, uri)
+      else   Nokogiri::XML.parse(stream, uri.to_s)
       end
       
       @id_mapping = Hash.new
 
-      raise ParserException, "Empty document" if @doc.nil? && @strict
+      raise ParserException, "Empty document" if @doc.nil? || @doc.root.nil?
       @callback = block
       
       root = @doc.root
