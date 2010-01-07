@@ -90,11 +90,6 @@ module RdfContext
 
     protected
 
-    # Escape backslashes and single quotes
-    def escapeQuotes(qstr)
-      qstr.nil? ? "" : qstr.gsub("\\","\\\\").gsub("'", "\\'").gsub('"', '""')
-    end
-
     # Where clase utility functions
     def buildSubjClause(subject, tableName)
   #    case subject
@@ -167,15 +162,18 @@ module RdfContext
       #@statement_cache[qStr] ||= @db.prepare(qStr)
       @statement_cache[qStr] ||= qStr
 
-      puts "executeSQL: '#{qStr}', #{params.join(", ")}" if $DEBUG
+      puts "executeSQL: '#{qStr}', '#{params.join("', '")}'" if $DEBUG
       if block_given?
         @db.execute(@statement_cache[qStr], *params) do |row|
           puts "executeSQL res: #{row.inspect}" if $DEBUG
           yield(row)
         end
       else
+        puts "executeSQL no block given" if $DEBUG
         @db.execute(@statement_cache[qStr], *params)
       end
+    rescue SQLite3::SQLException => e
+      puts "SQL Exception (ignored): #{e.message}" if $DEBUG
     end
 
     CREATE_ASSERTED_STATEMENTS_TABLE = %(

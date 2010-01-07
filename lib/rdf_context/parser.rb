@@ -50,6 +50,13 @@ module RdfContext
     # @raise [Error]:: Raises RdfError if _strict_
     def parse(stream, uri = nil, options = {}, &block) # :yields: triple
       if self.class == Parser
+        
+        options[:strict] ||= @strict if @strict
+        options[:graph] ||= @graph if @graph
+        options[:debug] ||= @debug if @debug
+        # Intuit type, if not provided
+        options[:type] ||= detect_format(stream, uri)
+        
         # Create a delegate of a specific parser class
         @delegate ||= case options[:type].to_s
         when "n3", "ntriples", "turtle" then N3Parser.new(options)
@@ -70,12 +77,40 @@ module RdfContext
       end
     end
     
+    
+    def graph; @delegate ? @delegate.graph : (@graph || Graph.new); end
+    def debug; @delegate ? @delegate.debug : @debug; end
+
     # Return N3 Parser instance
     def self.n3_parser(options = {}); N3Parser.new(options); end
     # Return RDF/XML Parser instance
     def self.rdfxml_parser(options = {}); RdfXmlParser.new(options); end
     # Return Rdfa Parser instance
     def self.rdfa_parser(options = {}); RdfaParser.new(options); end
+
+    # Heuristically detect the format of the uri
+    def detect_format(stream, uri = nil)
+      format = case uri.to_s
+      when /\.(rdf|xml)$/      then :rdfxml
+      when /\.(html|xhtml)$/   then :rdfa
+      when /\.(nt|n3|txt)$/    then :n3
+      else
+        # Got to look into the file to see
+        if stream.is_a?(IO)
+          stream.rewind
+          string = stream.read(1000)
+          stream.rewind
+        else
+          string = stream.to_s
+        end
+        case string
+        when /<\w+:RDF/ then :rdfxml
+        when /<RDF/     then :rdfxml
+        when /<html/i   then :rdfa
+        else                 :n3
+        end
+      end
+    end
 
     protected
     # Figure out the document path, if it is a Nokogiri::XML::Element or Attribute
@@ -115,6 +150,7 @@ module RdfContext
       triple
     rescue RdfException => e
       add_debug(node, "add_triple raised #{e.class}: #{e.message}")
+      puts e.backtrace if $DEBUG
       raise if @strict
     end
   end

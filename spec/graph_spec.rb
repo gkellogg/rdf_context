@@ -292,13 +292,11 @@ HERE
       end
     
       it "should output RDF/XML" do
-        rdfxml = <<HERE
+        rdfxml = <<-HERE
 <?xml version="1.0" encoding="UTF-8"?>
 <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:xhv="http://www.w3.org/1999/xhtml/vocab#">
   <rdf:Description rdf:about="http://example.org/john">
     <foaf:knows rdf:resource="http://example.org/jane"/>
-  </rdf:Description>
-  <rdf:Description rdf:about="http://example.org/john">
     <foaf:knows rdf:resource="http://example.org/rick"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://example.org/jane">

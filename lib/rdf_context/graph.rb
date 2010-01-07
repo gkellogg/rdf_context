@@ -28,7 +28,7 @@ module RdfContext
     # For more on named graphs, see: http://en.wikipedia.org/wiki/RDFLib
     #
     # @param [Hash] options:: Options
-    # <em>options[:store]</em>:: storage, defaults to a new ListStore instance
+    # <em>options[:store]</em>:: storage, defaults to a new ListStore instance. May be symbol :list_store or :memory_store
     # <em>options[:identifier]</em>:: Identifier for this graph, Literal, BNode or URIRef
     def initialize(options = {})
       @nsbinding = {}
@@ -41,7 +41,7 @@ module RdfContext
       else                     ListStore.new
       end
       
-      @identifier = options[:identifier] || BNode.new
+      @identifier = Triple.coerce_subject(options[:identifier]) || BNode.new
     end
 
     def inspect
@@ -131,7 +131,7 @@ module RdfContext
           tmp_ns = tmp_ns.succ
         end
       end
-      
+
       xml.instruct!
       xml.rdf(:RDF, rdf_attrs) do
         # Add statements for each subject
@@ -139,11 +139,12 @@ module RdfContext
           xml.rdf(:Description, (s.is_a?(BNode) ? "rdf:nodeID" : "rdf:about") => s) do
             triples(Triple.new(s, nil, nil)) do |triple, context|
               xml_args = triple.object.xml_args
+              qname = triple.predicate.to_qname(uri_bindings)
               if triple.object.is_a?(Literal) && triple.object.xmlliteral?
                 replace_text["__replace_with_#{triple.object.object_id}__"] = xml_args[0]
                 xml_args[0] = "__replace_with_#{triple.object.object_id}__"
               end
-              xml.tag!(triple.predicate.to_qname(uri_bindings), *xml_args)
+              xml.tag!(qname, *xml_args)
             end
           end
         end
@@ -170,6 +171,9 @@ module RdfContext
       @store.bind(namespace)
     end
 
+    # List of namespace bindings, as a hash
+    def nsbinding; @store.nsbinding; end
+    
     # Namespace for prefix
     def namespace(prefix); @store.namespace(prefix); end
 
@@ -327,20 +331,20 @@ module RdfContext
     end
 
     alias_method :==, :eql?
-  end
   
-  # Parse source into Graph.
-  #
-  # Merges results into a common Graph
-  #
-  # @param  [IO, String] stream:: the RDF IO stream, string, Nokogiri::HTML::Document or Nokogiri::XML::Document
-  # @param [String] uri:: the URI of the document
-  # @param [Hash] options:: Options from
-  # <em>options[:debug]</em>:: Array to place debug messages
-  # <em>options[:type]</em>:: One of _rdfxml_, _html_, or _n3_
-  # <em>options[:strict]</em>:: Raise Error if true, continue with lax parsing, otherwise
-  # @return [Graph]:: Returns the graph containing parsed triples
-  def parse(stream, uri, options = {}, &block) # :yields: triple
-    Parser.parse(stream, uri, options.merge(:graph => self), &block)
+    # Parse source into Graph.
+    #
+    # Merges results into a common Graph
+    #
+    # @param  [IO, String] stream:: the RDF IO stream, string, Nokogiri::HTML::Document or Nokogiri::XML::Document
+    # @param [String] uri:: the URI of the document
+    # @param [Hash] options:: Options from
+    # <em>options[:debug]</em>:: Array to place debug messages
+    # <em>options[:type]</em>:: One of _rdfxml_, _html_, or _n3_
+    # <em>options[:strict]</em>:: Raise Error if true, continue with lax parsing, otherwise
+    # @return [Graph]:: Returns the graph containing parsed triples
+    def parse(stream, uri, options = {}, &block) # :yields: triple
+      Parser.parse(stream, uri, options.merge(:graph => self), &block)
+    end
   end
 end

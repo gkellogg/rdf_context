@@ -458,7 +458,6 @@ module RdfContext
             QUOTED_PARTITION
           ]
         ]
-        q=unionSELECT(selects, :distinct => true, :select_type => CONTEXT_SELECT)
       else
         selects = [
           [
@@ -488,18 +487,19 @@ module RdfContext
         ]
       end
 
-      results = []
       q=unionSELECT(selects, :distinct => true, :select_type => CONTEXT_SELECT)
-      executeSQL(_normalizeSQLCmd(q), parameters) do |row|
+      executeSQL(_normalizeSQLCmd(q), parameters).map do |row|
         id, termComb = row
 
         termCombString = REVERSE_TERM_COMBINATIONS[termComb.to_i]
         subjTerm, predTerm, objTerm, ctxTerm = termCombString.chars.to_a
 
         graphKlass, idKlass = constructGraph(ctxTerm)
-        results << graphKlass.new(:store => self, :identifier => idKlass.new(id))
+        [graphKlass, idKlass.new(id)]
+      end.uniq.map do |gi|
+        graphKlass, id = gi
+        graphKlass.new(:store => self, :identifier => id)
       end
-      results
     end
     
     # Namespace persistence interface implementation
@@ -508,34 +508,54 @@ module RdfContext
     def bind(namespace)
       executeSQL("INSERT INTO #{namespace_binds} VALUES (?, ?)", namespace.prefix, namespace.uri)
       # May throw exception, should be handled in driver-specific class
-      
+
+      @namespaceCache ||= {}
+      @namespaceUriCache ||= {}
+      @nsbinding = nil
+      @namespaceCache[namespace.prefix] = namespace
+      @namespaceUriCache[namespace.uri.to_s] = namespace.prefix
       namespace
     end
 
     # Namespace for prefix
     def namespace(prefix)
-      executeSQL("SELECT uri FROM #{namespace_binds} WHERE prefix=?", prefix) do |row|
-        return Namespace.new(row[0], prefix)
+      @namespaceCache ||= {}
+      @namespaceUriCache ||= {}
+      unless @namespaceCache.has_key?(prefix)
+        @namespaceCache[prefix] = nil
+        executeSQL("SELECT uri FROM #{namespace_binds} WHERE prefix=?", prefix) do |row|
+          @namespaceCache[prefix] = Namespace.new(row[0], prefix)
+          @namespaceUriCache[row[0].to_s] = prefix
+        end
       end
-      nil
+      @namespaceCache[prefix]
     end
     
     # Prefix for namespace
     def prefix(namespace)
       uri = namespace.is_a?(Namespace) ? namespace.uri.to_s : namespace
-      executeSQL("SELECT prefix FROM #{namespace_binds} WHERE uri=?", uri) do |row|
-        return row[0]
+
+      @namespaceCache ||= {}
+      @namespaceUriCache ||= {}
+      unless @namespaceUriCache.has_key?(uri.to_s)
+        @namespaceUriCache[uri.to_s] = nil
+        executeSQL("SELECT prefix FROM #{namespace_binds} WHERE uri=?", uri) do |row|
+          @namespaceUriCache[uri.to_s] = row[0]
+        end
       end
-      nil
+      @namespaceUriCache[uri.to_s]
     end
 
     # List of namespace bindings, as a hash
     def nsbinding
-      namespaces = {}
-      executeSQL("SELECT prefix, uri FROM #{namespace_binds}") do |row|
-        namespaces[row[0]] = Namespace.new(row[1], row[0])
+      unless @nsbinding.is_a?(Hash)
+        @nsbinding = {}
+        executeSQL("SELECT prefix, uri FROM #{namespace_binds}") do |row|
+          @nsbinding[row[0]] = Namespace.new(row[1], row[0])
+        end
+        @nsbinding
       end
-      namespaces
+      @nsbinding
     end
     
     # Transactional interfaces
@@ -572,11 +592,6 @@ module RdfContext
       @db.execute(qStr, *params, &block)
     end
     
-    # Escape backslashes and single quotes
-    def escapeQuotes(qstr)
-      qstr.nil? ? "" : qstr.gsub("\\","\\\\").gsub("'", "\\'")
-    end
-    
     # Normalize a SQL command before executing it.  Commence unicode black magic
     def _normalizeSQLCmd(cmd)
       cmd # XXX
@@ -587,7 +602,7 @@ module RdfContext
     def normalizeTerm(term)
       case term
       when Graph    then normalizeTerm(term.identifier)
-      when Literal  then escapeQuotes(term.to_n3)
+      when Literal  then term.to_s.rdf_escape
       when URIRef   then term.to_s.rdf_escape
       when BNode    then term.to_s
       else               term
@@ -737,7 +752,7 @@ module RdfContext
     end
     
     def buildLitLanguageClause(obj,tableName)
-      ["#{tableName}.objDatatype='#{obj.lang}'"] if obj.is_a?(Literal) && obj.lang
+      ["#{tableName}.objLanguage='#{obj.lang}'"] if obj.is_a?(Literal) && obj.lang
     end
 
     # Stubs for Clause Functions that are overridden by specific implementations (MySQL vs SQLite for instance)
@@ -837,7 +852,11 @@ module RdfContext
 #      when "F"
 #        @otherCache[[termType, termString]] ||= QuotedGraph(:identifier => URIRef(termString), :store => self)
       when "B"
-        @bnodeCache[termString] ||= BNode.new(termString)
+        @bnodeCache[termString] ||= begin
+          bn = BNode.new
+          bn.identifier = termString
+          bn
+        end
       when "U"
         @uriCache[termString] || URIRef.new(termString)
 #      when "V"

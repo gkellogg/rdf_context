@@ -92,8 +92,8 @@ module RdfContext
         subject
       when nil
         subject
-      when /^\w+:\/\/\S+/ # does it smell like a URI?
-        URIRef.new subject
+      when /^\w+:\/\/\S+/, /^file:\S+/ # does it smell like a URI?
+        URIRef.new(subject)
       else
         raise InvalidSubject, "Subject is not of a known class (#{subject.class}: #{subject.inspect})"
       end

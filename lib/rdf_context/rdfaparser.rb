@@ -65,7 +65,7 @@ module RdfContext
       @doc = case stream
       when Nokogiri::HTML::Document then stream
       when Nokogiri::XML::Document then stream
-      else   Nokogiri::XML.parse(stream, uri)
+      else   Nokogiri::XML.parse(stream, uri.to_s)
       end
       
       raise ParserException, "Empty document" if @doc.nil? && @strict
