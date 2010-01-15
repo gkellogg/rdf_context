@@ -512,6 +512,7 @@ module RdfContext
       @namespaceCache ||= {}
       @namespaceUriCache ||= {}
       @nsbinding = nil
+      @uri_binding = nil
       @namespaceCache[namespace.prefix] = namespace
       @namespaceUriCache[namespace.uri.to_s] = namespace.prefix
       namespace
@@ -521,14 +522,14 @@ module RdfContext
     def namespace(prefix)
       @namespaceCache ||= {}
       @namespaceUriCache ||= {}
-      unless @namespaceCache.has_key?(prefix)
+      unless @namespaceCache.has_key?(prefix.to_s)
         @namespaceCache[prefix] = nil
-        executeSQL("SELECT uri FROM #{namespace_binds} WHERE prefix=?", prefix) do |row|
-          @namespaceCache[prefix] = Namespace.new(row[0], prefix)
-          @namespaceUriCache[row[0].to_s] = prefix
+        executeSQL("SELECT uri FROM #{namespace_binds} WHERE prefix=?", prefix.to_s) do |row|
+          @namespaceCache[prefix.to_s] = Namespace.new(row[0], prefix.to_s)
+          @namespaceUriCache[row[0].to_s] = prefix.to_s
         end
       end
-      @namespaceCache[prefix]
+      @namespaceCache[prefix.to_s]
     end
     
     # Prefix for namespace
@@ -546,16 +547,28 @@ module RdfContext
       @namespaceUriCache[uri.to_s]
     end
 
-    # List of namespace bindings, as a hash
+    # Hash of prefix => Namespace bindings
     def nsbinding
       unless @nsbinding.is_a?(Hash)
         @nsbinding = {}
+        @uri_binding = {}
         executeSQL("SELECT prefix, uri FROM #{namespace_binds}") do |row|
-          @nsbinding[row[0]] = Namespace.new(row[1], row[0])
+          prefix, uri = row
+          namespace = Namespace.new(uri, prefix)
+          @nsbinding[prefix] = namespace
+          # Over-write an empty prefix
+          @uri_binding[uri] = namespace unless prefix.to_s.empty?
+          @uri_binding[uri] ||= namespace
         end
         @nsbinding
       end
       @nsbinding
+    end
+    
+    # Hash of uri => Namespace bindings
+    def uri_binding
+      nsbinding
+      @uri_binding
     end
     
     # Transactional interfaces

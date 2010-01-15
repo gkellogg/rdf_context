@@ -34,6 +34,16 @@ describe "Blank nodes" do
     end
   end
 
+  it "should accept valid bnode identifier" do
+    bn = BNode.new
+    BNode.new(bn.to_s).should == bn
+  end
+
+  it "should accept valid named bnode identifier" do
+    bn = BNode.new("foo")
+    BNode.new(bn.to_s).should == bn
+  end
+
   describe "which has a blank identifier" do
     subject { BNode.new("", @context) }
     it "should not be the same as an anonymous identifier" do should_not == BNode.new end

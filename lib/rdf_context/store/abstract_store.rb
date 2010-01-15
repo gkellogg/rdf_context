@@ -1,12 +1,12 @@
 module RdfContext
   # Abstract storage module, superclass of other storage classes
   class AbstractStore
-    attr_reader :nsbinding, :identifier
+    attr_reader :nsbinding, :uri_binding, :identifier
     
     def initialize(identifier = nil, configuration = {})
       @nsbinding = {}
       # Reverse namespace binding
-      @prefix = {}
+      @uri_binding = {}
       
       @identifier = identifier || BNode.new
     end
@@ -34,18 +34,21 @@ module RdfContext
 
     # Bind namespace to store, returns bound namespace
     def bind(namespace)
-      @prefix[namespace.uri.to_s] = namespace.prefix
-      @nsbinding[namespace.prefix] ||= namespace
+      # Over-write an empty prefix
+      uri = namespace.uri.to_s
+      @uri_binding[uri] = namespace unless namespace.prefix.to_s.empty?
+      @uri_binding[uri] ||= namespace
+      @nsbinding[namespace.prefix.to_s] ||= namespace
     end
 
     # Namespace for prefix
     def namespace(prefix)
-      @nsbinding[prefix]
+      @nsbinding[prefix.to_s]
     end
     
     # Prefix for namespace
     def prefix(namespace)
-      namespace.is_a?(Namespace) ? @prefix[namespace.uri.to_s] : @prefix[namespace]
+      namespace.is_a?(Namespace) ? @uri_binding[namespace.uri.to_s].prefix : @uri_binding[namespace].prefix
     end
     
     # Get all BNodes with usage count used within graph

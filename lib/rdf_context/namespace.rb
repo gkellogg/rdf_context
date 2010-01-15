@@ -18,10 +18,10 @@ module RdfContext
     #
     # @author Tom Morris, Pius Uzamere
     def initialize(uri, prefix, fragment = nil)
+      prefix = prefix.to_s
       @uri = URIRef.new(uri) unless uri.is_a?(URIRef)
       @fragment = fragment
       @fragment = uri.to_s.match(/\#$/) ? true : false if fragment.nil?
-      prefix = nil if prefix.to_s.empty?
       if prefix_valid?(prefix)
         @prefix = prefix
       else
@@ -61,7 +61,7 @@ module RdfContext
 
     # Output xmlns attribute name
     def xmlns_attr
-      prefix.nil? ? "xmlns" : "xmlns:#{prefix}"
+      prefix.empty? ? "xmlns" : "xmlns:#{prefix}"
     end
     
     # Output namespace definition as a hash

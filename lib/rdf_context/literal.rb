@@ -35,10 +35,6 @@ module RdfContext
         end
       end
       
-      def inspect
-        to_s()
-      end
-      
       def self.the_null_encoding
         @the_null_encoding ||= Null.new(nil)
       end
@@ -314,6 +310,10 @@ module RdfContext
     end
     alias_method :to_ntriples, :to_n3
 
+    def inspect
+      "#{self.class}[#{self.to_n3}]"
+    end
+    
     # Output literal in TriX format
     def to_trix
       encoding.format_as_trix(@contents, @lang)
@@ -324,7 +324,7 @@ module RdfContext
     # ==== Example
     #  Encoding.the_null_encoding.xml_args("foo", "en-US") => ["foo", {"xml:lang" => "en-US"}]
     def xml_args
-      encoding.xml_args( @contents, @lang)
+      encoding.xml_args(@contents, @lang)
     end
 
     # Is this an XMLLiteral?

@@ -49,6 +49,9 @@ module RdfContext
 
     # Parse XHTML+RDFa document from a string or input stream to closure or graph.
     #
+    # If the parser is called with a block, triples are passed to the block rather
+    # than added to the graph.
+    #
     # Optionally, the stream may be a Nokogiri::HTML::Document or Nokogiri::XML::Document
     # With a block, yeilds each statement with URIRef, BNode or Literal elements
     #

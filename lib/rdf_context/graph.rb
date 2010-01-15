@@ -59,8 +59,14 @@ module RdfContext
     def nsbinding; @store.nsbinding; end
 
     # Destroy the store identified by _configuration_ if supported
+    # If configuration is nil, remove the graph context
     def destroy(configuration = nil)
-      @store.destroy(configuration)
+      if configuration
+        @store.destroy(configuration)
+      else
+        @store.remove(Triple.new(nil, nil, nil), self)
+      end
+      
       self.freeze
     end
 
@@ -120,13 +126,18 @@ module RdfContext
         "xml"   => XML_NS
       )
       rdf_attrs = extended_bindings.values.inject({}) { |hash, ns| hash.merge(ns.xmlns_attr => ns.uri.to_s)}
-      uri_bindings = extended_bindings.values.inject({}) { |hash, ns| hash.merge(ns.uri.to_s => ns.prefix)}
+      uri_bindings = self.uri_binding.merge(
+        RDF_NS.uri.to_s => RDF_NS,
+        RDFS_NS.uri.to_s => RDFS_NS,
+        XHV_NS.uri.to_s => XHV_NS,
+        XML_NS.uri.to_s => XML_NS
+      )
       
       # Add bindings for predicates not already having bindings
       tmp_ns = "ns0"
       predicates.each do |p|
         unless uri_bindings.has_key?(p.base)
-          uri_bindings[p.base] = tmp_ns
+          uri_bindings[p.base] = Namespace.new(p.base, tmp_ns)
           rdf_attrs["xmlns:#{tmp_ns}"] = p.base
           tmp_ns = tmp_ns.succ
         end
@@ -171,8 +182,11 @@ module RdfContext
       @store.bind(namespace)
     end
 
-    # List of namespace bindings, as a hash
+    # Hash of prefix => Namespace bindings
     def nsbinding; @store.nsbinding; end
+    
+    # Hash of uri => Namespace bindings
+    def uri_binding; @store.uri_binding; end
     
     # Namespace for prefix
     def namespace(prefix); @store.namespace(prefix); end

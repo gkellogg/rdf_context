@@ -1,3 +1,10 @@
+=== 0.4.6
+* Added Graph#uri_mapping and AbstractStore#uri_mapping for uri => Namespace mappings in graph
+* Fix BNode creation from existing identifier (named or un-named)
+* Graph#destroy removes graph context from store without configuration, and removes store storage with configuration
+* Added Triple#to_n3 and URIRef#to_n3
+* Added AbstractStore#uri_binding to give uri => namespace mapping from all store classes.
+
 === 0.4.5
 * Order includes to remove platform dependencies on load requirements.
 * Fix XML Comparison matcher

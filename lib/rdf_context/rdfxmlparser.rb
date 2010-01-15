@@ -98,8 +98,10 @@ module RdfContext
 
     # Parse RDF/XML document from a string or input stream to closure or graph.
     #
+    # If the parser is called with a block, triples are passed to the block rather
+    # than added to the graph.
+    #
     # Optionally, the stream may be a string or Nokogiri::XML::Document
-    # With a block, yeilds each statement with URIRef, BNode or Literal elements
     # 
     # @param [IO] stream:: the RDF/XML IO stream, string or Nokogiri::XML::Document
     # @param [String] uri:: the URI of the document
@@ -115,6 +117,8 @@ module RdfContext
       when Nokogiri::XML::Document then stream
       else   Nokogiri::XML.parse(stream, uri.to_s)
       end
+      
+      raise ParserException, "Synax errors:\n#{@doc.errors}" unless @doc.errors.empty?
       
       @id_mapping = Hash.new
 
@@ -196,6 +200,12 @@ module RdfContext
         # Determine the content type of this property element
         text_nodes = child.children.select {|e| e.text? && !e.blank?}
         element_nodes = child.children.select(&:element?)
+        add_debug(child, "#{text_nodes.length} text nodes, #{element_nodes.length} element nodes")
+        if element_nodes.length > 1
+          element_nodes.each do |node|
+            add_debug(child, "  node: #{node.to_s}")
+          end
+        end
 
         # List expansion
         predicate = ec.li_next(predicate) if predicate == RDF_NS.li
@@ -245,12 +255,12 @@ module RdfContext
         resourceAttr = resourceAttr.rdf_escape if resourceAttr
         nodeID = nodeID_check(el, nodeID.rdf_escape) if nodeID
 
-        add_debug(el, "attrs: #{attrs.inspect}")
-        add_debug(el, "datatype: #{datatype}") if datatype
-        add_debug(el, "parseType: #{parseType}") if parseType
-        add_debug(el, "resource: #{resourceAttr}") if resourceAttr
-        add_debug(el, "nodeID: #{nodeID}") if nodeID
-        add_debug(el, "id: #{id}") if id
+        add_debug(child, "attrs: #{attrs.inspect}")
+        add_debug(child, "datatype: #{datatype}") if datatype
+        add_debug(child, "parseType: #{parseType}") if parseType
+        add_debug(child, "resource: #{resourceAttr}") if resourceAttr
+        add_debug(child, "nodeID: #{nodeID}") if nodeID
+        add_debug(child, "id: #{id}") if id
         
         if attrs.empty? && datatype.nil? && parseType.nil? && element_nodes.length == 1
           # Production resourcePropertyElt

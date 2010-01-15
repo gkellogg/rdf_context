@@ -16,9 +16,11 @@ module RdfContext
     # @param [String] identifier:: Legal NCName or nil for a named BNode
     # @param [Hash] context:: Context used to store named BNodes
     def initialize(identifier = nil, context = {})
-      if identifier != nil && self.valid_id?(identifier)
-        identifier = identifier.sub(/nbn\d+[a-z]+N/, '')  # creating a named BNode from a named BNode
-        # Generate a name if it's blank. Always prepend "named" to avoid generation overlap
+      if identifier.nil?
+        @identifier = generate_bn_identifier
+      elsif identifier.match(/n?bn\d+[a-z]+(N\w+)?$/)
+        @identifier = context[identifier] || identifier
+      elsif self.valid_id?(identifier)
         @identifier = context[identifier] ||= generate_bn_identifier(identifier)
       else
         @identifier = generate_bn_identifier
@@ -42,14 +44,7 @@ module RdfContext
     def to_n3
       "_:#{self.identifier}"
     end
-
-    ## 
-    # Exports the BNode in N-Triples form.
-    #
-    # Syonym for to_n3
-    def to_ntriples
-      self.to_n3
-    end
+    alias_method :to_ntriples, :to_n3
 
     # Output URI as resource reference for RDF/XML
     #
@@ -66,8 +61,12 @@ module RdfContext
     
     # Compare BNodes. BNodes are equivalent if they have the same identifier
     def eql?(other)
-      other.class == self.class &&
-      other.identifier == self.identifier
+      case other
+      when BNode
+        other.identifier == self.identifier
+      else
+        self.identifier == other.to_s
+      end
     end
     alias_method :==, :eql?
     
@@ -75,7 +74,7 @@ module RdfContext
     def hash; self.to_s.hash; end
     
     def inspect
-      "[bn:#{identifier}]"
+      "#{self.class}[#{self.to_n3}]"
     end
     
     protected

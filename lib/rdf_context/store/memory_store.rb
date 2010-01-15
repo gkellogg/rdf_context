@@ -74,7 +74,7 @@ module RdfContext
       oi = resource_to_int(triple.object) || gen_key(triple.object)
       ci = resource_to_int(context) || gen_key(context)
     
-      #puts "add: #{si}, #{pi}, #{oi}, #{ci}" if $DEBUG
+      puts "add: #{si}, #{pi}, #{oi}, #{ci}" if $DEBUG
       set_nested_index(@cspo, ci, si, pi, oi)
       set_nested_index(@cpos, ci, pi, oi, si)
       set_nested_index(@cosp, ci, oi, si, pi)

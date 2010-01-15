@@ -36,16 +36,17 @@ module RdfContext
       @patern
     end
     
-    # Serialize Triple to N-Triples
-    def to_ntriples
+    # Serialize Triple to N3
+    def to_n3
       raise RdfException.new("Can't serialize patern triple") if is_patern?
       @subject.to_ntriples + " " + @predicate.to_ntriples + " " + @object.to_ntriples + " ."
     end
+    alias_method :to_ntriples, :to_n3
     
     def to_s; self.to_ntriples; end
     
     def inspect
-      [@subject, @predicate, @object, @patern].inspect
+      "#{self.class}[#{self.to_n3}]"
     end
 
     # Is the predicate of this statment rdf:type?

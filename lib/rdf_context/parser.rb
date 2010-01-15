@@ -39,6 +39,9 @@ module RdfContext
     
     # Parse RDF document from a string or input stream to closure or graph.
     #
+    # If the parser is called with a block, triples are passed to the block rather
+    # than added to the graph.
+    #
     # Virtual Class, prototype for Parser subclass.
     #
     # @param  [IO, String] stream:: the RDF IO stream, string, Nokogiri::HTML::Document or Nokogiri::XML::Document
@@ -96,7 +99,7 @@ module RdfContext
       when /\.(nt|n3|txt)$/    then :n3
       else
         # Got to look into the file to see
-        if stream.is_a?(IO)
+        if stream.is_a?(IO) || stream.is_a?(StringIO)
           stream.rewind
           string = stream.read(1000)
           stream.rewind
@@ -132,6 +135,9 @@ module RdfContext
     end
 
     # add a triple, object can be literal or URI or bnode
+    #
+    # If the parser is called with a block, triples are passed to the block rather
+    # than added to the graph.
     #
     # @param [Nokogiri::XML::Node, any] node:: XML Node or string for showing context
     # @param [URIRef, BNode] subject:: the subject of the triple

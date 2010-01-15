@@ -9,9 +9,9 @@ module RdfContext
 
     # Parse N3 document from a string or input stream to closure or graph.
     #
-    # Optionally, the stream may be a Nokogiri::HTML::Document or Nokogiri::XML::Document
-    # With a block, yeilds each statement with URIRef, BNode or Literal elements
-    # 
+    # If the parser is called with a block, triples are passed to the block rather
+    # than added to the graph.
+    #
     # @param [String] n3_str:: the Notation3/Turtle string
     # @param [String] uri:: the URI of the document
     # @param [Hash] options:: Options include the following

@@ -72,11 +72,14 @@ describe "URI References" do
   end
 
   it "should create QName from URI with namespace" do
-    uri = URIRef.new("http://example.org/foo#bar")
-    uri.to_qname("http://example.org/foo#" => "ex").should == "ex:bar"
+    ex = Namespace.new("http://example.org/foo#", "ex")
+    foaf = Namespace.new("http://xmlns.com/foaf/0.1/", "foaf")
+
+    uri = ex.bar
+    uri.to_qname(ex.uri.to_s => ex).should == "ex:bar"
     
-    uri = URIRef.new("http://xmlns.com/foaf/0.1/knows")
-    uri.to_qname("http://xmlns.com/foaf/0.1/" => "foaf").should == "foaf:knows"
+    uri = foaf.knows
+    uri.to_qname(foaf.uri.to_s => foaf).should == "foaf:knows"
   end
   
   it "should create resource hash for RDF/XML" do

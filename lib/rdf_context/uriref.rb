@@ -3,6 +3,7 @@ require 'net/http'
 module RdfContext
   class URIRef
     attr_accessor :uri
+    attr_reader   :namespace
     
     # Create a URIRef from a URI  or a fragment and a URI
     #
@@ -70,19 +71,20 @@ module RdfContext
       @uri.to_s
     end
   
-    def to_ntriples
+    def to_n3
       "<" + @uri.to_s + ">"
     end
+    alias_method :to_ntriples, :to_n3
   
     # Output URI as QName using URI binding
     def to_qname(uri_binding = {})
-      sn = self.short_name
-      uri_base = self.base
-      if uri_binding.has_key?(uri_base)
-        "#{uri_binding[uri_base]}:#{sn}"
-      else
-        raise ParserException, "Couldn't find QName for #{@uri}, base: #{uri_base}"
-      end
+      @namespace ||= uri_binding[self.base]
+      raise RdfException, "Couldn't find QName for #{@uri}" unless @namespace
+      "#{@namespace.prefix}:#{self.short_name}"
+    end
+    
+    def inspect
+      "#{self.class}[#{self.to_n3}]"
     end
     
     # Output URI as resource reference for RDF/XML
