@@ -1,3 +1,9 @@
+begin
+  require 'xml'
+  $libxml_enabled = true
+rescue LoadError
+end
+
 module RdfContext
   # An RDF Literal, with value, encoding and language elements.
   class Literal
@@ -23,7 +29,17 @@ module RdfContext
       def self.string
         @string ||= coerce "http://www.w3.org/2001/XMLSchema#string"
       end
-
+      
+      # Shortcut for <tt>Literal::Encoding.new("http://www.w3.org/2001/XMLSchema#date")</tt>
+      def self.date
+        @date ||= coerce "http://www.w3.org/2001/XMLSchema#date"
+      end
+      
+      # Shortcut for <tt>Literal::Encoding.new("http://www.w3.org/2001/XMLSchema#dateTime")</tt>
+      def self.datetime
+        @datetime ||= coerce "http://www.w3.org/2001/XMLSchema#dateTime"
+      end
+      
       # Create from URI, empty or nil string
       def self.coerce(string_or_nil)
         if string_or_nil.nil? || string_or_nil == ''
@@ -179,7 +195,9 @@ module RdfContext
 
         # Add already mapped namespaces and language
         @contents = contents.map do |c|
-          c = Nokogiri::XML.parse(c.copy(true).to_s) if c.is_a?(LibXML::XML::Node)
+          if $libxml_enabled
+            c = Nokogiri::XML.parse(c.copy(true).to_s) if c.is_a?(LibXML::XML::Node)
+          end
           if c.is_a?(Nokogiri::XML::Element)
             # Gather namespaces from self and decendant nodes
             c.traverse do |n|

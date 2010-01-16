@@ -102,8 +102,8 @@ module RdfContext
 
     # Coerce a predicate to the appropriate RdfContext type.
     # 
-    # @param[URI, URIRef, String] subject:: If a String looks like a URI, a URI is created
-    # @raise[InvalidSubject]:: If subject can't be predicate.
+    # @param[URI, URIRef, String] predicate:: If a String looks like a URI, a URI is created
+    # @raise[InvalidPredicate]:: If predicate can't be predicate.
     def self.coerce_predicate(predicate)
       case predicate
       when Addressable::URI
@@ -124,7 +124,7 @@ module RdfContext
     # Coerce a object to the appropriate RdfContext type.
     # 
     # @param[URI, URIRef, String, Integer, Float, BNode, Literal] object:: If a String looks like a URI, a URI is created, otherwise an untyped Literal.
-    # @raise[InvalidSubject]:: If subject can't be predicate.
+    # @raise[InvalidObject]:: If object can't be predicate.
     def self.coerce_object(object)
       case object
       when Addressable::URI
@@ -135,11 +135,11 @@ module RdfContext
         else
           Literal.untyped(object)
         end
-      when Integer, Float
+      when Integer, Float, Date
         Literal.build_from(object)
       when URIRef, BNode, Literal
         object
-      when nil, regexp
+      when nil, Regexp
         object
       else
         raise InvalidObject, "#{object.class}: #{object.inspect} is not a valid object"

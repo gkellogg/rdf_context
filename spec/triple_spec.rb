@@ -61,7 +61,7 @@ describe "Triples" do
     it "should accept a uri string and make URIRef" do
       Triple.coerce_subject('http://localhost/').should == URIRef.new('http://localhost/')
     end
-    
+
     it "should accept an Addressable::URI object and make URIRef" do
       Triple.coerce_subject(Addressable::URI.parse("http://localhost/")).should == URIRef.new("http://localhost/")
     end
@@ -91,6 +91,26 @@ describe "Triples" do
   end
 
   describe "with coerced object" do
+    it 'should make a literal for Integer types' do
+      ref = 5
+      Triple.coerce_object(ref).should == Literal.build_from(ref)
+    end
+    
+    it 'should make a literal for Float types' do
+      ref = 15.4
+      Triple.coerce_object(ref).should == Literal.build_from(ref)
+    end
+    
+    it 'should make a literal for Date types' do
+      ref = Date::civil(2010, 1, 2)
+      Triple.coerce_object(ref).should == Literal.build_from(ref)
+    end
+    
+    it 'should make a literal for DateTime types' do
+      ref = DateTime.parse('2010-01-03T01:02:03')
+      Triple.coerce_object(ref).should == Literal.build_from(ref)
+    end
+    
     it "should leave URIRefs alone" do
       ref = URIRef.new("http://localhost/")
       Triple.coerce_object(ref).should == ref
@@ -102,6 +122,11 @@ describe "Triples" do
     
     it "should leave BNodes alone" do
       ref = BNode.new()
+      Triple.coerce_object(ref).should == ref
+    end
+    
+    it "should leave Regexp alone" do
+      ref = /foo/
       Triple.coerce_object(ref).should == ref
     end
     
