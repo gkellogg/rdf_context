@@ -50,14 +50,20 @@ describe "Namespace" do
     subject.foo.should == "http://xmlns.com/foaf/0.1/foo"
   end
   
-  it "should construct URI with +" do
-    (subject + "foo").class.should == URIRef
-    (subject + "foo").should == "http://xmlns.com/foaf/0.1/foo"
-  end
-  
-  it "will cause method conflict" do
-    (subject + "class").should == "http://xmlns.com/foaf/0.1/class"
-    subject.class.should ==  Namespace
+  describe '#+' do
+    it "should construct URI with +" do
+      (subject + "foo").class.should == URIRef
+      (subject + "foo").should == "http://xmlns.com/foaf/0.1/foo"
+    end
+    
+    it "should strip trailing _ (used to work around reserved method names)" do
+      (subject + "type_").should == "http://xmlns.com/foaf/0.1/type"
+    end
+    
+    it "will cause method conflict" do
+      (subject + "class").should == "http://xmlns.com/foaf/0.1/class"
+      subject.class.should ==  Namespace
+    end
   end
   
   it "should be be equivalent" do

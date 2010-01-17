@@ -1,4 +1,3 @@
-require 'xml'
 require File.join(File.dirname(__FILE__), 'parser')
 
 module RdfContext

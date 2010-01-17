@@ -132,7 +132,37 @@ describe "Literals: " do
       float.encoding.should == "http://www.w3.org/2001/XMLSchema#float"
     end
   end
+
+  describe "a date" do
+    describe "encodings" do
+      subject { Literal.typed("2010-01-02", "http://www.w3.org/2001/XMLSchema#date") }
+      it "should return n3" do subject.to_n3.should == "\"2010-01-02\"^^<http://www.w3.org/2001/XMLSchema#date>" end
+      it "should return ntriples" do subject.to_ntriples.should == subject.to_n3 end
+      it "should return xml_args" do subject.xml_args.should == ["2010-01-02", {"rdf:datatype" => "http://www.w3.org/2001/XMLSchema#date"}] end
+      it "should return TriX" do subject.to_trix.should == "<typedLiteral datatype=\"http://www.w3.org/2001/XMLSchema#date\">2010-01-02</typedLiteral>" end
+    end
+
+    it "should infer type" do
+      int = Literal.build_from(Date::civil(2010, 1, 2))
+      int.encoding.should == "http://www.w3.org/2001/XMLSchema#date"
+    end
+  end
+  
+  describe "a date time" do
+    describe "encodings" do
+      subject { Literal.typed("2010-01-03T01:02:03", "http://www.w3.org/2001/XMLSchema#dateTime") }
+      it "should return n3" do subject.to_n3.should == "\"2010-01-03T01:02:03\"^^<http://www.w3.org/2001/XMLSchema#dateTime>" end
+      it "should return ntriples" do subject.to_ntriples.should == subject.to_n3 end
+      it "should return xml_args" do subject.xml_args.should == ["2010-01-03T01:02:03", {"rdf:datatype" => "http://www.w3.org/2001/XMLSchema#dateTime"}] end
+      it "should return TriX" do subject.to_trix.should == "<typedLiteral datatype=\"http://www.w3.org/2001/XMLSchema#dateTime\">2010-01-03T01:02:03</typedLiteral>" end
+    end
     
+    it "should infer type" do
+      int = Literal.build_from(DateTime.parse('2010-01-03T01:02:03'))
+      int.encoding.should == "http://www.w3.org/2001/XMLSchema#dateTime"
+    end
+  end
+  
   describe "XML Literal" do
     describe "with no namespace" do
       subject { Literal.typed("foo <sup>bar</sup> baz!", "http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral") }
@@ -299,6 +329,12 @@ describe "Literals: " do
     end
     specify "string" do
       Literal::Encoding.string.should == Literal::Encoding.new("http://www.w3.org/2001/XMLSchema#string")
+    end
+    specify "date" do
+      Literal::Encoding.date.should == Literal::Encoding.new("http://www.w3.org/2001/XMLSchema#date")
+    end
+    specify "date time" do
+      Literal::Encoding.datetime.should == Literal::Encoding.new("http://www.w3.org/2001/XMLSchema#dateTime")
     end
     specify "xmlliteral" do
       Literal::Encoding.xmlliteral.should == Literal::XMLLiteral.new("http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral")

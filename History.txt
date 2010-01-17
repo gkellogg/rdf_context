@@ -1,4 +1,9 @@
 === 0.4.7
+* Graph identifiers only URIRef or BNode; Literal not supported by SQL Store.
+* Namespace#+ updated to not use URIRef logic for creating URIs, as this removes part of the URI in the case that the URI does not end with / or #.
+* Incorporated pdlug's changes:
+  * Support using trailing underscores to work around generating URI's with Namespace that use methods that are on core ruby classes or reserved words (like Nokogiri Builder does). For example dc.type_ to generate the dc:type URI.
+  * Tests for Date/DateTime literals, added support for detecting them and generating the right literals in Triple.
 
 === 0.4.6
 * Added Graph#uri_mapping and AbstractStore#uri_mapping for uri => Namespace mappings in graph

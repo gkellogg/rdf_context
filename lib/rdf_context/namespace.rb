@@ -36,6 +36,8 @@ module RdfContext
     #   foaf = Namespace.new("http://xmlns.com/foaf/0.1/", "foaf"); foaf.knows # => returns a new URIRef with URI "http://xmlns.com/foaf/0.1/knows"
     #   foaf = Namespace.new("http://xmlns.com/foaf/0.1/", "foaf", true); foaf.knows # => returns a new URIRef with URI "http://xmlns.com/foaf/0.1/#knows"
     #
+    # To avoid naming problems, a suffix may have an appended '_', which will be removed when the URI is generated.
+    #
     # @return [URIRef]:: The newly created URIRegerence.
     # @raise [Error]:: Checks validity of the desired prefix and raises if it is incorrect.
     # @author Tom Morris, Pius Uzamere
@@ -47,7 +49,8 @@ module RdfContext
     def +(suffix)
       prefix = @uri.to_s
       prefix += '#' if fragment && !prefix.match(/\#$/)
-      URIRef.new(prefix + suffix.to_s)
+      suffix = suffix.to_s.sub(/_$/, '')
+      URIRef.new(prefix + suffix)
     end
 
     # Bind this namespace to a Graph
