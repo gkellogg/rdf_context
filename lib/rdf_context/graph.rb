@@ -29,7 +29,7 @@ module RdfContext
     #
     # @param [Hash] options:: Options
     # <em>options[:store]</em>:: storage, defaults to a new ListStore instance. May be symbol :list_store or :memory_store
-    # <em>options[:identifier]</em>:: Identifier for this graph, Literal, BNode or URIRef
+    # <em>options[:identifier]</em>:: Identifier for this graph, BNode or URIRef
     def initialize(options = {})
       @nsbinding = {}
 

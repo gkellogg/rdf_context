@@ -1,3 +1,5 @@
+=== 0.4.7
+
 === 0.4.6
 * Added Graph#uri_mapping and AbstractStore#uri_mapping for uri => Namespace mappings in graph
 * Fix BNode creation from existing identifier (named or un-named)

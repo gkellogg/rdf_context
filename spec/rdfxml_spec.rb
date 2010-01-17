@@ -20,10 +20,8 @@ EOF
   end
   
   it "should parse simple doc without a base URI" do
-        sampledoc = <<-EOF;
-    <?xml version="1.0" ?>
-    <NotRDF />
-    EOF
+        sampledoc = %(<?xml version="1.0" ?>
+    <NotRDF />)
         graph = @parser.parse(sampledoc, nil, :strict => true)
         graph.size.should == 1
         statement = graph[0]

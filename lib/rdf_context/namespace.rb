@@ -45,7 +45,9 @@ module RdfContext
 
     # Construct a URIRef from a namespace as in method_missing, but without method collision issues
     def +(suffix)
-      URIRef.new((fragment ? "##{suffix}" : suffix.to_s), @uri)
+      prefix = @uri.to_s
+      prefix += '#' if fragment && !prefix.match(/\#$/)
+      URIRef.new(prefix + suffix.to_s)
     end
 
     # Bind this namespace to a Graph

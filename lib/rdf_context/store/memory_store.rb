@@ -74,7 +74,7 @@ module RdfContext
       oi = resource_to_int(triple.object) || gen_key(triple.object)
       ci = resource_to_int(context) || gen_key(context)
     
-      puts "add: #{si}, #{pi}, #{oi}, #{ci}" if $DEBUG
+      puts "add: #{si}=#{triple.subject}, #{pi}=#{triple.predicate}, #{oi}=#{triple.object}, #{ci}=#{context ? context.identifier : 'none'}" if $DEBUG
       set_nested_index(@cspo, ci, si, pi, oi)
       set_nested_index(@cpos, ci, pi, oi, si)
       set_nested_index(@cosp, ci, oi, si, pi)
@@ -132,7 +132,7 @@ module RdfContext
     
       results = []
       si, pi, oi = triple_to_int(triple)
-      puts "triples: si=#{si}, pi=#{pi}, oi=#{oi}, ci=#{ci}" if $DEBUG
+      puts "triples? #{si}=#{triple.subject}, #{pi}=#{triple.predicate}, #{oi}=#{triple.object}, #{ci}=#{context ? context.identifier : 'none'}" if $DEBUG
 
       def result(v, si, pi, oi, ctx)
         triple = int_to_triple(si, pi, oi)
@@ -141,12 +141,15 @@ module RdfContext
             # keys are contexts
             v.keys.each do |ci|
               context = int_to_resource(ci)
+              puts "triples= #{si}=#{triple.subject}, #{pi}=#{triple.predicate}, #{oi}=#{triple.object}, #{ci}=#{context ? context.identifier : 'none'}" if $DEBUG
               yield triple, context
             end
           else
-            #puts "ctx: #{ctx}"
+            puts "triples= #{si}=#{triple.subject}, #{pi}=#{triple.predicate}, #{oi}=#{triple.object}, #{ctx ? ctx.identifier : 'none'}" if $DEBUG
             yield triple, ctx
           end
+        else
+          puts "triples= #{si}=#{triple.subject}, #{pi}=#{triple.predicate}, #{oi}=#{triple.object}, #{ctx ? ctx.identifier : 'none'}" if $DEBUG
         end
         triple
       end
@@ -214,13 +217,13 @@ module RdfContext
       elsif !triple.object.nil?
         # Subject+predicate unspecified, object specified but not found, skip
       else # subject+predicate+object unbound
-        puts "spo = #{spo.inspect}" if $DEBUG
+        #puts "spo = #{spo.inspect}" if $DEBUG
         spo.keys.each do |si|
-          puts "spo[#{si}] = #{spo[si].inspect}" if $DEBUG
+          #puts "spo[#{si}] = #{spo[si].inspect}" if $DEBUG
           spo[si].keys.each do |pi|
-            puts "spo[#{si}][#{pi}] = #{spo[si][pi].inspect}" if $DEBUG
+            #puts "spo[#{si}][#{pi}] = #{spo[si][pi].inspect}" if $DEBUG
             spo[si][pi].each_pair do |oi, value|
-              puts "spo[#{si}][#{pi}][#{oi}] = #{spo[si][pi][oi].inspect}" if $DEBUG
+              #puts "spo[#{si}][#{pi}][#{oi}] = #{spo[si][pi][oi].inspect}" if $DEBUG
               results << result(value, si, pi, oi, context, &block)
             end
           end

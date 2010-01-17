@@ -139,7 +139,7 @@ module RdfContext
         Literal.build_from(object)
       when URIRef, BNode, Literal
         object
-      when nil, regexp
+      when nil
         object
       else
         raise InvalidObject, "#{object.class}: #{object.inspect} is not a valid object"
