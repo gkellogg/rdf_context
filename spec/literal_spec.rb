@@ -103,9 +103,29 @@ describe "Literals: " do
     end
   end
   
-  describe "an integer" do
+  describe "a boolean" do
+    subject { Literal.typed(true, "http://www.w3.org/2001/XMLSchema#boolean") }
     describe "encodings" do
-      subject { Literal.typed(5, "http://www.w3.org/2001/XMLSchema#int") }
+      it "should return n3" do subject.to_n3.should == "\"true\"^^<http://www.w3.org/2001/XMLSchema#boolean>" end
+      it "should return ntriples" do subject.to_ntriples.should == subject.to_n3 end
+      it "should return xml_args" do subject.xml_args.should == ["true", {"rdf:datatype" => "http://www.w3.org/2001/XMLSchema#boolean"}] end
+      it "should return TriX" do subject.to_trix.should == "<typedLiteral datatype=\"http://www.w3.org/2001/XMLSchema#boolean\">true</typedLiteral>" end
+    end
+
+    it "should infer type" do
+      int = Literal.build_from(true)
+      int.encoding.should == "http://www.w3.org/2001/XMLSchema#boolean"
+    end
+
+    it "should have string contents" do subject.contents.should == "true" end
+    it "should have native contents" do subject.to_native.should == true end
+    it "should coerce 1" do Literal.typed("1", XSD_NS.boolean).contents.should == "true" end
+    it "should coerce 1" do Literal.typed("0", XSD_NS.boolean).contents.should == "false" end
+  end
+    
+  describe "an integer" do
+    subject { Literal.typed(5, "http://www.w3.org/2001/XMLSchema#int") }
+    describe "encodings" do
       it "should return n3" do subject.to_n3.should == "\"5\"^^<http://www.w3.org/2001/XMLSchema#int>" end
       it "should return ntriples" do subject.to_ntriples.should == subject.to_n3 end
       it "should return xml_args" do subject.xml_args.should == ["5", {"rdf:datatype" => "http://www.w3.org/2001/XMLSchema#int"}] end
@@ -116,11 +136,14 @@ describe "Literals: " do
       int = Literal.build_from(15)
       int.encoding.should == "http://www.w3.org/2001/XMLSchema#int"
     end
+
+    it "should have string contents" do subject.contents.should == "5" end
+    it "should have native contents" do subject.to_native.should == 5 end
   end
     
   describe "a float" do
+    subject { Literal.typed(15.4, "http://www.w3.org/2001/XMLSchema#float") }
     describe "encodings" do
-      subject { Literal.typed(15.4, "http://www.w3.org/2001/XMLSchema#float") }
       it "should return n3" do subject.to_n3.should == "\"15.4\"^^<http://www.w3.org/2001/XMLSchema#float>" end
       it "should return ntriples" do subject.to_ntriples.should == subject.to_n3 end
       it "should return xml_args" do subject.xml_args.should == ["15.4", {"rdf:datatype" => "http://www.w3.org/2001/XMLSchema#float"}] end
@@ -131,36 +154,85 @@ describe "Literals: " do
       float = Literal.build_from(15.4)
       float.encoding.should == "http://www.w3.org/2001/XMLSchema#float"
     end
+
+    it "should have string contents" do subject.contents.should == "15.4" end
+    it "should have native contents" do subject.to_native.should == 15.4 end
   end
 
   describe "a date" do
+    before(:each) { @value = Date.parse("2010-01-02Z") }
+    subject { Literal.typed(@value, "http://www.w3.org/2001/XMLSchema#date") }
     describe "encodings" do
-      subject { Literal.typed("2010-01-02", "http://www.w3.org/2001/XMLSchema#date") }
-      it "should return n3" do subject.to_n3.should == "\"2010-01-02\"^^<http://www.w3.org/2001/XMLSchema#date>" end
+      it "should return n3" do subject.to_n3.should == "\"2010-01-02Z\"^^<http://www.w3.org/2001/XMLSchema#date>" end
       it "should return ntriples" do subject.to_ntriples.should == subject.to_n3 end
-      it "should return xml_args" do subject.xml_args.should == ["2010-01-02", {"rdf:datatype" => "http://www.w3.org/2001/XMLSchema#date"}] end
-      it "should return TriX" do subject.to_trix.should == "<typedLiteral datatype=\"http://www.w3.org/2001/XMLSchema#date\">2010-01-02</typedLiteral>" end
+      it "should return xml_args" do subject.xml_args.should == ["2010-01-02Z", {"rdf:datatype" => "http://www.w3.org/2001/XMLSchema#date"}] end
+      it "should return TriX" do subject.to_trix.should == "<typedLiteral datatype=\"http://www.w3.org/2001/XMLSchema#date\">2010-01-02Z</typedLiteral>" end
     end
 
     it "should infer type" do
-      int = Literal.build_from(Date::civil(2010, 1, 2))
+      int = Literal.build_from(@value)
       int.encoding.should == "http://www.w3.org/2001/XMLSchema#date"
     end
+
+    it "should have string contents" do subject.contents.should == "2010-01-02Z" end
+    it "should have native contents" do subject.to_native.should ==  @value end
   end
   
-  describe "a date time" do
+  describe "a dateTime" do
+    before(:each) { @value = DateTime.parse('2010-01-03T01:02:03Z') }
+    subject { Literal.typed(@value, "http://www.w3.org/2001/XMLSchema#dateTime") }
     describe "encodings" do
-      subject { Literal.typed("2010-01-03T01:02:03", "http://www.w3.org/2001/XMLSchema#dateTime") }
-      it "should return n3" do subject.to_n3.should == "\"2010-01-03T01:02:03\"^^<http://www.w3.org/2001/XMLSchema#dateTime>" end
+      it "should return n3" do subject.to_n3.should == "\"2010-01-03T01:02:03Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>" end
       it "should return ntriples" do subject.to_ntriples.should == subject.to_n3 end
-      it "should return xml_args" do subject.xml_args.should == ["2010-01-03T01:02:03", {"rdf:datatype" => "http://www.w3.org/2001/XMLSchema#dateTime"}] end
-      it "should return TriX" do subject.to_trix.should == "<typedLiteral datatype=\"http://www.w3.org/2001/XMLSchema#dateTime\">2010-01-03T01:02:03</typedLiteral>" end
+      it "should return xml_args" do subject.xml_args.should == ["2010-01-03T01:02:03Z", {"rdf:datatype" => "http://www.w3.org/2001/XMLSchema#dateTime"}] end
+      it "should return TriX" do subject.to_trix.should == "<typedLiteral datatype=\"http://www.w3.org/2001/XMLSchema#dateTime\">2010-01-03T01:02:03Z</typedLiteral>" end
     end
     
     it "should infer type" do
-      int = Literal.build_from(DateTime.parse('2010-01-03T01:02:03'))
+      int = Literal.build_from(@value)
       int.encoding.should == "http://www.w3.org/2001/XMLSchema#dateTime"
     end
+
+    it "should have string contents" do subject.contents.should == "2010-01-03T01:02:03Z" end
+    it "should have native contents" do subject.to_native.should ==  @value end
+  end
+  
+  describe "a time" do
+    before(:each) { @value = Time.parse('01:02:03Z') }
+    subject { Literal.typed(@value, "http://www.w3.org/2001/XMLSchema#time") }
+    describe "encodings" do
+      it "should return n3" do subject.to_n3.should == "\"01:02:03Z\"^^<http://www.w3.org/2001/XMLSchema#time>" end
+      it "should return ntriples" do subject.to_ntriples.should == subject.to_n3 end
+      it "should return xml_args" do subject.xml_args.should == ["01:02:03Z", {"rdf:datatype" => "http://www.w3.org/2001/XMLSchema#time"}] end
+      it "should return TriX" do subject.to_trix.should == "<typedLiteral datatype=\"http://www.w3.org/2001/XMLSchema#time\">01:02:03Z</typedLiteral>" end
+    end
+    
+    it "should infer type" do
+      int = Literal.build_from(@value)
+      int.encoding.should == "http://www.w3.org/2001/XMLSchema#time"
+    end
+
+    it "should have string contents" do subject.contents.should == "01:02:03Z" end
+    it "should have native contents" do subject.to_native.should ==  @value end
+  end
+  
+  describe "a duration" do
+    before(:each) { @value = Duration.parse('-P1111Y11M23DT4H55M16.666S') }
+    subject { Literal.typed(@value, "http://www.w3.org/2001/XMLSchema#duration") }
+    describe "encodings" do
+      it "should return n3" do subject.to_n3.should == "\"-P1111Y11M23DT4H55M16.666S\"^^<http://www.w3.org/2001/XMLSchema#duration>" end
+      it "should return ntriples" do subject.to_ntriples.should == subject.to_n3 end
+      it "should return xml_args" do subject.xml_args.should == ["-P1111Y11M23DT4H55M16.666S", {"rdf:datatype" => "http://www.w3.org/2001/XMLSchema#duration"}] end
+      it "should return TriX" do subject.to_trix.should == "<typedLiteral datatype=\"http://www.w3.org/2001/XMLSchema#duration\">-P1111Y11M23DT4H55M16.666S</typedLiteral>" end
+    end
+    
+    it "should infer type" do
+      int = Literal.build_from(@value)
+      int.encoding.should == "http://www.w3.org/2001/XMLSchema#duration"
+    end
+
+    it "should have string contents" do subject.contents.should == "-P1111Y11M23DT4H55M16.666S" end
+    it "should have native contents" do subject.to_native.should ==  @value end
   end
   
   describe "XML Literal" do

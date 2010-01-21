@@ -55,6 +55,8 @@ module RdfContext
   RDFS_NS     = Namespace.new("http://www.w3.org/2000/01/rdf-schema#", "rdfs")
   XHV_NS      = Namespace.new("http://www.w3.org/1999/xhtml/vocab#", "xhv")
   XML_NS      = Namespace.new("http://www.w3.org/XML/1998/namespace", "xml")
+  XSD_NS      = Namespace.new("http://www.w3.org/2001/XMLSchema#", "xsd")
+  XSI_NS      = Namespace.new("http://www.w3.org/2001/XMLSchema-instance", "xsi")
 
   XH_MAPPING  = {"" => Namespace.new("http://www.w3.org/1999/xhtml/vocab\#", nil)}
 end

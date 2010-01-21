@@ -30,7 +30,7 @@ module RdfContext
 
     # Check to see if this graph contains the specified triple
     def contains?(triple, context = nil)
-      !@triples.find_index(triple).nil?
+      @triples.any? {|t| t == triple}
     end
 
     # Triples from graph, optionally matching subject, predicate, or object.

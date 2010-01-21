@@ -4,6 +4,9 @@ begin
 rescue LoadError
 end
 
+require 'parsedate'
+require File.join(File.dirname(__FILE__), 'duration')
+
 module RdfContext
   # An RDF Literal, with value, encoding and language elements.
   class Literal
@@ -15,29 +18,49 @@ module RdfContext
         @value = URIRef.new(value.to_s) if value
       end
 
-      # Shortcut for <tt>Literal::Encoding.new("http://www.w3.org/2001/XMLSchema#int")</tt>
-      def self.integer
-        @integer ||= coerce "http://www.w3.org/2001/XMLSchema#int"
+      # Shortcut for <tt>Literal::Encoding.new("http://www.w3.org/2001/XMLSchema#boolean")</tt>
+      def self.boolean
+        @boolean ||= coerce XSD_NS.boolean
+      end
+
+      # Shortcut for <tt>Literal::Encoding.new("http://www.w3.org/2001/XMLSchema#double")</tt>
+      def self.double
+        @double ||= coerce XSD_NS.double
       end
 
       # Shortcut for <tt>Literal::Encoding.new("http://www.w3.org/2001/XMLSchema#float")</tt>
       def self.float
-        @float ||= coerce "http://www.w3.org/2001/XMLSchema#float"
+        @float ||= coerce XSD_NS.float
       end
 
-      # Shortcut for <tt>Literal::Encoding.new("http://www.w3.org/2001/XMLSchema#string")</tt>
-      def self.string
-        @string ||= coerce "http://www.w3.org/2001/XMLSchema#string"
+      # Shortcut for <tt>Literal::Encoding.new("http://www.w3.org/2001/XMLSchema#int")</tt>
+      def self.integer
+        @integer ||= coerce XSD_NS.int
       end
-      
+
       # Shortcut for <tt>Literal::Encoding.new("http://www.w3.org/2001/XMLSchema#date")</tt>
       def self.date
-        @date ||= coerce "http://www.w3.org/2001/XMLSchema#date"
+        @date ||= coerce XSD_NS.date
       end
       
       # Shortcut for <tt>Literal::Encoding.new("http://www.w3.org/2001/XMLSchema#dateTime")</tt>
       def self.datetime
-        @datetime ||= coerce "http://www.w3.org/2001/XMLSchema#dateTime"
+        @datetime ||= coerce XSD_NS.dateTime
+      end
+      
+      # Shortcut for <tt>Literal::Encoding.new("http://www.w3.org/2001/XMLSchema#duration")</tt>
+      def self.duration
+        @duration ||= coerce XSD_NS.duration
+      end
+      
+      # Shortcut for <tt>Literal::Encoding.new("http://www.w3.org/2001/XMLSchema#string")</tt>
+      def self.string
+        @string ||= coerce XSD_NS.string
+      end
+      
+      # Shortcut for <tt>Literal::Encoding.new("http://www.w3.org/2001/XMLSchema#time")</tt>
+      def self.time
+        @time ||= coerce XSD_NS.time
       end
       
       # Create from URI, empty or nil string
@@ -108,7 +131,14 @@ module RdfContext
       
       # Encode literal contents
       def encode_contents(contents, options)
-        contents
+        case @value
+        when XSD_NS.boolean   then %w(1 true).include?(contents.to_s) ? "true" : "false"
+        when XSD_NS.time      then contents.is_a?(Time) ? contents.strftime("%H:%M:%S%Z").sub(/\+00:00|UTC/, "Z") : contents.to_s
+        when XSD_NS.dateTime  then contents.is_a?(DateTime) ? contents.strftime("%Y-%m-%dT%H:%M:%S%Z").sub(/\+00:00|UTC/, "Z") : contents.to_s
+        when XSD_NS.date      then contents.is_a?(Date) ? contents.strftime("%Y-%m-%d%Z").sub(/\+00:00|UTC/, "Z") : contents.to_s
+        when XSD_NS.duration  then contents.is_a?(Duration) ? contents.to_s(:xml) : contents.to_s
+        else                       contents.to_s
+        end
       end
     end
     
@@ -292,12 +322,15 @@ module RdfContext
     # Infer the proper XML datatype for the given object
     def self.infer_encoding_for(object)
       case object
-      when Integer  then Encoding.new("http://www.w3.org/2001/XMLSchema#int")
-      when Float    then Encoding.new("http://www.w3.org/2001/XMLSchema#float")
-      when Time     then Encoding.new("http://www.w3.org/2001/XMLSchema#time")
-      when DateTime then Encoding.new("http://www.w3.org/2001/XMLSchema#dateTime")
-      when Date     then Encoding.new("http://www.w3.org/2001/XMLSchema#date")
-      else               Encoding.new("http://www.w3.org/2001/XMLSchema#string")
+      when TrueClass  then Encoding.boolean
+      when FalseClass then Encoding.boolean
+      when Integer    then Encoding.integer
+      when Float      then Encoding.float
+      when Time       then Encoding.time
+      when DateTime   then Encoding.datetime
+      when Date       then Encoding.date
+      when Duration   then Encoding.duration
+      else                 Encoding.string
       end
     end
 
@@ -335,6 +368,21 @@ module RdfContext
     # Output literal in TriX format
     def to_trix
       encoding.format_as_trix(@contents, @lang)
+    end
+    
+    # Create native representation for value
+    def to_native
+      case encoding
+      when Encoding.boolean   then @contents.to_s == "true"
+      when Encoding.double    then @contents.to_s.to_f
+      when Encoding.integer   then @contents.to_s.to_i
+      when Encoding.float     then @contents.to_s.to_f
+      when Encoding.time      then Time.parse(@contents.to_s)
+      when Encoding.datetime  then DateTime.parse(@contents.to_s)
+      when Encoding.date      then Date.parse(@contents.to_s)
+      when Encoding.duration  then Duration.parse(@contents.to_s)
+      else                         @contents.to_s
+      end
     end
     
     # Return content and hash appropriate for encoding in XML

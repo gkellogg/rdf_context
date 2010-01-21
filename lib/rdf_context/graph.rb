@@ -325,7 +325,7 @@ module RdfContext
     # after sorting each graph.
     #
     # We just follow Python RDFlib's lead and do a simple comparison
-    def eql? (other)
+    def eql?(other)
       #puts "eql? size #{self.size} vs #{other.size}"
       return false if !other.is_a?(Graph) || self.size != other.size
       return false unless other.identifier.to_s == identifier.to_s

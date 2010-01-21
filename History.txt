@@ -1,3 +1,9 @@
+=== 0.4.8
+* Add Duration and support in Literal
+* Add datatype support for xs:boolean, xs:double, xs:duration and xs:time.
+* Literal::Encoding#encode_contents properly encodes different datatypes to string.
+* Literal#to_native converts literal value to appropriate native object based on datatype.
+
 === 0.4.7
 * Graph identifiers only URIRef or BNode; Literal not supported by SQL Store.
 * Namespace#+ updated to not use URIRef logic for creating URIs, as this removes part of the URI in the case that the URI does not end with / or #.

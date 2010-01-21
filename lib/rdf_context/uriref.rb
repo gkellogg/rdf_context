@@ -78,9 +78,15 @@ module RdfContext
   
     # Output URI as QName using URI binding
     def to_qname(uri_binding = {})
-      @namespace ||= uri_binding[self.base]
-      raise RdfException, "Couldn't find QName for #{@uri}" unless @namespace
-      "#{@namespace.prefix}:#{self.short_name}"
+      "#{namespace(uri_binding).prefix}:#{self.short_name}"
+    end
+    
+    def namespace(uri_binding = {})
+      @namespace ||= begin
+        ns = uri_binding[self.base]
+        raise RdfException, "Couldn't find namespace for #{@uri}" unless ns
+        ns
+      end
     end
     
     def inspect
