@@ -136,7 +136,7 @@ module RdfContext
       # Add bindings for predicates not already having bindings
       tmp_ns = "ns0"
       predicates.each do |p|
-        unless uri_bindings.has_key?(p.base)
+        unless p.namespace(uri_bindings)
           uri_bindings[p.base] = Namespace.new(p.base, tmp_ns)
           rdf_attrs["xmlns:#{tmp_ns}"] = p.base
           tmp_ns = tmp_ns.succ

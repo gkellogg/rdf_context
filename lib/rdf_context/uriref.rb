@@ -40,7 +40,9 @@ module RdfContext
     # short_name of URI for creating QNames.
     #   "#{base]{#short_name}}" == uri
     def short_name
-      @short_name ||= if @uri.fragment()
+      @short_name ||= if @namespace
+        self.to_s.sub(@namespace.uri.to_s, "")
+      elsif @uri.fragment()
         @uri.fragment()
       elsif @uri.path.split("/").last.class == String and @uri.path.split("/").last.length > 0
         @uri.path.split("/").last
@@ -78,14 +80,16 @@ module RdfContext
   
     # Output URI as QName using URI binding
     def to_qname(uri_binding = {})
-      "#{namespace(uri_binding).prefix}:#{self.short_name}"
+      ns = namespace(uri_binding)
+      sn = self.to_s.sub(ns.uri.to_s, "")
+      "#{ns.prefix}:#{sn}"
     end
     
     def namespace(uri_binding = {})
       @namespace ||= begin
-        ns = uri_binding[self.base]
-        raise RdfException, "Couldn't find namespace for #{@uri}" unless ns
-        ns
+        uri = uri_binding.keys.detect {|u| self.to_s.index(u) == 0 }
+        raise RdfException, "Couldn't find namespace for #{@uri}" unless uri
+        uri_binding[uri]
       end
     end
     

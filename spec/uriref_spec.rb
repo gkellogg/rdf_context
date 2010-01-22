@@ -71,15 +71,38 @@ describe "URI References" do
     uri2.to_s.should == "http://example.org/foo#bar"
   end
 
-  it "should create QName from URI with namespace" do
-    ex = Namespace.new("http://example.org/foo#", "ex")
-    foaf = Namespace.new("http://xmlns.com/foaf/0.1/", "foaf")
+  describe "QName" do
+      it "should find with trailing /" do
+        ex = Namespace.new("http://example.org/foo/", "ex")
+        ex.bar.to_qname(ex.uri.to_s => ex).should == "ex:bar"
+      end
 
-    uri = ex.bar
-    uri.to_qname(ex.uri.to_s => ex).should == "ex:bar"
-    
-    uri = foaf.knows
-    uri.to_qname(foaf.uri.to_s => foaf).should == "foaf:knows"
+      it "should find with trailing #" do
+        ex = Namespace.new("http://example.org/foo#", "ex")
+        ex.bar.to_qname(ex.uri.to_s => ex).should == "ex:bar"
+      end
+
+      it "should find with trailing word" do
+        ex = Namespace.new("http://example.org/foo", "ex")
+        ex.bar.to_qname(ex.uri.to_s => ex).should == "ex:bar"
+      end
+    end
+  
+  describe "namespace" do
+    it "should find with trailing /" do
+      ex = Namespace.new("http://example.org/foo/", "ex")
+      ex.bar.namespace(ex.uri.to_s => ex).should == ex
+    end
+
+    it "should find with trailing #" do
+      ex = Namespace.new("http://example.org/foo#", "ex")
+      ex.bar.namespace(ex.uri.to_s => ex).should == ex
+    end
+
+    it "should find with trailing word" do
+      ex = Namespace.new("http://example.org/foo", "ex")
+      ex.bar.namespace(ex.uri.to_s => ex).should == ex
+    end
   end
   
   it "should create resource hash for RDF/XML" do

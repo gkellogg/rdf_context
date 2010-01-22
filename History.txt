@@ -1,3 +1,7 @@
+=== 0.4.9
+* Fixed bug in URIRef#namespace & to_qname when namespace does not have a trailing / or #
+* URIRef#short_name may return a different value after a namespace is assigned.
+
 === 0.4.8
 * Add Duration and support in Literal
 * Add datatype support for xs:boolean, xs:double, xs:duration and xs:time.

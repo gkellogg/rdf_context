@@ -190,6 +190,31 @@ HERE
     end
   end
   
+  describe "with namespaces" do
+    subject { Graph.new(:store => ListStore.new) }
+    
+    it "should use namespace with trailing slash" do
+      ns = Namespace.new("http://www.example.com/ontologies/test/", "test")
+      subject.bind(ns)
+      subject.add_triple("http://example.com", ns.hasChallenge, "Interesting Title")
+      subject.to_rdfxml.should =~ /<test:hasChallenge/
+    end
+    
+    it "should use namespace with trailing #" do
+      ns = Namespace.new("http://www.example.com/ontologies/test#", "test")
+      subject.bind(ns)
+      subject.add_triple("http://example.com", ns.hasChallenge, "Interesting Title")
+      subject.to_rdfxml.should =~ /<test:hasChallenge/
+    end
+
+    it "should use namespace with trailing word" do
+      ns = Namespace.new("http://www.example.com/ontologies/test", "test")
+      subject.bind(ns)
+      subject.add_triple("http://example.com", ns.hasChallenge, "Interesting Title")
+      subject.to_rdfxml.should =~ /<test:hasChallenge/
+    end
+  end
+  
   describe "with triples" do
     subject {
       g = Graph.new(:store => ListStore.new)
