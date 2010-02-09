@@ -3,7 +3,7 @@ require File.join(File.dirname(__FILE__), 'graph')
 module RdfContext
   # Generic RdfContext Parser class
   class Parser
-    attr_reader :debug
+    attr_reader :debug, :uri
     attr_accessor :doc, :graph
 
     ## 
@@ -72,7 +72,7 @@ module RdfContext
         @delegate.parse(stream, uri, options, &block)
       else
         # Common parser operations
-        @uri = Addressable::URI.parse(uri.to_s).to_s unless uri.nil?
+        @uri = URIRef.new(uri.to_s) unless uri.nil?
         @strict = options[:strict] if options.has_key?(:strict)
         @debug = options[:debug] if options.has_key?(:debug)
         

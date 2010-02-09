@@ -2,6 +2,7 @@ require 'rdf/redland'
 
 module Matchers
   class BeEquivalentGraph
+    Info = Struct.new(:about, :information)
     def normalize(graph)
       case graph
       when Graph then graph
@@ -13,7 +14,11 @@ module Matchers
     end
     
     def initialize(expected, info)
-      @info = info
+      @info = if info.respond_to?(:about)
+        info
+      else
+        Info.new(expected.is_a?(Graph) ? expected.identifier : URIRef.new(info), info.to_s)
+      end
       @expected = normalize(expected)
     end
 
@@ -41,7 +46,7 @@ module Matchers
     end
   end
   
-  def be_equivalent_graph(expected, info = "")
+  def be_equivalent_graph(expected, info = nil)
     BeEquivalentGraph.new(expected, info)
   end
 

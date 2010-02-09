@@ -415,5 +415,4 @@ describe "Literals: " do
       Literal::Encoding.the_null_encoding.should == Literal::Null.new(nil)
     end
   end
-  
 end

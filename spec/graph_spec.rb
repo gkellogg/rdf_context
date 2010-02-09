@@ -415,4 +415,32 @@ HERE
       end
     end
   end
+  
+  describe "Bnode Permutation matching" do
+    {
+      "a1"  => %w(aA),
+      "a1b1"  => %w(aAbB aBbA),
+      "a2b1"  => %w(aAbB),
+      "a2b2c1"  => %w(aAbBcC aBbAcC),
+      "a2b2c3d3e1f4" => %w(
+        aAbBcCdDeEfF
+        aBbAcCdDeEfF
+        aAbBcDdCeEfF
+        aBbAcDdCeEfF
+      )
+    }.each_pair do |list, perms|
+      it "should permute #{list} as #{perms.to_sentence}" do
+        h_source = list.scan(/\w\d/).inject({}) {|hash, ad| hash[ad[0,1]] = ad[1,1]; hash}
+        h_dest = list.upcase.scan(/\w\d/).inject({}) {|hash, ad| hash[ad[0,1]] = ad[1,1]; hash}
+        subject.send(:bnode_permutations, h_source, h_dest) do |hash|
+          perm = ""
+          hash.each_pair {|k, v| perm << "#{k}#{v}"}
+          puts "perm: #{perm}"
+          perms.should include(perm)
+          perms -= [perm]
+        end
+        perms.should be_empty
+      end
+    end
+  end
 end

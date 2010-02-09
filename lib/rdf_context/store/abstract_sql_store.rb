@@ -862,8 +862,8 @@ module RdfContext
       case termType
       when "L"
         @literalCache[[termString, objLanguage, objDatatype]] ||= Literal.n3_encoded(termString, objLanguage, objDatatype)
-#      when "F"
-#        @otherCache[[termType, termString]] ||= QuotedGraph(:identifier => URIRef(termString), :store => self)
+      when "F"
+        @otherCache[[termType, termString]] ||= QuotedGraph(:identifier => URIRef(termString), :store => self)
       when "B"
         @bnodeCache[termString] ||= begin
           bn = BNode.new

@@ -1,5 +1,6 @@
 module RdfContext
   class RdfException < RuntimeError; end
+
   class ParserException < RdfException; end
   class GraphException < RdfException; end
   class StoreException < RdfException; end
@@ -8,4 +9,6 @@ module RdfContext
   class InvalidPredicate < RdfException; end
   class InvalidSubject < RdfException; end
   class InvalidObject < RdfException; end
+
+  class ReadOnlyGraphException < GraphException; end
 end

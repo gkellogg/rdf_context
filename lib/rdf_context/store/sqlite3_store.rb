@@ -92,13 +92,14 @@ module RdfContext
 
     # Where clase utility functions
     def buildSubjClause(subject, tableName)
-  #    case subject
+      case subject
   #    when REGEXTerm
   #    when Array
-  #    when QuotedGraph
-  #    else
+      when Graph
+         ["#{tableName}.subject=?", self.normalizeTerm(subject.identifier)]
+      else
         ["#{tableName}.subject=?", subject] if subject
-  #    end
+      end
     end
 
     def buildPredClause(predicate, tableName)
@@ -112,13 +113,14 @@ module RdfContext
 
     # Where clase utility functions
     def buildObjClause(object, tableName)
-  #    case object
+      case object
   #    when REGEXTerm
   #    when Array
-  #    when QuotedGraph
-  #    else
+    when Graph
+      ["#{tableName}.object=?", self.normalizeTerm(object.identifier)]
+      else
         ["#{tableName}.object=?", object] if object
-  #    end
+      end
     end
 
     # Where clase utility functions

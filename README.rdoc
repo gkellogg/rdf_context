@@ -54,6 +54,10 @@ Instantiate an existing graph from a datastore
   s = SQLIte3Store.new(:path => "store.db")
   g = Graph.new(:store => s, :identifier => "http://example.com/context")
 
+QuotedGraph implements N3 Formulae semantics, by creating a graph within a store that is formula_aware. QuotedGraph triples are not returned in a query to a ConjunctiveGraph.
+
+AggregateGraphs allow multiple graphs from a given context_aware store to be combined into a single read-only graph.
+
 === Parsers
 Instantiate a parser and parse source, specifying type and base-URL
 
@@ -95,10 +99,6 @@ SQLite3Store:: context aware datastore using a SQLite3 database to create a pers
 == TODO:
 * Testing
   * Integrate ntriples tests in spec/ntriples/test.nt
-  * Turtle tests from http://www.w3.org/2000/10/swap/test/n3/turtle-manifest.n3 (if can find .ttl and .out files)
-  * N3-RDF tests from http://www.w3.org/2000/10/swap/test/n3/n3-rdf.tests
-  * N3-Full tests from http://www.w3.org/2000/10/swap/test/n3/n3-full.tests
-  * N3 grammar tests?
   * RDFa updates for new tests and non XHTML representations.
 * Graphs
   * n3 serialization
@@ -108,6 +108,10 @@ SQLite3Store:: context aware datastore using a SQLite3 database to create a pers
 * Ruby objects
   * ActiveRDF-like class support
   * Integrate with RDFObjects (http://github.com/rsinger/RDFObjects)
+
+== Resources:
+* Distiller[http://kellogg-assoc/distiller]
+* RDoc[http://rdoc.info/projects/gkellogg/rdf_context]
 
 == LICENSE:
 

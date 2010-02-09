@@ -117,30 +117,115 @@ describe "N3 parser" do
         @parser.graph[0].object.contents.should == contents
       end
     end
-  end
-  
-  # n3p tests taken from http://inamidst.com/n3p/test/
-  describe "parsing n3p test" do
-   dir_name = File.join(File.dirname(__FILE__), '..', 'test', 'n3_tests', 'n3p', '*.n3')
-    Dir.glob(dir_name).each do |n3|    
-      it n3 do
-        test_file(n3)
-      end
+    
+    it "should parse multi-line literal" do
+      @parser.parse(%(
+<http://www.example.com/books#book12345> <http://purl.org/dc/elements/1.1/title> """
+        Foo
+        <html:b xmlns:html="http://www.w3.org/1999/xhtml" html:a="b">bar<rdf:Thing xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><a:b xmlns:a="foo:"></a:b>here<a:c xmlns:a="foo:"></a:c></rd
+f:Thing></html:b>
+        baz
+        <html:i xmlns:html="http://www.w3.org/1999/xhtml">more</html:i>
+     """ .
+      ))
+      
+      @parser.graph.should_not be_nil
+      @parser.graph.size.should == 1
+      @parser.graph[0].object.contents.should == %(
+        Foo
+        <html:b xmlns:html="http://www.w3.org/1999/xhtml" html:a="b">bar<rdf:Thing xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><a:b xmlns:a="foo:"></a:b>here<a:c xmlns:a="foo:"></a:c></rd
+f:Thing></html:b>
+        baz
+        <html:i xmlns:html="http://www.w3.org/1999/xhtml">more</html:i>
+     )
     end
   end
   
-  describe "parsing real data tests" do
-    dirs = [ 'misc', 'lcsh' ]
-    dirs.each do |dir|
-      dir_name = File.join(File.dirname(__FILE__), '..', 'test', 'n3_tests', dir, '*.n3')
-      Dir.glob(dir_name).each do |n3|
-        it "#{dir} #{n3}" do
+  describe "n3" do
+    # n3p tests taken from http://inamidst.com/n3p/test/
+    describe "parsing n3p test" do
+     dir_name = File.join(File.dirname(__FILE__), '..', 'test', 'n3_tests', 'n3p', '*.n3')
+      Dir.glob(dir_name).each do |n3|    
+        it n3 do
           test_file(n3)
         end
       end
     end
+
+    describe "parsing real data tests" do
+      dirs = %w(misc lcsh)
+      dirs.each do |dir|
+        dir_name = File.join(File.dirname(__FILE__), '..', 'test', 'n3_tests', dir, '*.n3')
+        Dir.glob(dir_name).each do |n3|
+          it "#{dir} #{n3}" do
+            test_file(n3)
+          end
+        end
+      end
+    end
+
+    describe "rdflib tests" do
+      subject { Graph.new }
+
+      describe "with a type" do
+        before(:each) do
+          subject.parse(%(
+          @prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+          @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+          @prefix : <http://test/> .
+          :foo a rdfs:Class.
+          :bar :d :c.
+          :a :d :c.
+          ), "http://example.com")
+        end
+        
+        it "should have 3 namespaces" do
+          puts subject.nsbinding.inspect
+          subject.nsbinding.keys.length.should == 3
+        end
+      end
+    
+      describe "with blank clause" do
+        before(:each) do
+          subject.parse(%(
+          @prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+          @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+          @prefix : <http://test/> .
+          @prefix log: <http://www.w3.org/2000/10/swap/log#>.
+          :foo a rdfs:Resource.
+          :bar rdfs:isDefinedBy [ a log:Formula ].
+          :a :d :e.
+          ), "http://example.com")
+        end
+        
+        it "should have 4 namespaces" do
+          subject.nsbinding.keys.length.should == 4
+        end
+      end
+    
+      describe "with empty subject" do
+        before(:each) do
+          subject.parse(%(
+          @prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+          @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+          @prefix log: <http://www.w3.org/2000/10/swap/log#>.
+          @prefix : <http://test/> .
+          <> a log:N3Document.
+          ), "http://test/")
+        end
+        
+        it "should have 4 namespaces" do
+          subject.nsbinding.keys.length.should == 4
+        end
+        
+        it "should have default subject" do
+          subject.size.should == 1
+          subject.triples.first.subject.should == "http://test/"
+        end
+      end
+    end
   end
-  
+
   it "should throw an exception when presented with a BNode as a predicate" do
     n3doc = "_:a _:b _:c ."
     lambda { @parser.parse(n3doc) }.should raise_error(RdfContext::Triple::InvalidPredicate)
@@ -172,13 +257,24 @@ describe "N3 parser" do
     @parser.graph[0].object.class.should == RdfContext::Literal
   end
   
+  it "should create typed literals with qname" do
+    n3doc = %(
+      @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+      @prefix foaf: <http://xmlns.com/foaf/0.1/>
+      @prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+      <http://example.org/joe> foaf:name \"Joe\"^^xsd:string .
+    )
+    @parser.parse(n3doc)
+    @parser.graph[0].object.class.should == RdfContext::Literal
+  end
+  
   it "should map <#> to document uri" do
     n3doc = "@prefix : <#> ."
     @parser.parse(n3doc, "http://the.document.itself")
-    @parser.graph.nsbinding.should == {"__local__", Namespace.new("http://the.document.itself", "__local__")}
+    @parser.graph.nsbinding.should == {"", Namespace.new("http://the.document.itself", "")}
   end
 
-  it "should parse testcase" do
+  it "should parse rdf_core testcase" do
     sampledoc = <<-EOF;
 <http://www.w3.org/2000/10/rdf-tests/rdfcore/xmlbase/Manifest.rdf#test001> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/10/rdf-tests/rdfcore/testSchema#PositiveParserTest> .
 <http://www.w3.org/2000/10/rdf-tests/rdfcore/xmlbase/Manifest.rdf#test001> <http://www.w3.org/2000/10/rdf-tests/rdfcore/testSchema#approval> <http://lists.w3.org/Archives/Public/w3c-rdfcore-wg/2002Mar/0235.html> .
@@ -196,7 +292,7 @@ EOF
     nt_string = sort_ntriples(sampledoc)
     ntriples.should == nt_string    
   end
-  
+
   def test_file(filepath)
     anon = "a"
     anon_ctx = {}

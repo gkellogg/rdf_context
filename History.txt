@@ -1,6 +1,12 @@
 === 0.4.9
 * Fixed bug in URIRef#namespace & to_qname when namespace does not have a trailing / or #
 * URIRef#short_name may return a different value after a namespace is assigned.
+* Graph#qname(uri) as alternative to uri.qname, has namespaces available.
+* Graph#seq(subject) returns ordered rdf:_n objects if subject is a rdf:Seq.
+* N3 parser update to bring more inline with spec. Tests added, working on SWAP test suite.
+* Real graph comparisons, including permutation search of triples containing BNodes (obviously, may be expensive)
+* Literal#== as alias to eql? Needed for sort and uniq.
+* Add QuotedGraph and AggregateGraph
 
 === 0.4.8
 * Add Duration and support in Literal

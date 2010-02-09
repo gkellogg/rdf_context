@@ -95,6 +95,7 @@ module RdfContext
         base = base_el.attributes['href']
         # Strip any fragment from base
         base = base.to_s.split("#").first
+        @uri = URIRef.new(base)
         add_debug(base_el, "parse_whole_doc: base='#{base}'")
       end
 

@@ -12,7 +12,7 @@ module RdfContext
     }
 
     GRAPH_TERM_DICT = {
-        #'F' => [QuotedGraph, URIRef],
+        'F' => [QuotedGraph, URIRef],
         'U' => [Graph, URIRef],
         'B' => [Graph, BNode]
     }
@@ -157,9 +157,12 @@ module RdfContext
     # Takes an instance of a Graph (Graph, QuotedGraph, ConjunctiveGraph)
     # and returns the Graphs identifier and 'type' ('U' for Graphs, 'F' for QuotedGraphs ).
     def normalizeGraph(graph)
-      t = #graph.is_a?(QuotedGraph) ? "F" : term2Letter(graph.identifier)
+      t = case graph
+      when QuotedGraph  then "F"
+      when Graph        then term2Letter(graph.identifier)
+      else                   term2Letter(graph)
+      end
       identifier = graph.respond_to?(:identifier) ? graph.identifier : graph
-      t = term2Letter(identifier)
       [identifier, t]
     end
     
@@ -168,7 +171,7 @@ module RdfContext
       when URIRef       then "U"
       when BNode        then "B"
       when Literal      then "L"
-      #when QuotedGraph  then "F"
+      when QuotedGraph  then "F"
       #when Variable     then "V"
       when Graph        then term2Letter(term.identifier)
       when nil          then "L"

@@ -19,14 +19,12 @@ module RdfContext
     # @author Tom Morris, Pius Uzamere
     def initialize(uri, prefix, fragment = nil)
       prefix = prefix.to_s
-      @uri = URIRef.new(uri) unless uri.is_a?(URIRef)
+      @uri = uri.is_a?(URIRef) ? uri : URIRef.new(uri)
       @fragment = fragment
       @fragment = uri.to_s.match(/\#$/) ? true : false if fragment.nil?
-      if prefix_valid?(prefix)
-        @prefix = prefix
-      else
-        raise ParserException, "Invalid prefix '#{prefix}'"
-      end
+
+      raise ParserException, "Invalid prefix '#{prefix}'" unless prefix_valid?(prefix)
+      @prefix = prefix
     end
 
     ## 

@@ -21,7 +21,7 @@ module RdfContext
     # @param [URIRef, BNode] subject:: the subject of the triple
     # @param [URIRef] predicate:: the predicate of the triple
     # @param [URIRef, BNode, Literal, TypedLiteral] object:: the object of the triple
-    # @return [Triple]:: An array of the triples (leaky abstraction? consider returning the graph instead)
+    # @return [Triple]:: Generated triple
     # @raise [Error]:: Checks parameter types and raises if they are incorrect.
     #
     # @author Tom Morris
@@ -135,7 +135,7 @@ module RdfContext
         else
           Literal.untyped(object)
         end
-      when Integer, Float, Date
+      when Numeric, Date, Duration, Time, DateTime
         Literal.build_from(object)
       when URIRef, BNode, Literal
         object

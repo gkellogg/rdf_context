@@ -284,17 +284,13 @@ EOF
   end
   
   describe "parsing rdf files" do
-    def test_file(filepath, uri = nil)
-      n3_string = File.read(filepath)
-      graph = @parser.parse(n3_string, uri, :strict => true)
-      ntriples = graph.to_ntriples
-      ntriples.gsub!(/_:bn\d+/, '_:node1')
-      ntriples = ntriples.split("\n").sort.join("\n")
+    def test_file(filepath, uri)
+      rdf_string = File.read(filepath)
+      graph = @parser.parse(rdf_string, uri, :strict => true)
 
       nt_string = File.read(filepath.sub('.rdf', '.nt'))
-      nt_string = nt_string.split("\n").sort.join("\n")
 
-      ntriples.should == nt_string
+      graph.should be_equivalent_graph(nt_string, uri)
     end
 
     before(:all) do
@@ -307,10 +303,10 @@ EOF
       test_file(file, "http://www.bbc.co.uk/music/artists/#{gid}")
     end
 
-    # it "should parse xml literal test" do
-    #   file = File.join(@rdf_dir, "xml-literal-mixed.rdf")
-    #   test_file(file)
-    # end
+    it "should parse xml literal test" do
+     file = File.join(@rdf_dir, "xml-literal-mixed.rdf")
+     test_file(file, "http://www.example.com/books#book12345")
+    end
   end
 
   # W3C Test suite from http://www.w3.org/2000/10/rdf-tests/rdfcore/

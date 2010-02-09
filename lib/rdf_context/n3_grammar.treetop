@@ -4,63 +4,99 @@ grammar N3Grammer
 	end
 	
 	rule statements
-		(space / (statement / directive) space* ('.' space*)? )*
+		(space / statement space* ('.' space*)? )*
 	end
 	
 	rule statement
+		declaration
+		/ existential
+		/ simpleStatement
+		/ universal
+	end
+	
+	rule simpleStatement
 		subject space+ property_list
 	end
 	
+	rule existential
+	  "@"? "forSome" symbol_csl
+	end
+	
+	rule universal
+	  "@"? "forAll" symbol_csl
+	end
+	
 	rule subject
-		node
+		expression
 	end
 	
 	rule verb
-		">-" prop "->"      # has xxx of 
-		/ "<-" prop "<-"    # is xxx of 
-		# / # / operator     # has operator:xxx of??? NOT IMPLMENTED
-		/ prop              # has xxx of -- shorthand
-		# / "has" prop        # has xxx of
-		# / "is" prop "of"    # is xxx of
-		/ "a"               # has rdf:type of
-		# / "="               # has daml:equivaent of
+		prop																	# has xxx of -- shorthand
+		/ ("has" / "@has") prop								# has xxx of
+		/ ("is" / "@is") prop ("of" / "@of")	# is xxx of
+		/ ("a" / "@a")												# has rdf:type
+		/ "="																	# has owl:sameAs
+		/ "=>"																# has log:implies
+		/ "<="																# is log:implies of
 	end
 	
 	rule prop
-		node
+		expression
 	end
 	
-	rule node
-		uri_ref / anonnode / 'this'
+	rule expression
+		pathitem
+		/ "!" expression
+		/ "^" expression
+	end
+
+	rule pathitem
+		boolean
+		/ literal
+		/ numericliteral
+		#/ quickvariable
+		/ symbol
+		/ "[" space* property_list space* "]" { def anonnode; true; end }
+		/ "{" statements "}" { def formula; true; end }
+		/ "(" pathlist ")" { def list; true; end }
 	end
 	
-	rule anonnode
-		"[" space* property_list space* "]"  # something which ...
-		/ "{" statementlist "}"  # the statementlist itself as a resource
-		/ "(" nodelist ")" {
-			def anonnode; true; end
-		}
+	rule pathlist
+		space* expression pathlist*
+		/ ""
 	end
 	
 	rule property_list
 		verb space+ object_list space* ";" space+ property_list
 		/ verb space+ object_list
-		/ ":-" anonnode  #to allow two anonymous forms to be given eg [ a :Truth; :- { :sky :color :blue } ] )
-		/ ":-" anonnode ";" property_list
 		/ '.'
 	end
 
-	rule object_list
-		object "," space* object_list / object
-	end
-
-	rule directive
-		'@prefix' space+ nprefix:nprefix? ':' space+ uri_ref:uri_ref {
-			def directive; true; end
+	rule declaration
+		'@base' space+ symbol:symbol {
+			def declaration; true; end
+			def base; true; end
+		}
+		/ '@keywords' space+ barename_list {
+			def declaration; true; end
+			def keywords; true;end
+		}
+		/ '@prefix' space+ nprefix:nprefix? ':' space+ symbol:symbol {
+			def declaration; true; end
 		}
 	end
 	
-	rule uri_ref
+	rule barename_list
+		fragid
+		/ barename_list space* "," space* fragid
+	end
+	
+	rule symbol_csl
+	  symbol
+	  / symbol space* "," space* symbol_csl
+	end
+	
+	rule symbol
 		qname / "<" uri:URI_Reference ">"
 	end
 	
@@ -69,11 +105,19 @@ grammar N3Grammer
 	end
 	
 	rule object
-		subject / literal
+		expression
 	end
 	
+	rule object_list
+		object "," space* object_list / object
+	end
+
 	rule literal
-  	(string_single / string_multi) ("^^<" uri:URI_Reference ">" / "@" language )?
+		(string_single / string_multi) ("^^" symbol / "@" language )?
+	end
+	
+	rule boolean
+		"@"* ("true" / "false")
 	end
 	
 	rule language
@@ -109,29 +153,45 @@ grammar N3Grammer
 	end
 	
 	rule comment
-	  '#' (![\n\r] .)*
+		'#' (![\n\r] .)*
 	end
 
-  # " constant-value-with-escaping "
+	# " constant-value-with-escaping "
 	rule string_single
 		'""' !["] / '"' string_single_char+ '"'
 	end
 
 	rule string_single_char
-    !["\n\r] (
-      ("\\"
-        [\\\"nrt]
-      / ( "u" hexdigit hexdigit hexdigit hexdigit )
-      / ( "U" "00" hexdigit hexdigit hexdigit hexdigit hexdigit hexdigit)
-      )
-    / .)
+		!["\n\r] (
+			("\\"
+				[\\\"nrt]
+			/ ( "u" hexdigit hexdigit hexdigit hexdigit )
+			/ ( "U" "00" hexdigit hexdigit hexdigit hexdigit hexdigit hexdigit)
+			)
+		/ .)
 	end
 
-  rule hexdigit
-    [0-9a-fA-F]
-  end
-  
-  # """ constant value with escaping including single or double occurrences of quotes and/or newlines """	
+	rule hexdigit
+		[0-9a-fA-F]
+	end
+	
+	rule numericliteral
+		integer / decimal / double
+	end
+	
+	rule decimal
+		integer "." [0-9]+
+	end
+	
+	rule double
+		decimal [eE] integer
+	end
+	
+	rule integer
+		 [+-]? [0-9]+
+	end
+	
+	# """ constant value with escaping including single or double occurrences of quotes and/or newlines """ 
 	rule string_multi
 		'"""' string_multi_char* '"""'
 	end

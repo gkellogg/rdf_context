@@ -93,6 +93,7 @@ module RdfContext
           false
         end
       end
+      alias_method :eql?, :==
 
       # Generate hash of type to determine uniqueness
       def hash

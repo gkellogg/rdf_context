@@ -1,5 +1,6 @@
 require File.join(File.dirname(__FILE__), 'namespace')
 require File.join(File.dirname(__FILE__), 'triple')
+require File.join(File.dirname(__FILE__), 'array_hacks')
 require File.join(File.dirname(__FILE__), 'store', 'list_store')
 require File.join(File.dirname(__FILE__), 'store', 'memory_store')
 
@@ -53,7 +54,7 @@ module RdfContext
       [self.class.to_s, self.identifier].hash
     end
     
-    def context_aware?; @context_aware; end
+    def context_aware?; @store.context_aware?; end
     
     # Data Store interface
     def nsbinding; @store.nsbinding; end
@@ -188,6 +189,11 @@ module RdfContext
     # Hash of uri => Namespace bindings
     def uri_binding; @store.uri_binding; end
     
+    # QName for a URI
+    def qname(uri)
+      uri.to_qname(self.uri_binding)
+    end
+    
     # Namespace for prefix
     def namespace(prefix); @store.namespace(prefix); end
 
@@ -271,13 +277,28 @@ module RdfContext
       @store.triples(triple, self, &block) || []
     end
     alias_method :find, :triples
+    
+    # Returns ordered rdf:_n objects for a given subject
+    def seq(subject)
+      return [] unless self.contains(Triple.new(subject, RDF_TYPE, RDF_NS.Seq))
+      
+      self.triples(Triple.new(subject, nil, nil)).
+        select { |t| t.predicate.to_s.index(RDF_NS._.to_s) == 0 }.
+        sort { |a, |b| a.predicate.short_name.to_i <=> b.predicate.short_name.to_i }.
+        map { |t| t.object}
+    end
+    
+    # Return an n3 identifier for the Graph
+    def n3
+      "[#{self.identifier.to_n3}]"
+    end
 
     # Detect the presence of a BNode in the graph, either as a subject or an object
     #
     # @param [BNode] bn:: BNode to find
     #
     def has_bnode_identifier?(bn)
-      triples do |triple, context|
+      self.triples do |triple, context|
         return true if triple.subject.eql?(bn) || triple.object.eql?(bn)
       end
       false
@@ -326,26 +347,52 @@ module RdfContext
     #
     # We just follow Python RDFlib's lead and do a simple comparison
     def eql?(other)
-      #puts "eql? size #{self.size} vs #{other.size}"
+      puts "eql? size #{self.size} vs #{other.size}" if $DEBUG
       return false if !other.is_a?(Graph) || self.size != other.size
       return false unless other.identifier.to_s == identifier.to_s
       
       bn_self = bnodes.values.sort
       bn_other = other.bnodes.values.sort
-      #puts "eql? bnodes '#{bn_self.to_sentence}' vs '#{bn_other.to_sentence}'"
+      puts "eql? bnodes '#{bn_self.to_sentence}' vs '#{bn_other.to_sentence}'" if $DEBUG
       return false unless bn_self == bn_other
       
       # Check each triple to see if it's contained in the other graph
       triples do |t, ctx|
         next if t.subject.is_a?(BNode) || t.object.is_a?(BNode)
-        #puts "eql? contains '#{t.to_ntriples}'"
+        puts "eql? contains '#{t.to_ntriples}: #{other.contains?(t)}'" if $DEBUG
         return false unless other.contains?(t)
       end
-      true
+      
+      # For each BNode, check permutations of similar bnodes in other graph
+      bnode_permutations(bnodes, other.bnodes) do |bn_map|
+        puts "bnode permutations: #{bn_map.inspect}" if $DEBUG
+        # bn_map contains 1-1 mapping of bnodes from self to other
+        catch :next_perm do
+          triples do |t, ctx|
+            next unless t.subject.is_a?(BNode) || t.object.is_a?(BNode)
+            subject, object = t.subject, t.object
+            subject = bn_map[subject] if bn_map.has_key?(subject)
+            object = bn_map[object] if bn_map.has_key?(object)
+            tn = Triple.new(subject, t.predicate, object)
+            puts "  eql? contains '#{tn.inspect}': #{other.contains?(tn)}" if $DEBUG
+            next if other.contains?(tn)
+          
+            puts "  no, next permutation" if $DEBUG
+            # Not a match, try next permutation
+            throw :next_perm
+          end
+          
+          # If we matched all triples in the graph using this permutation, we're done
+          return true
+        end
+      end
+      
+      # Exhausted all permutations, unless there were no bnodes
+      bn_self.length == 0
     end
 
     alias_method :==, :eql?
-  
+    
     # Parse source into Graph.
     #
     # Merges results into a common Graph
@@ -357,8 +404,63 @@ module RdfContext
     # <em>options[:type]</em>:: One of _rdfxml_, _html_, or _n3_
     # <em>options[:strict]</em>:: Raise Error if true, continue with lax parsing, otherwise
     # @return [Graph]:: Returns the graph containing parsed triples
-    def parse(stream, uri, options = {}, &block) # :yields: triple
+    def parse(stream, uri = nil, options = {}, &block) # :yields: triple
       Parser.parse(stream, uri, options.merge(:graph => self), &block)
     end
   end
+  
+  protected
+
+    # Permutations of two BNode lists
+    #
+    # Take source keys and run permutations mapping to other keys, if the permutation
+    # maps to the same counts for each
+    def bnode_permutations(bn_source, bn_other)
+      puts "compare #{bn_source.inspect}\n   with #{bn_other.inspect}" if $DEBUG
+
+      source_keys = bn_source.keys
+      other_keys = bn_other.keys
+      values = bn_source.values.uniq
+
+      # Break key lists into groups based on sharing equivalent usage counts
+      case values.length
+      when 0
+        {}
+      when 1
+        # All keys have equivalent counts, yield permutations
+        if source_keys.length == 1
+          puts "yield #{{source_keys.first => other_keys.first}.inspect}" if $DEBUG
+          yield({source_keys.first => other_keys.first})
+        else
+          (0..(source_keys.length-1)).to_a.permute do |indicies|
+            puts "indicies #{indicies.inspect}" if $DEBUG
+            ok = other_keys.dup
+            map = indicies.inject({}) { |hash, i| hash[source_keys[i]] = ok.shift; hash}
+            puts "yield #{map.inspect}" if $DEBUG
+            yield(map)
+          end
+        end
+      else
+        # Break bnodes into 2 arrays sharing a common usage count and permute each separately
+        max = values.max
+        bn_source_min = bn_source.clone
+        bn_other_min = bn_other.clone
+        bn_source_max = {}
+        bn_other_max = {}
+        bn_source.each_pair do |bn, v|
+          bn_source_max[bn] = bn_source_min.delete(bn) if v == max
+        end
+        bn_other.each_pair do |bn, v|
+          bn_other_max[bn] = bn_other_min.delete(bn) if v == max
+        end
+
+        puts "yield permutations of multiple with max #{bn_source_max.inspect}\n  and #{bn_other_max.inspect}" if $DEBUG
+        # Yield for each permutation of max joined with permutations of min
+        bnode_permutations(bn_source_max, bn_other_max) do |bn_perm_max|
+          bnode_permutations(bn_source_min, bn_other_min) do |bn_perm_min|
+            yield bn_perm_max.merge(bn_perm_min)
+          end
+        end
+      end
+    end
 end
