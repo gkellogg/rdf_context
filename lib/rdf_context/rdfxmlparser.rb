@@ -198,7 +198,7 @@ module RdfContext
         
         # Determine the content type of this property element
         text_nodes = child.children.select {|e| e.text? && !e.blank?}
-        element_nodes = child.children.select(&:element?)
+        element_nodes = child.children.select {|c| c.element? }
         add_debug(child, "#{text_nodes.length} text nodes, #{element_nodes.length} element nodes")
         if element_nodes.length > 1
           element_nodes.each do |node|
@@ -501,7 +501,7 @@ module RdfContext
       if (CORE_SYNTAX_TERMS + [RDF_NS.li.to_s] + OLD_TERMS).include?(el.uri.to_s)
         warn = "Invalid use of rdf:#{el.name}"
         add_debug(el, warn)
-        raise InvalidSubject.new(warn) if @strict
+        raise InvalidNode.new(warn) if @strict
       end
     end
 

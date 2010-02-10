@@ -12,8 +12,8 @@ module RdfContext
     ##
     # Creates a new triple directly from the intended subject, predicate, and object.
     #
-    # Any or all of _subject_, _predicate_ or _object_ may be nil, to create a triple patern.
-    # A patern may not be added to a graph.
+    # Any or all of _subject_, _predicate_ or _object_ may be nil, to create a triple pattern.
+    # A pattern may not be added to a graph.
     #
     # ==== Example
     #   Triple.new(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new) # => results in the creation of a new triple and returns it
@@ -26,19 +26,19 @@ module RdfContext
     #
     # @author Tom Morris
     def initialize (subject, predicate, object)
-      @subject   = self.class.coerce_subject(subject)
+      @subject   = self.class.coerce_node(subject)
       @predicate = self.class.coerce_predicate(predicate)
-      @object    = self.class.coerce_object(object)
-      @patern = subject.nil? || predicate.nil? || object.nil?
+      @object    = self.class.coerce_node(object)
+      @pattern = subject.nil? || predicate.nil? || object.nil?
     end
 
-    def is_patern?
-      @patern
+    def is_pattern?
+      @pattern
     end
     
     # Serialize Triple to N3
     def to_n3
-      raise RdfException.new("Can't serialize patern triple") if is_patern?
+      raise RdfException.new("Can't serialize pattern triple '#{@subject.inspect}, #{@predicate.inspect}, #{@object.inspect}'") if is_pattern?
       @subject.to_ntriples + " " + @predicate.to_ntriples + " " + @object.to_ntriples + " ."
     end
     alias_method :to_ntriples, :to_n3
@@ -55,7 +55,7 @@ module RdfContext
     end
 
     # Two triples are equal if their of their subjects, predicates and objects are equal.
-    # Or self or other is a patern and subject, predicate, object matches
+    # Or self or other is a pattern and subject, predicate, object matches
     def eql? (other)
       other.is_a?(Triple) &&
       (other.subject == self.subject || other.subject.nil? || self.subject.nil?) &&
@@ -67,7 +67,7 @@ module RdfContext
 
     # Clone triple, keeping references to literals and URIRefs, but cloning BNodes
     def clone
-      raise RdfException.new("Can't clone patern triple") if is_patern?
+      raise RdfException.new("Can't clone pattern triple") if is_pattern?
       s = subject.is_a?(BNode) ? subject.clone : subject
       p = predicate.is_a?(BNode) ? predicate.clone : predicate
       o = object.is_a?(BNode) ? object.clone : object
@@ -80,25 +80,6 @@ module RdfContext
     end
     
     protected
-
-    # Coerce a subject to the appropriate RdfContext type.
-    # 
-    # @param[URI, URIRef, String] subject:: If a String looks like a URI, a URI is created, otherwise a BNode.
-    # @raise[InvalidSubject]:: If subject can't be intuited.
-    def self.coerce_subject(subject)
-      case subject
-      when Addressable::URI
-        URIRef.new(subject.to_s)
-      when URIRef, BNode
-        subject
-      when nil
-        subject
-      when /^\w+:\/\/\S+/, /^file:\S+/ # does it smell like a URI?
-        URIRef.new(subject)
-      else
-        raise InvalidSubject, "Subject is not of a known class (#{subject.class}: #{subject.inspect})"
-      end
-    end
 
     # Coerce a predicate to the appropriate RdfContext type.
     # 
@@ -121,28 +102,26 @@ module RdfContext
       raise InvalidPredicate, "Couldn't make a URIRef: #{e.message}"
     end
 
-    # Coerce a object to the appropriate RdfContext type.
+    # Coerce a node (subject or object) to the appropriate RdfContext type.
     # 
     # @param[URI, URIRef, String, Integer, Float, BNode, Literal] object:: If a String looks like a URI, a URI is created, otherwise an untyped Literal.
-    # @raise[InvalidObject]:: If object can't be predicate.
-    def self.coerce_object(object)
-      case object
+    # @raise[InvalidNode]:: If node can't be predicate.
+    def self.coerce_node(node)
+      case node
       when Addressable::URI
-        URIRef.new(object.to_s)
+        URIRef.new(node.to_s)
       when String
-        if object.to_s =~ /^\w+:\/\/\S+/ # does it smell like a URI?
-          URIRef.new(object.to_s)
+        if node.to_s =~ /^\w+:\/\/\S+/ # does it smell like a URI?
+          URIRef.new(node.to_s)
         else
-          Literal.untyped(object)
+          Literal.untyped(node)
         end
       when Numeric, Date, Duration, Time, DateTime
-        Literal.build_from(object)
-      when URIRef, BNode, Literal
-        object
-      when nil
-        object
+        Literal.build_from(node)
+      when URIRef, BNode, Literal, Graph, nil
+        node
       else
-        raise InvalidObject, "#{object.class}: #{object.inspect} is not a valid object"
+        raise InvalidNode, "#{node.class}: #{node.inspect} is not a valid node"
       end
     end
   end

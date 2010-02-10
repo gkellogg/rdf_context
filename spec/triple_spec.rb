@@ -2,16 +2,78 @@ require File.join(File.dirname(__FILE__), 'spec_helper')
 
 describe "Triples" do
   before(:all) { @graph = Graph.new(:store => ListStore.new) }
-  it "should require that the subject is a URIRef or BNode" do
-   lambda do
-     Triple.new(Literal.new("foo"), URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new)
-    end.should raise_error
+  
+  describe "with subjects" do
+    it "should allow URIRef" do
+      v = URIRef.new("http://foo")
+      Triple.new(v, RDF_TYPE, "obj").subject.should == v
+    end
+    
+    it "should allow BNode" do
+      v = BNode.new
+      Triple.new(v, RDF_TYPE, "obj").subject.should == v
+    end
+    
+    it "should allow Literal" do
+      v = Literal.untyped("foo")
+      Triple.new(v, RDF_TYPE, "obj").subject.should == v
+    end
+    
+    it "should allow Graph" do
+      v = Graph.new
+      Triple.new(v, RDF_TYPE, "obj").subject.should == v
+    end
+    
+    it "should allow QuotedGraph" do
+      v = QuotedGraph.new
+      Triple.new(v, RDF_TYPE, "obj").subject.should == v
+    end
+    
+    it "should if not a URIRef or BNode, Literal or Typed Literal" do
+     lambda do
+       Triple.new({}, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new)
+      end.should raise_error
+    end
   end
 
   it "should require that the predicate is a URIRef" do
     lambda do
       Triple.new(BNode.new, BNode.new, BNode.new)
     end.should raise_error
+  end
+
+  describe "with objects" do
+    it "should allow URIRef" do
+      v = URIRef.new("http://foo")
+      Triple.new(RDF_NS.Seq, RDF_TYPE, v).object.should == v
+    end
+    
+    it "should allow BNode" do
+      v = BNode.new
+      Triple.new(RDF_NS.Seq, RDF_TYPE, v).object.should == v
+    end
+    
+    it "should allow Literal" do
+      v = Literal.untyped("foo")
+      Triple.new(RDF_NS.Seq, RDF_TYPE, v).object.should == v
+    end
+    
+    it "should allow Graph" do
+      v = Graph.new
+      Triple.new(RDF_NS.Seq, RDF_TYPE, v).object.should == v
+    end
+    
+    it "should allow QuotedGraph" do
+      v = QuotedGraph.new
+      Triple.new(RDF_NS.Seq, RDF_TYPE, v).object.should == v
+    end
+    
+    it "should if not a URIRef or BNode, Literal or Typed Literal" do
+     lambda do
+       v = {}
+       Triple.new(RDF_NS.Seq, RDF_TYPE, v).object.should == v
+      end.should raise_error
+    end
   end
 
   it "should require that the object is a URIRef, BNode, Literal or Typed Literal" do
@@ -47,32 +109,6 @@ describe "Triples" do
     end
   end
 
-  describe "with coerced subject" do
-    it "should accept a URIRef" do
-      ref = URIRef.new('http://localhost/')
-      Triple.coerce_subject(ref).should == ref
-    end
-
-    it "should accept a BNode" do
-      node = BNode.new('a')
-      Triple.coerce_subject(node).should == node
-    end
-
-    it "should accept a uri string and make URIRef" do
-      Triple.coerce_subject('http://localhost/').should == URIRef.new('http://localhost/')
-    end
-
-    it "should accept an Addressable::URI object and make URIRef" do
-      Triple.coerce_subject(Addressable::URI.parse("http://localhost/")).should == URIRef.new("http://localhost/")
-    end
-    
-    it "should raise an InvalidSubject exception with any other class argument" do
-      lambda do
-        Triple.coerce_subject(Object.new)
-      end.should raise_error(Triple::InvalidSubject)
-    end
-  end
-
   describe "with coerced predicate" do
     it "should make a string into a URI ref" do
       Triple.coerce_predicate("http://localhost/").should == URIRef.new('http://localhost/')
@@ -90,47 +126,47 @@ describe "Triples" do
     end
   end
 
-  describe "with coerced object" do
+  describe "with coerced node" do
     it 'should make a literal for Integer types' do
       ref = 5
-      Triple.coerce_object(ref).should == Literal.build_from(ref)
+      Triple.coerce_node(ref).should == Literal.build_from(ref)
     end
     
     it 'should make a literal for Float types' do
       ref = 15.4
-      Triple.coerce_object(ref).should == Literal.build_from(ref)
+      Triple.coerce_node(ref).should == Literal.build_from(ref)
     end
     
     it 'should make a literal for Date types' do
       ref = Date::civil(2010, 1, 2)
-      Triple.coerce_object(ref).should == Literal.build_from(ref)
+      Triple.coerce_node(ref).should == Literal.build_from(ref)
     end
     
     it 'should make a literal for DateTime types' do
       ref = DateTime.parse('2010-01-03T01:02:03')
-      Triple.coerce_object(ref).should == Literal.build_from(ref)
+      Triple.coerce_node(ref).should == Literal.build_from(ref)
     end
     
     it "should leave URIRefs alone" do
       ref = URIRef.new("http://localhost/")
-      Triple.coerce_object(ref).should == ref
+      Triple.coerce_node(ref).should == ref
     end
     
     it "should accept an Addressable::URI object and make URIRef" do
-      Triple.coerce_object(Addressable::URI.parse("http://localhost/")).should == URIRef.new("http://localhost/")
+      Triple.coerce_node(Addressable::URI.parse("http://localhost/")).should == URIRef.new("http://localhost/")
     end
     
     it "should leave BNodes alone" do
       ref = BNode.new()
-      Triple.coerce_object(ref).should == ref
+      Triple.coerce_node(ref).should == ref
     end
     
     it "should leave Literals alone" do
       ref = Literal.untyped('foo')
-      Triple.coerce_object(ref).should == ref
+      Triple.coerce_node(ref).should == ref
       
       typedref = Literal.build_from('foo')
-      Triple.coerce_object(ref).should == ref
+      Triple.coerce_node(ref).should == ref
     end
     
   end
@@ -138,7 +174,7 @@ describe "Triples" do
   describe "with wildcards" do
     it "should accept nil" do
       t = Triple.new(nil, nil, nil)
-      t.is_patern?.should be_true
+      t.is_pattern?.should be_true
     end
   end
   
@@ -168,7 +204,7 @@ describe "Triples" do
       end
     end
     
-    it "should be equal to paterns" do
+    it "should be equal to patterns" do
       @test_cases.each do |triple|
         [
           Triple.new(triple.subject, triple.predicate, triple.object),

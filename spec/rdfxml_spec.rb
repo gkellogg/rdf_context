@@ -181,12 +181,9 @@ xmlns:ex="http://www.example.org/" xml:lang="en" xml:base="http://www.example.or
 <http://example.org/triples/#triple1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate> <http://example.org/stuff/1.0/prop> .
 <http://example.org/triples/#triple1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#object> \"blah\" .
 EOF
-    tc = RdfXMLHelper::TestCase.new([])
-    tc.about = "http://example.com"
-    tc.parser = @parser
 
-    graph = @parser.parse(sampledoc, tc.about, :strict => true)
-    graph.should be_equivalent_graph(triples, tc)
+    graph = @parser.parse(sampledoc, "http://example.com/", :strict => true)
+    graph.should be_equivalent_graph(triples, :about => "http://example.com/", :trace => @parser.debug)
   end
   
   it "should make sure that the value of rdf:ID attributes match the XML Name production (data attribute version)" do
@@ -276,11 +273,10 @@ EOF
 <http://www.w3.org/2000/10/rdf-tests/rdfcore/amp-in-url/test001.nt> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/10/rdf-tests/rdfcore/testSchema#NT-Document> .
 <http://www.w3.org/2000/10/rdf-tests/rdfcore/amp-in-url/test001.rdf> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/10/rdf-tests/rdfcore/testSchema#RDF-XML-Document> .
 EOF
-    tc = RdfXMLHelper::TestCase.new([])
-    tc.about = "http://www.w3.org/2000/10/rdf-tests/rdfcore/xmlbase/Manifest.rdf#test001"
-    tc.parser = @parser
-    graph = @parser.parse(sampledoc, tc.about, :strict => true)
-    graph.should be_equivalent_graph(triples, tc)
+    uri = "http://www.w3.org/2000/10/rdf-tests/rdfcore/xmlbase/Manifest.rdf#test001"
+
+    graph = @parser.parse(sampledoc, uri, :strict => true)
+    graph.should be_equivalent_graph(triples, :about => uri, :trace => @parser.debug)
   end
   
   describe "parsing rdf files" do
@@ -290,7 +286,7 @@ EOF
 
       nt_string = File.read(filepath.sub('.rdf', '.nt'))
 
-      graph.should be_equivalent_graph(nt_string, uri)
+      graph.should be_equivalent_graph(nt_string, :about => uri, :trace => @parser.debug)
     end
 
     before(:all) do

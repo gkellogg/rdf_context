@@ -57,7 +57,7 @@ shared_examples_for "Store" do
       subject.contains?(Triple.new(@ex.john, @foaf.knows, @ex.jane), nil).should be_true
     end
     
-    it "should contain different triple paterns" do
+    it "should contain different triple patterns" do
       [
         Triple.new(URIRef.new("http://foo"),URIRef.new("http://bar"),URIRef.new("http://baz")),
         Triple.new(URIRef.new("http://foo"),URIRef.new("http://bar"),Literal.untyped("baz")),

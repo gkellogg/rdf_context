@@ -7,6 +7,8 @@
 * Real graph comparisons, including permutation search of triples containing BNodes (obviously, may be expensive)
 * Literal#== as alias to eql? Needed for sort and uniq.
 * Add QuotedGraph and AggregateGraph
+* Allow Triple#subject to be like an object, allowing literals and graphs
+* Replaced some (&:meth) spells with {|c| c.meth} for Ruby 1.8.6 compatibility
 
 === 0.4.8
 * Add Duration and support in Literal

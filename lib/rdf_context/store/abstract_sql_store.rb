@@ -492,7 +492,7 @@ module RdfContext
         id, termComb = row
 
         termCombString = REVERSE_TERM_COMBINATIONS[termComb.to_i]
-        subjTerm, predTerm, objTerm, ctxTerm = termCombString.chars.to_a
+        subjTerm, predTerm, objTerm, ctxTerm = termCombString.scan(/./)
 
         graphKlass, idKlass = constructGraph(ctxTerm)
         [graphKlass, idKlass.new(id)]
@@ -846,7 +846,7 @@ module RdfContext
 
       context = rtContext || hardCodedContext
       termCombString = REVERSE_TERM_COMBINATIONS[termComb.to_i]
-      subjTerm, predTerm, objTerm, ctxTerm = termCombString.chars.to_a
+      subjTerm, predTerm, objTerm, ctxTerm = termCombString.scan(/./)
       
       s = createTerm(subject, subjTerm)
       p = createTerm(predicate, predTerm)

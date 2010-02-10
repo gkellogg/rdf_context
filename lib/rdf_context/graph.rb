@@ -42,7 +42,7 @@ module RdfContext
       else                     ListStore.new
       end
       
-      @identifier = Triple.coerce_subject(options[:identifier]) || BNode.new
+      @identifier = Triple.coerce_node(options[:identifier]) || BNode.new
     end
 
     def inspect
@@ -271,7 +271,7 @@ module RdfContext
     # Triples from graph, optionally matching subject, predicate, or object.
     # Delegates to Store#triples.
     #
-    # @param [Triple, nil] triple:: Triple to match, may be a patern triple or nil
+    # @param [Triple, nil] triple:: Triple to match, may be a pattern triple or nil
     # @return [Array]:: List of matched triples
     def triples(triple = Triple.new(nil, nil, nil), &block) # :yields: triple, context
       @store.triples(triple, self, &block) || []

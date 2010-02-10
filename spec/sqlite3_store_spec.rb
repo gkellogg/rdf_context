@@ -51,7 +51,7 @@ describe "SQLite3 Store" do
     subject.contexts(triple).length.should == 1
   end
   
-  it "should find contexts patern triple" do
+  it "should find contexts pattern triple" do
     triple = Triple.new("http://foo", RDF_TYPE, "http://baz")
     subject.add(triple, nil)
     subject.contexts(Triple.new(nil, nil, nil)).length.should == 1

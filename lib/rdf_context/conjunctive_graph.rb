@@ -36,7 +36,7 @@ module RdfContext
     # Triples across all contexts in store, optionally matching subject, predicate, or object.
     # Delegates to Store#triples.
     #
-    # @param [Triple, nil] triple:: Triple to match, may be a patern triple or nil
+    # @param [Triple, nil] triple:: Triple to match, may be a pattern triple or nil
     # @return [Array]:: List of matched triples
     def triples(triple = Triple.new(nil, nil, nil), &block) # :yields: triple, context
       @store.triples(triple, nil, &block) || []

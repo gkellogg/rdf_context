@@ -2,7 +2,7 @@ require 'rdf/redland'
 
 module Matchers
   class BeEquivalentGraph
-    Info = Struct.new(:about, :information)
+    Info = Struct.new(:about, :information, :trace)
     def normalize(graph)
       case graph
       when Graph then graph
@@ -16,6 +16,9 @@ module Matchers
     def initialize(expected, info)
       @info = if info.respond_to?(:about)
         info
+      elsif info.is_a?(Hash)
+        identifier = info[:identifier] || expected.is_a?(Graph) ? expected.identifier : URIRef.new(info[:about])
+        Info.new(identifier, info[:information] || "", info[:trace])
       else
         Info.new(expected.is_a?(Graph) ? expected.identifier : URIRef.new(info), info.to_s)
       end
@@ -39,7 +42,7 @@ module Matchers
       "\n\n#{info + "\n" unless info.empty?}" +
       "Unsorted Expected:\n#{@expected.to_ntriples}" +
       "Unsorted Results:\n#{@actual.to_ntriples}" +
-      (@info.respond_to?(:trace) ? "\nDebug:\n#{@info.trace}" : "")
+      (@info.trace ? "\nDebug:\n#{@info.trace}" : "")
     end
     def negative_failure_message
       "Graphs do not differ\n"

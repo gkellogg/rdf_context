@@ -9,7 +9,7 @@ class Parse
     graph_opts = {:identifier => base_uri}
     graph_opts[:store] = store if store
     parser = Parser.new(:graph => Graph.new(graph_opts))
-    parser.parse(File.read(file), base_uri, :strict => true)
+    parser.parse(file.respond_to?(:read) ? file : File.open(file), base_uri, :strict => true)
     output = case $format
     when "xml"
       parser.graph.to_rdfxml
@@ -30,15 +30,17 @@ class Parse
   end
 end
 
+mode = ARGV.shift
+
 $verbose = false
 base_uri  = "http://example.com"
-store     = :list_store
+store = :list_store
 opts = GetoptLong.new(
-  ["--verbose", GetoptLong::NO_ARGUMENT],
-  ["--quiet", GetoptLong::NO_ARGUMENT],
+#  ["--verbose", GetoptLong::NO_ARGUMENT],
+#  ["--quiet", GetoptLong::NO_ARGUMENT],
   ["--debug", GetoptLong::NO_ARGUMENT],
-  ["--format", GetoptLong::REQUIRED_ARGUMENT],
-  ["--store", GetoptLong::REQUIRED_ARGUMENT],
+#  ["--format", GetoptLong::REQUIRED_ARGUMENT],
+#  ["--store", GetoptLong::REQUIRED_ARGUMENT],
   ["--uri", GetoptLong::REQUIRED_ARGUMENT]
 )
 opts.each do |opt, arg|
@@ -62,7 +64,12 @@ opts.each do |opt, arg|
 end
 
 x = Parse.new
-ARGV.each do |test_file|
-  x.parse(test_file, base_uri, store)
+if ARGV.empty?
+  s = $stdin.read
+  x.parse(StringIO.new(s), base_uri, store)
+else
+  ARGV.each do |test_file|
+    x.parse(test_file, base_uri, store)
+  end
 end
 

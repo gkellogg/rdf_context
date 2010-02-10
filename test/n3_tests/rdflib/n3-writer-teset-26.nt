@@ -1,0 +1,14 @@
+<http://server/deck> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://joseki.org/2002/11/configuration#AttachedModel> .
+<http://server/deck> <http://joseki.org/2002/11/configuration#attachedModel> <file:deck.n3> .
+<http://server/deck> <http://joseki.org/2002/11/configuration#hasQueryOperation> <http://joseki.org/2002/11/configuration#BindingRDQL> .
+<http://server/deck> <http://joseki.org/2002/11/configuration#hasQueryOperation> <http://joseki.org/2002/11/configuration#BindingGET> .
+<http://server/deck> <http://joseki.org/2002/11/configuration#hasQueryOperation> <http://joseki.org/2002/11/configuration#BindingSPO> .
+<http://server/deck> <http://joseki.org/2002/11/configuration#hasOperation> <http://joseki.org/2002/11/configuration#BindingQueryModel> .
+<http://server/deck> <http://joseki.org/2002/11/configuration#hasOperation> <http://joseki.org/2002/11/configuration#BindingOptions> .
+_:bnode0 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://joseki.org/2002/11/configuration#QueryLanguageBinding> .
+_:bnode0 <http://joseki.org/2002/11/configuration#queryOperationName> "fetch" .
+_:bnode1 <http://joseki.org/2002/11/configuration#className> "org.joseki.server.processors.QueryProcessorFetch" .
+_:bnode0 <http://joseki.org/2002/11/configuration#queryOperation> _:bnode1 .
+<http://server/deck> <http://joseki.org/2002/11/configuration#hasQueryOperation> _:bnode0 .
+<http://server/deck> <http://joseki.org/2002/11/configuration#isImmutable> "true" .
+<http://server/deck> <http://www.w3.org/2000/01/rdf-schema#comment> "Deck of cards" .

@@ -360,9 +360,9 @@ HERE
       g.add_triple(BNode.new("a1", @bn_ctx), URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new("a2", @bn_ctx))
       g.merge!(subject)
       g.size.should == 2
-      s1, s2 = g.triples.map(&:subject)
-      p1, p2 = g.triples.map(&:predicate)
-      o1, o2 = g.triples.map(&:object)
+      s1, s2 = g.triples.map {|s| s.subject}
+      p1, p2 = g.triples.map {|p| p.predicate}
+      o1, o2 = g.triples.map {|o| o.object}
       s1.should_not == s2
       p1.should == p1
       o1.should_not == o2

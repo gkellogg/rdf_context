@@ -1,203 +1,212 @@
 grammar N3Grammer
-	rule document
-		statements
-	end
-	
-	rule statements
-		(space / statement space* ('.' space*)? )*
-	end
-	
-	rule statement
-		declaration
-		/ existential
-		/ simpleStatement
-		/ universal
-	end
-	
-	rule simpleStatement
-		subject space+ property_list
-	end
-	
-	rule existential
-	  "@"? "forSome" symbol_csl
-	end
-	
-	rule universal
-	  "@"? "forAll" symbol_csl
-	end
-	
-	rule subject
-		expression
-	end
-	
-	rule verb
-		prop																	# has xxx of -- shorthand
-		/ ("has" / "@has") prop								# has xxx of
-		/ ("is" / "@is") prop ("of" / "@of")	# is xxx of
-		/ ("a" / "@a")												# has rdf:type
-		/ "="																	# has owl:sameAs
-		/ "=>"																# has log:implies
-		/ "<="																# is log:implies of
-	end
-	
-	rule prop
-		expression
-	end
-	
-	rule expression
-		pathitem
-		/ "!" expression
-		/ "^" expression
-	end
+  rule document
+    statements
+  end
+  
+  rule statements
+    (space / statement space* ('.' space*)? )*
+  end
+  
+  rule statement
+    declaration
+    / existential
+    / simpleStatement
+    / universal
+  end
+  
+  rule simpleStatement
+    subject space+ property_list
+  end
+  
+  rule existential
+    "@"? "forSome" symbol_csl
+  end
+  
+  rule universal
+    "@"? "forAll" symbol_csl
+  end
+  
+  rule subject
+    expression
+  end
+  
+  rule verb
+    "@"? "has" space+ prop                    # has xxx
+    / "@"? "is" space+ prop space+ "@"? "of" { # is xxx of
+      def invert; true; end
+    }
+    / "@"? "a" !":"                           # has rdf:type
+    / "=>"                                    # has log:implies
+    / "<=" { def invert; true; end }          # is log:implies of
+    / "="                                     # has owl:sameAs
+    / prop                                    # has xxx of -- shorthand
+  end
+  
+  rule prop
+    expression
+  end
+  
+  rule expression
+    pathitem
+    / pathitem space* "." expression
+    / pathitem space* "!" space* expression
+    / pathitem space* "^" space* expression
+  end
 
-	rule pathitem
-		boolean
-		/ literal
-		/ numericliteral
-		#/ quickvariable
-		/ symbol
-		/ "[" space* property_list space* "]" { def anonnode; true; end }
-		/ "{" statements "}" { def formula; true; end }
-		/ "(" pathlist ")" { def list; true; end }
-	end
-	
-	rule pathlist
-		space* expression pathlist*
-		/ ""
-	end
-	
-	rule property_list
-		verb space+ object_list space* ";" space+ property_list
-		/ verb space+ object_list
-		/ '.'
-	end
+  rule pathitem
+    boolean { def boolean; true; end }
+    / literal { def literal; true; end }
+    / numericliteral  { def literal; true; end }
+    #/ quickvariable
+    / symbol
+    / "[" space* "]" { def anonnode; true; end }
+    / "[" space* property_list space* "]" { def anonnode; true; end }
+    / "{" space* statements space* "}" { def anonnode; true; end }
+    / "(" space* path_list space* ")" { def anonnode; true; end }
+  end
+  
+  rule path_list
+    expression space* path_list
+    / ""
+  end
+  
+  rule property_list
+    verb space+ object_list space* ";"+ space* property_list
+    / verb space+ object_list space* ";"*
+    / '.'
+  end
 
-	rule declaration
-		'@base' space+ symbol:symbol {
-			def declaration; true; end
-			def base; true; end
-		}
-		/ '@keywords' space+ barename_list {
-			def declaration; true; end
-			def keywords; true;end
-		}
-		/ '@prefix' space+ nprefix:nprefix? ':' space+ symbol:symbol {
-			def declaration; true; end
-		}
-	end
-	
-	rule barename_list
-		fragid
-		/ barename_list space* "," space* fragid
-	end
-	
-	rule symbol_csl
-	  symbol
-	  / symbol space* "," space* symbol_csl
-	end
-	
-	rule symbol
-		qname / "<" uri:URI_Reference ">"
-	end
-	
-	rule qname
-		nprefix ":" localname / ':' localname
-	end
-	
-	rule object
-		expression
-	end
-	
-	rule object_list
-		object "," space* object_list / object
-	end
+  rule declaration
+    '@base' space+ explicituri:explicituri {
+      def declaration; true; end
+      def base; true; end
+    }
+    / '@keywords' space+ barename_list {
+      def declaration; true; end
+      def keywords; true;end
+    }
+    / '@prefix' space+ nprefix:nprefix? ':' space* explicituri:explicituri {
+      def declaration; true; end
+    }
+  end
+  
+  rule barename_list
+    fragid
+    / barename_list space* "," space* fragid
+  end
+  
+  rule symbol_csl
+    symbol
+    / symbol space* "," space* symbol_csl
+  end
+  
+  rule symbol
+    qname / explicituri
+  end
+  
+  rule explicituri
+   "<" uri:URI_Reference ">"
+  end
+  
+  rule qname
+    nprefix ":" localname / ':' localname
+  end
+  
+  rule object
+    expression
+  end
+  
+  rule object_list
+    object space* "," space* object_list
+    / object
+  end
 
-	rule literal
-		(string_single / string_multi) ("^^" symbol / "@" language )?
-	end
-	
-	rule boolean
-		"@"* ("true" / "false")
-	end
-	
-	rule language
-		[a-z]+ ( "-" [a-z0-9]+ )*
-	end
+  rule literal
+    (string_single / string_multi) ("^^" symbol / "@" language )?
+  end
+  
+  rule boolean
+    "@"* ("true" / "false")
+  end
+  
+  rule language
+    [a-z]+ ( "-" [a-z0-9]+ )*
+  end
 
-	rule localname
-		fragid
-	end
-	
-	rule URI_Reference
-		[^{}<>]*
-	end
-	
-	rule nprefix
-		((alpha / "_") alphanumeric*)
-	end
+  rule localname
+    fragid
+  end
+  
+  rule URI_Reference
+    [^{}<>]*
+  end
+  
+  rule nprefix
+    ((alpha / "_") alphanumeric*)
+  end
 
-	rule fragid
-		alpha alphanumeric*
-	end
+  rule fragid
+    alpha alphanumeric*
+  end
 
-	rule alpha
-		[a-zA-Z]
-	end
-	
-	rule alphanumeric
-		alpha / [0-9] / "_"
-	end
-	
-	rule space
-		[ \t\n\r]+ / comment
-	end
-	
-	rule comment
-		'#' (![\n\r] .)*
-	end
+  rule alpha
+    [a-zA-Z]
+  end
+  
+  rule alphanumeric
+    alpha / [0-9] / "_"
+  end
+  
+  rule space
+    [ \t\n\r]+ / comment
+  end
+  
+  rule comment
+    '#' (![\n\r] .)*
+  end
 
-	# " constant-value-with-escaping "
-	rule string_single
-		'""' !["] / '"' string_single_char+ '"'
-	end
+  # " constant-value-with-escaping "
+  rule string_single
+    '""' !["] / '"' string_single_char+ '"'
+  end
 
-	rule string_single_char
-		!["\n\r] (
-			("\\"
-				[\\\"nrt]
-			/ ( "u" hexdigit hexdigit hexdigit hexdigit )
-			/ ( "U" "00" hexdigit hexdigit hexdigit hexdigit hexdigit hexdigit)
-			)
-		/ .)
-	end
+  rule string_single_char
+    !["\n\r] (
+      ("\\"
+        [\\\"nrt]
+      / ( "u" hexdigit hexdigit hexdigit hexdigit )
+      / ( "U" "00" hexdigit hexdigit hexdigit hexdigit hexdigit hexdigit)
+      )
+    / .)
+  end
 
-	rule hexdigit
-		[0-9a-fA-F]
-	end
-	
-	rule numericliteral
-		integer / decimal / double
-	end
-	
-	rule decimal
-		integer "." [0-9]+
-	end
-	
-	rule double
-		decimal [eE] integer
-	end
-	
-	rule integer
-		 [+-]? [0-9]+
-	end
-	
-	# """ constant value with escaping including single or double occurrences of quotes and/or newlines """ 
-	rule string_multi
-		'"""' string_multi_char* '"""'
-	end
+  rule hexdigit
+    [0-9a-fA-F]
+  end
+  
+  rule numericliteral
+    integer / decimal / double
+  end
+  
+  rule decimal
+    integer "." [0-9]+
+  end
+  
+  rule double
+    decimal [eE] integer
+  end
+  
+  rule integer
+     [+-]? [0-9]+
+  end
+  
+  # """ constant value with escaping including single or double occurrences of quotes and/or newlines """ 
+  rule string_multi
+    '"""' string_multi_char* '"""'
+  end
 
-	rule string_multi_char
-		!'"""' . # something like this; need to think about it some more	
-	end
-		
+  rule string_multi_char
+    !'"""' . # something like this; need to think about it some more  
+  end
+    
 end

@@ -4,7 +4,7 @@ include RdfContext
 describe "N3 parser" do
   before(:each) { @parser = N3Parser.new(:strict => true) }
   
-  describe "parse simple ntriples" do
+  describe "with simple ntriples" do
     it "should parse simple triple" do
       n3_string = "<http://example.org/> <http://xmlns.com/foaf/0.1/name> \"Tom Morris\" . "
       @parser.parse(n3_string)
@@ -24,7 +24,7 @@ describe "N3 parser" do
     end
 
     # NTriple tests from http://www.w3.org/2000/10/rdf-tests/rdfcore/ntriples/test.nt
-    describe "recognize blank lines" do
+    describe "with blank lines" do
       {
         "comment"                   => "# comment lines",
         "comment after whitespace"  => "            # comment after whitespace",
@@ -34,6 +34,66 @@ describe "N3 parser" do
         specify "test #{name}" do
           @parser.parse(statement)
           @parser.graph.size.should == 0
+        end
+      end
+    end
+
+    describe "with literal encodings" do
+      {
+        'Dürst' => '_:a <http://example.org/named> "D\u00FCrst" .',
+        'simple literal' => '<http://example.org/resource7> <http://example.org/property> "simple literal" .',
+        'backslash:\\' => '<http://example.org/resource8> <http://example.org/property> "backslash:\\\\" .',
+        'dquote:"' => '<http://example.org/resource9> <http://example.org/property> "dquote:\"" .',
+        "newline:\n" => '<http://example.org/resource10> <http://example.org/property> "newline:\n" .',
+        "return\r" => '<http://example.org/resource11> <http://example.org/property> "return\r" .',
+        "tab:\t" => '<http://example.org/resource12> <http://example.org/property> "tab:\t" .',
+        "é" => '<http://example.org/resource16> <http://example.org/property> "\u00E9" .',
+        "€" => '<http://example.org/resource17> <http://example.org/property> "\u20AC" .',
+      }.each_pair do |contents, triple|
+        specify "test #{contents}" do
+          @parser.parse(triple)
+          @parser.graph.should_not be_nil
+          @parser.graph.size.should == 1
+          @parser.graph[0].object.contents.should == contents
+        end
+      end
+
+      it "should parse multi-line literal" do
+        @parser.parse(%(
+  <http://www.example.com/books#book12345> <http://purl.org/dc/elements/1.1/title> """
+          Foo
+          <html:b xmlns:html="http://www.w3.org/1999/xhtml" html:a="b">bar<rdf:Thing xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><a:b xmlns:a="foo:"></a:b>here<a:c xmlns:a="foo:"></a:c></rd
+  f:Thing></html:b>
+          baz
+          <html:i xmlns:html="http://www.w3.org/1999/xhtml">more</html:i>
+       """ .
+        ))
+
+        @parser.graph.should_not be_nil
+        @parser.graph.size.should == 1
+        @parser.graph[0].object.contents.should == %(
+          Foo
+          <html:b xmlns:html="http://www.w3.org/1999/xhtml" html:a="b">bar<rdf:Thing xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><a:b xmlns:a="foo:"></a:b>here<a:c xmlns:a="foo:"></a:c></rd
+  f:Thing></html:b>
+          baz
+          <html:i xmlns:html="http://www.w3.org/1999/xhtml">more</html:i>
+       )
+      end
+      
+      describe "having illegal content" do
+        {
+          %(:y :p1 "xyz"^^xsd:integer .) => %r(Typed literal has an invalid lexical value: .* "xyz"),
+          %(:y :p1 "12xyz"^^xsd:integer .) => %r(Typed literal has an invalid lexical value: .* "12xyz"),
+          %(:y :p1 "xy.z"^^xsd:double .) => %r(Typed literal has an invalid lexical value: .* "xy\.z"),
+          %(:y :p1 ""+1.0z"^^xsd:double .) => %r(Typed literal has an invalid lexical value: .* "\+1.0z"),
+        }.each_pair do |n3, error|
+          it "should raise error for '#{n3}'" do
+            pending do
+              lambda {
+                @parser.parse("@prefix xsd: <http://www.w3.org/2001/XMLSchema#> . #{n3}", "http://example.com")
+              }.should raise_error(error)
+            end
+          end
         end
       end
     end
@@ -96,64 +156,474 @@ describe "N3 parser" do
         @parser.graph[0].to_ntriples.should == [statement].flatten.last.gsub(/\s+/, " ").strip
       end
     end
+
+    it "should create typed literals" do
+      n3doc = "<http://example.org/joe> <http://xmlns.com/foaf/0.1/name> \"Joe\"^^<http://www.w3.org/2001/XMLSchema#string> ."
+      @parser.parse(n3doc)
+      @parser.graph[0].object.class.should == RdfContext::Literal
+    end
+
+    it "should create BNodes" do
+      n3doc = "_:a a _:c ."
+      @parser.parse(n3doc)
+      @parser.graph[0].subject.class.should == RdfContext::BNode
+      @parser.graph[0].object.class.should == RdfContext::BNode
+    end
+
+    it "should create URIRefs" do
+      n3doc = "<http://example.org/joe> <http://xmlns.com/foaf/0.1/knows> <http://example.org/jane> ."
+      @parser.parse(n3doc)
+      @parser.graph[0].subject.class.should == RdfContext::URIRef
+      @parser.graph[0].object.class.should == RdfContext::URIRef
+    end
+
+    it "should create literals" do
+      n3doc = "<http://example.org/joe> <http://xmlns.com/foaf/0.1/name> \"Joe\"."
+      @parser.parse(n3doc)
+      @parser.graph[0].object.class.should == RdfContext::Literal
+    end
   end
   
-  describe "literal encodings" do
-    {
-      'Dürst' => '_:a <http://example.org/named> "D\u00FCrst" .',
-      'simple literal' => '<http://example.org/resource7> <http://example.org/property> "simple literal" .',
-      'backslash:\\' => '<http://example.org/resource8> <http://example.org/property> "backslash:\\\\" .',
-      'dquote:"' => '<http://example.org/resource9> <http://example.org/property> "dquote:\"" .',
-      "newline:\n" => '<http://example.org/resource10> <http://example.org/property> "newline:\n" .',
-      "return\r" => '<http://example.org/resource11> <http://example.org/property> "return\r" .',
-      "tab:\t" => '<http://example.org/resource12> <http://example.org/property> "tab:\t" .',
-      "é" => '<http://example.org/resource16> <http://example.org/property> "\u00E9" .',
-      "€" => '<http://example.org/resource17> <http://example.org/property> "\u20AC" .',
-    }.each_pair do |contents, triple|
-      specify "test #{contents}" do
-        @parser.parse(triple)
-        @parser.graph.should_not be_nil
-        @parser.graph.size.should == 1
-        @parser.graph[0].object.contents.should == contents
+  describe "with n3 grammer" do
+    describe "syntactic expressions" do
+      it "should create typed literals with qname" do
+        n3doc = %(
+          @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+          @prefix foaf: <http://xmlns.com/foaf/0.1/>
+          @prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+          <http://example.org/joe> foaf:name \"Joe\"^^xsd:string .
+        )
+        @parser.parse(n3doc)
+        @parser.graph[0].object.class.should == RdfContext::Literal
+      end
+
+      it "should map <#> to document uri" do
+        n3doc = "@prefix : <#> ."
+        @parser.parse(n3doc, "http://the.document.itself")
+        @parser.graph.nsbinding.should == {"", Namespace.new("http://the.document.itself#", "")}
+      end
+
+      it "should map <> to document uri" do
+        n3doc = "@prefix : <> ."
+        @parser.parse(n3doc, "http://the.document.itself")
+        @parser.graph.nsbinding.should == {"", Namespace.new("http://the.document.itself", "")}
+      end
+
+      it "should use <> as a prefix and as a triple node" do
+        n3 = %(@prefix : <> . <> a :a.)
+        nt = %(
+        <http://example.com/> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.com/a> .
+        )
+        @parser.parse(n3, "http://example.com/").should be_equivalent_graph(nt, :about => "http://example.com/", :trace => @parser.debug)
+      end
+      
+      it "should use <#> as a prefix and as a triple node" do
+        n3 = %(@prefix : <#> . <#> a :a.)
+        nt = %(
+        <http://example.com#> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.com#a> .
+        )
+        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+      end
+      
+      it "should generate rdf:type for 'a'" do
+        n3 = %(@prefix a: <http://foo/a#> . a:b a <http://www.w3.org/2000/01/rdf-schema#resource> .)
+        nt = %(<http://foo/a#b> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#resource> .)
+        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+      end
+      
+      it "should generate rdf:type for '@a'" do
+        n3 = %(@prefix a: <http://foo/a#> . a:b @a <http://www.w3.org/2000/01/rdf-schema#resource> .)
+        nt = %(<http://foo/a#b> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#resource> .)
+        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+      end
+      
+      it "should generate inverse predicate for 'is xxx of'" do
+        n3 = %("value" is :prop of :b . :b :prop "value"  .)
+        nt = %(:b :prop "value" .)
+        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+      end
+      
+      it "should generate inverse predicate for '@is xxx @of'" do
+        n3 = %("value" @is :prop @of :b . :b :prop "value"  .)
+        nt = %(:b :prop "value" .)
+        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+      end
+      
+      it "should generate inverse predicate for 'is xxx of' with object list" do
+        n3 = %("value" is :prop of :b, :c . )
+        nt = %(:b :prop "value" . :c :prop "value" .)
+        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+      end
+      
+      it "should generate predicate for 'has xxx'" do
+        n3 = %(@prefix a: <http://foo/a#> . a:b has :pred a:c .)
+        nt = %(<http://foo/a#b> :pred <http://foo/a#c> .)
+        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+      end
+      
+      it "should generate predicate for '@has xxx'" do
+        n3 = %(@prefix a: <http://foo/a#> . a:b @has :pred a:c .)
+        nt = %(<http://foo/a#b> :pred <http://foo/a#c> .)
+        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+      end
+      
+      it "should create log:implies predicate for '=>'" do
+        n3 = %(@prefix a: <http://foo/a#> . _:a => a:something .)
+        nt = %(_:a <http://www.w3.org/2000/10/swap/log#implies> <http://foo/a#something> .)
+        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+      end
+      
+      it "should create log:implies inverse predicate for '<='" do
+        n3 = %(@prefix a: <http://foo/a#> . _:a <= a:something .)
+        nt = %(<http://foo/a#something> <http://www.w3.org/2000/10/swap/log#implies> _:a .)
+        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+      end
+      
+      it "should create owl:sameAs predicate for '='" do
+        n3 = %(@prefix a: <http://foo/a#> . _:a = a:something .)
+        nt = %(_:a <http://www.w3.org/2002/07/owl#sameAs> <http://foo/a#something> .)
+        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
       end
     end
     
-    it "should parse multi-line literal" do
-      @parser.parse(%(
-<http://www.example.com/books#book12345> <http://purl.org/dc/elements/1.1/title> """
-        Foo
-        <html:b xmlns:html="http://www.w3.org/1999/xhtml" html:a="b">bar<rdf:Thing xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><a:b xmlns:a="foo:"></a:b>here<a:c xmlns:a="foo:"></a:c></rd
-f:Thing></html:b>
-        baz
-        <html:i xmlns:html="http://www.w3.org/1999/xhtml">more</html:i>
-     """ .
-      ))
+    describe "namespaces" do
+      it "should set absolute base"
       
-      @parser.graph.should_not be_nil
-      @parser.graph.size.should == 1
-      @parser.graph[0].object.contents.should == %(
-        Foo
-        <html:b xmlns:html="http://www.w3.org/1999/xhtml" html:a="b">bar<rdf:Thing xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><a:b xmlns:a="foo:"></a:b>here<a:c xmlns:a="foo:"></a:c></rd
-f:Thing></html:b>
-        baz
-        <html:i xmlns:html="http://www.w3.org/1999/xhtml">more</html:i>
-     )
+      it "should set relative base"
+      
+      it "should bind named namespace"
+      
+      it "should bind default namespace"
+      
+      it "should bind empty prefix to <%> by default"
+      
+      it "should be able to bind _ as namespace" do
+        n3 = %(@prefix _: <http://underscore/> . _:a a _:p.)
+        nt = %(<http://underscore/a> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://underscore/p> .)
+        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+      end
     end
-  end
-  
-  describe "n3" do
-    # n3p tests taken from http://inamidst.com/n3p/test/
-    describe "parsing n3p test" do
-     dir_name = File.join(File.dirname(__FILE__), '..', 'test', 'n3_tests', 'n3p', '*.n3')
-      Dir.glob(dir_name).each do |n3|    
-        it n3 do
-          test_file(n3)
+    
+    describe "keywords" do
+      it "should require @ for keywords if keywords set to empty"
+      
+      it "should recognize keywords without @"
+      
+      it "should map keyword to local URI if keywords set to empty"
+      
+      it "should map identifier to local URI if keywords set to empty"
+      
+      it "should require raise error if non-keyword identifier entered without @keywords directive"
+      
+      it "should recognize 'is', 'of', and 'a' as keywords with no @keywords directive"
+    end
+    
+    describe "declaration ordering" do
+      it "should process _ namespace binding after an initial use as a BNode" do
+        n3 = %(
+        _:a a :p.
+        @prefix _: <http://underscore/> .
+        _:a a :p.
+        )
+        nt = %(
+        <http://underscore/a> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> :p .
+        _:a <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> :p .
+        )
+        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+      end
+      
+      it "should allow a prefix to be redefined" do
+        n3 = %(
+        @prefix a: <http://host/A#>.
+        a:b a:p a:v .
+
+        @prefix a: <http://host/Z#>.
+        a:b a:p a:v .
+        )
+        nt = %(
+        <http://host/A#b> <http://host/A#p> <http://host/A#v> .
+        <http://host/Z#b> <http://host/Z#p> <http://host/Z#v> .
+        )
+        pending do
+          @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
         end
       end
     end
+    
+    describe "BNodes" do
+      it "should create BNode for identifier with '_' prefix"
+      
+      it "should create BNode for [] as subject" do
+        n3 = %(@prefix a: <http://foo/a#> . [] a:p a:v .)
+        nt = %(_:bnode0 <http://foo/a#p> <http://foo/a#v> .)
+        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+      end
+      
+      it "should create BNode for [] as object" do
+        n3 = %(@prefix a: <http://foo/a#> . a:s a:p [] .)
+        nt = %(<http://foo/a#s> <http://foo/a#p> _:bnode0 .)
+        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+      end
+      
+      it "should create statements with BNode subjects using [ pref obj]" do
+        n3 = %(@prefix a: <http://foo/a#> . [ a:p a:v ] .)
+        nt = %(_:bnode0 <http://foo/a#p> <http://foo/a#v> .)
+        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+      end
+      
+      it "should create BNode as a single object" do
+        n3 = %(@prefix a: <http://foo/a#> . a:b a:oneRef [ a:pp "1" ; a:qq "2" ] .)
+        nt = %(
+        _:bnode0 <http://foo/a#pp> "1" .
+        _:bnode0 <http://foo/a#qq> "2" .
+        <http://foo/a#b> <http://foo/a#oneRef> _:bnode0 .
+        )
+        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+      end
+      
+      it "should create a shared BNode" do
+        n3 = %(
+        @prefix a: <http://foo/a#> .
 
-    describe "parsing real data tests" do
-      dirs = %w(misc lcsh)
+        a:b1 a:twoRef _:a .
+        a:b2 a:twoRef _:a .
+
+        _:a :pred [ a:pp "1" ; a:qq "2" ].
+        )
+        nt = %(
+        <http://foo/a#b1> <http://foo/a#twoRef> _:a .
+        <http://foo/a#b2> <http://foo/a#twoRef> _:a .
+        _:bnode0 <http://foo/a#pp> "1" .
+        _:bnode0 <http://foo/a#qq> "2" .
+        _:a :pred _:bnode0 .
+        )
+        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+      end
+      
+      it "should create nested BNodes" do
+        n3 = %(
+        @prefix a: <http://foo/a#> .
+
+        a:a a:p [ a:p2 [ a:p3 "v1" , "v2" ; a:p4 "v3" ] ; a:p5 "v4" ] .
+        )
+        nt = %(
+        _:bnode0 <http://foo/a#p3> "v1" .
+        _:bnode0 <http://foo/a#p3> "v2" .
+        _:bnode0 <http://foo/a#p4> "v3" .
+        _:bnode1 <http://foo/a#p2> _:bnode0 .
+        _:bnode1 <http://foo/a#p5> "v4" .
+        <http://foo/a#a> <http://foo/a#p> _:bnode1 .
+        )
+        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+      end
+
+      it "should create bnode for path x.p" do
+        n3 = %(:x2.:y2 :p2 "3" .)
+        nt = %(:x2 :y2 _:bnode0 . _:bnode0 :p2 "3" .)
+        pending do
+          @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        end
+      end
+      
+      it "should create bnode for path x!p" do
+        n3 = %(:x2!:y2 :p2 "3" .)
+        nt = %(:x2 :y2 _:bnode0 . _:bnode0 :p2 "3" .)
+        pending do
+          @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        end
+      end
+      
+      it "should craete bnode for path x^p" do
+        n3 = %(:x2^:y2 :p2 "3" .)
+        nt = %(_:bnode0 :y2 :x2 . _:bnode0 :p2 "3" .)
+        pending do
+          @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        end
+      end
+      
+      it "should decode :joe!fam:mother!loc:office!loc:zip as Joe's mother's office's zipcode" do
+        n3 = %(
+        @prefix fam: <http://foo/fam#> .
+        @prefix loc: <http://foo/loc#> .
+
+        :joe!fam:mother!loc:office!loc:zip .
+        )
+        nt = %(
+        :joe <http://foo/fam#mother> _:bnode0 .
+        _:bnode0 <http://foo/loc#office> _:bnode1 .
+        _:bnode1 <http://foo/loc#zip> _:bnode2 .
+        )
+        pending do
+          @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        end
+      end
+
+      it "should decode :joe!fam:mother^fam:mother Anyone whose mother is Joe's mother." do
+        n3 = %(
+        @prefix fam: <http://foo/fam#> .
+        @prefix loc: <http://foo/loc#> .
+
+        :joe!fam:mother^fam:mother .
+        )
+        nt = %(
+        :joe <http://foo/fam#mother> _:bnode0 .
+        _:bnode1 <http://foo/fam#mother> _:bnode0 .
+        )
+        pending do
+          @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        end
+      end
+
+      it "should decode path with property list." do
+        n3 = %(
+        @prefix a: <http://a/ns#>.
+        :a2.a:b2.a:c2 :q1 "3" ; :q2 "4" , "5" .
+        )
+        nt = %(
+        :a2 <http://a/ns#b2> _:bnode0 .
+        _:bnode0 <http://a/ns#c2> _:bnode1 .
+        _:bnode1 :q1 "3" .
+        _:bnode1 :q2 "4" .
+        _:bnode1 :q2 "5" .
+        )
+        pending do
+          @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        end
+      end
+
+      it "should decode path as object." do
+        n3 = %(
+        @prefix a: <http://a/ns#>.
+        :r :p :o.a:p1.a:p2 .
+        )
+        nt = %(
+        :o <http://a/ns#p1> _:bnode0 .
+        _:bnode0 <http://a/ns#p2> _:bnode1 .
+        :r :p _:bnode1 .
+        )
+        pending do
+          @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        end
+      end
+    end
+    
+    describe "formulae" do
+      it "should require that graph be formula_aware when encountering a formlua"
+      
+      it "should separate triples between specified and quoted graphs"
+    end
+    
+    describe "object lists" do
+    end
+    
+    describe "property lists" do
+      it "should parse property list" do
+        n3 = %(
+        @prefix a: <http://foo/a#> .
+
+        a:b a:p1 "123" ; a:p1 "456" .
+        a:b a:p2 a:v1 ; a:p3 a:v2 .
+        )
+        nt = %(
+        <http://foo/a#b> <http://foo/a#p1> "123" .
+        <http://foo/a#b> <http://foo/a#p1> "456" .
+        <http://foo/a#b> <http://foo/a#p2> <http://foo/a#v1> .
+        <http://foo/a#b> <http://foo/a#p3> <http://foo/a#v2> .
+        )
+        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+      end
+    end
+    
+    describe "path lists" do
+      it "should parse empty list" do
+        n3 = %(@prefix :<http://example.com/>. :empty :set ().)
+        nt = %(
+        <http://example.com/empty> <http://example.com/set> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .)
+        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+      end
+      
+      it "should parse list with single element" do
+        n3 = %(@prefix :<http://example.com/>. :gregg :wrote ("RdfContext").)
+        nt = %(
+        _:bnode0 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> "RdfContext" .
+        _:bnode0 <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+        <http://example.com/gregg> <http://example.com/wrote> _:bnode0 .
+        )
+        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+      end
+      
+      it "should parse list with multiple elements" do
+        n3 = %(@prefix :<http://example.com/>. :gregg :name ("Gregg" "Barnum" "Kellogg").)
+        nt = %(
+        _:bnode0 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> "Gregg" .
+        _:bnode0 <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:bnode1 .
+        _:bnode1 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> "Barnum" .
+        _:bnode1 <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:bnode2 .
+        _:bnode2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> "Kellogg" .
+        _:bnode2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+        <http://example.com/gregg> <http://example.com/name> _:bnode0 .
+        )
+        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+      end
+      
+      it "should parse unattached lists" do
+        n3 = %(
+        @prefix a: <http://foo/a#> .
+
+        ("1" "2" "3") .
+        # This is not a statement.
+        () .
+        )
+        nt = %(
+        _:bnode0 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> "1" .
+        _:bnode0 <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:bnode1 .
+        _:bnode1 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> "2" .
+        _:bnode1 <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:bnode2 .
+        _:bnode2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> "3" .
+        _:bnode2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+        )
+        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+      end
+      
+      it "should add property to nil list" do
+        n3 = %(@prefix a: <http://foo/a#> . () a:prop "nilProp" .)
+        nt = %(<http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> <http://foo/a#prop> "nilProp" .)
+        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+      end
+      it "should parse with compound items" do
+        n3 = %(
+        @prefix a: <http://foo/a#> .
+
+        a:a a:p ( [ a:p2 "v1" ] 
+        	  <http://resource1>
+        	  <http://resource2>
+        	  ("inner list") ) .
+
+        <http://resource1> a:p "value" .
+        )
+        nt = %(
+        _:bnode0 <http://foo/a#p2> "v1" .
+        _:bnode1 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> _:bnode0 .
+        _:bnode1 <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:bnode2 .
+        _:bnode2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://resource1> .
+        _:bnode2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:bnode3 .
+        _:bnode3 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://resource2> .
+        _:bnode4 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> "inner list" .
+        _:bnode4 <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+        _:bnode3 <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:bnode5 .
+        _:bnode5 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> _:bnode4 .
+        _:bnode5 <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+        <http://foo/a#a> <http://foo/a#p> _:bnode1 .
+        <http://resource1> <http://foo/a#p> "value" .
+        )
+        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+      end
+      
+    end
+    
+    # n3p tests taken from http://inamidst.com/n3p/test/
+    describe "with real data tests" do
+      dirs = %w(misc lcsh rdflib n3p)
       dirs.each do |dir|
         dir_name = File.join(File.dirname(__FILE__), '..', 'test', 'n3_tests', dir, '*.n3')
         Dir.glob(dir_name).each do |n3|
@@ -164,7 +634,7 @@ f:Thing></html:b>
       end
     end
 
-    describe "rdflib tests" do
+    describe "with AggregateGraph tests" do
       subject { Graph.new }
 
       describe "with a type" do
@@ -180,7 +650,6 @@ f:Thing></html:b>
         end
         
         it "should have 3 namespaces" do
-          puts subject.nsbinding.inspect
           subject.nsbinding.keys.length.should == 3
         end
       end
@@ -230,50 +699,7 @@ f:Thing></html:b>
     n3doc = "_:a _:b _:c ."
     lambda { @parser.parse(n3doc) }.should raise_error(RdfContext::Triple::InvalidPredicate)
   end
-
-  it "should create BNodes" do
-    n3doc = "_:a a _:c ."
-    @parser.parse(n3doc)
-    @parser.graph[0].subject.class.should == RdfContext::BNode
-    @parser.graph[0].object.class.should == RdfContext::BNode
-  end
   
-  it "should create URIRefs" do
-    n3doc = "<http://example.org/joe> <http://xmlns.com/foaf/0.1/knows> <http://example.org/jane> ."
-    @parser.parse(n3doc)
-    @parser.graph[0].subject.class.should == RdfContext::URIRef
-    @parser.graph[0].object.class.should == RdfContext::URIRef
-  end
-  
-  it "should create literals" do
-    n3doc = "<http://example.org/joe> <http://xmlns.com/foaf/0.1/name> \"Joe\"."
-    @parser.parse(n3doc)
-    @parser.graph[0].object.class.should == RdfContext::Literal
-  end
-  
-  it "should create typed literals" do
-    n3doc = "<http://example.org/joe> <http://xmlns.com/foaf/0.1/name> \"Joe\"^^<http://www.w3.org/2001/XMLSchema#string> ."
-    @parser.parse(n3doc)
-    @parser.graph[0].object.class.should == RdfContext::Literal
-  end
-  
-  it "should create typed literals with qname" do
-    n3doc = %(
-      @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-      @prefix foaf: <http://xmlns.com/foaf/0.1/>
-      @prefix xsd: <http://www.w3.org/2001/XMLSchema#>
-      <http://example.org/joe> foaf:name \"Joe\"^^xsd:string .
-    )
-    @parser.parse(n3doc)
-    @parser.graph[0].object.class.should == RdfContext::Literal
-  end
-  
-  it "should map <#> to document uri" do
-    n3doc = "@prefix : <#> ."
-    @parser.parse(n3doc, "http://the.document.itself")
-    @parser.graph.nsbinding.should == {"", Namespace.new("http://the.document.itself", "")}
-  end
-
   it "should parse rdf_core testcase" do
     sampledoc = <<-EOF;
 <http://www.w3.org/2000/10/rdf-tests/rdfcore/xmlbase/Manifest.rdf#test001> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/10/rdf-tests/rdfcore/testSchema#PositiveParserTest> .
@@ -286,40 +712,20 @@ f:Thing></html:b>
 <http://www.w3.org/2000/10/rdf-tests/rdfcore/xmlbase/test001.rdf> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/10/rdf-tests/rdfcore/testSchema#RDF-XML-Document> .
 EOF
     @parser.parse(sampledoc, "http://www.w3.org/2000/10/rdf-tests/rdfcore/amp-in-url/Manifest.rdf")
-    ntriples = @parser.graph.to_ntriples
-    ntriples = sort_ntriples(ntriples)
 
-    nt_string = sort_ntriples(sampledoc)
-    ntriples.should == nt_string    
+    @parser.graph.should be_equivalent_graph(sampledoc,
+      :about => "http://www.w3.org/2000/10/rdf-tests/rdfcore/amp-in-url/Manifest.rdf",
+      :trace => @parser.debug
+    )
   end
 
   def test_file(filepath)
-    anon = "a"
-    anon_ctx = {}
     n3_string = File.read(filepath)
     @parser.parse(n3_string, "file:#{filepath}")
-    ntriples = @parser.graph.to_ntriples
-    ntriples.gsub!(/_:nbn\d+[a-z]+N/, "_:")  # Normalize named BNodes
-    ntriples.gsub!(/_:bn\d+[a-z]+/) do |bn|
-      # Normalize anon BNodes
-      if anon_ctx[bn]
-        anon_ctx[bn]
-      else
-        anon_ctx[bn] = anon
-        anon = anon.succ
-      end
-      "_:#{anon_ctx[bn]}"
-    end
-    ntriples = sort_ntriples(ntriples)
 
     nt_string = File.read(filepath.sub('.n3', '.nt'))
-    nt_string = sort_ntriples(nt_string)
-
-    ntriples.should == nt_string    
+    @parser.graph.should be_equivalent_graph(nt_string,
+      :about => "file:#{filepath}",
+      :trace => @parser.debug)
   end
-  
-  def sort_ntriples(string)
-    string.split("\n").sort.join("\n")
-  end
-
 end
