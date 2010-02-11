@@ -154,9 +154,13 @@ module RdfContext
 
     def process_uri(uri, normalize = true)
       uri = uri.text_value if uri.respond_to?(:text_value)
-      # If we're not normalizing, take non-normalized URI from @default_ns
-      base_uri = @default_ns ? @default_ns.uri : @uri
-      URIRef.new(uri, base_uri, :normalize => normalize)
+      # Use non-normalized URI from @default_ns when constructing URIs
+      if uri.match(/^\#/) && @default_ns
+        @default_ns + uri
+      else
+        base_uri = @default_ns ? @default_ns.uri : @uri
+        URIRef.new(uri, base_uri, :normalize => normalize)
+      end
     end
     
     def process_properties(properties)

@@ -54,6 +54,7 @@ module RdfContext
     def +(suffix)
       prefix = @uri.to_s
       prefix += '#' if @fragment && !prefix.index("#")
+      suffix = suffix.to_s.sub(/^\#/, "") if prefix.index("#")
       suffix = suffix.to_s.sub(/_$/, '')
       URIRef.new(prefix + suffix, :normalize => false, :namespace => self)
     end

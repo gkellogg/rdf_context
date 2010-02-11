@@ -70,6 +70,8 @@ module RdfaHelper
       reviewStatus.to_s.split("#").last
     end
     
+    def compare; :graph; end
+    
     def information
       %w(purpose specificationReference).map {|a| v = self.send(a); "#{a}: #{v}" if v}.compact.join("\n")
     end

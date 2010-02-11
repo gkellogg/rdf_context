@@ -2,14 +2,49 @@ require 'rdf/redland'
 
 module Matchers
   class BeEquivalentGraph
-    Info = Struct.new(:about, :information, :trace)
+    Info = Struct.new(:about, :information, :trace, :compare)
     def normalize(graph)
-      case graph
-      when Graph then graph
-      when Parser then graph.graph
+      case @info.compare
+      when :array
+        array = case graph
+        when Graph, Parser
+          graph = graph.graph if graph.respond_to?(:graph)
+          anon = "a"
+          anon_ctx = {}
+          graph.triples.collect {|triple| triple.to_ntriples }.each do |t|
+            t.gsub(/_:nbn\d+[a-z]+N/, "_:").
+            gsub!(/_:bn\d+[a-z]+/) do |bn|
+              # Normalize anon BNodes
+              if anon_ctx[bn]
+                anon_ctx[bn]
+              else
+                anon_ctx[bn] = anon
+                anon = anon.succ
+              end
+              "_:#{anon_ctx[bn]}"
+            end
+          end.sort
+        when Array
+          graph.sort
+        else
+          graph.to_s.split("\n").
+            map {|t| t.gsub(/^\s*(.*)\s*$/, '\1')}.
+            reject {|t2| t2.match(/^\s*$/)}.
+            compact.
+            sort
+        end
+        
+        # Implement to_ntriples on array, to simplify logic later
+        def array.to_ntriples; self.join("\n") + "\n"; end
+        array
       else
-        triples = [graph].flatten.join("\n")
-        N3Parser.parse(graph.to_s, @info.about, :strict => true)
+        case graph
+        when Graph then graph
+        when Parser then graph.graph
+        else
+          triples = [graph].flatten.join("\n")
+          N3Parser.parse(graph.to_s, @info.about, :strict => true)
+        end
       end
     end
     
@@ -18,7 +53,7 @@ module Matchers
         info
       elsif info.is_a?(Hash)
         identifier = info[:identifier] || expected.is_a?(Graph) ? expected.identifier : info[:about]
-        Info.new(identifier, info[:information] || "", info[:trace])
+        Info.new(identifier, info[:information] || "", info[:trace], info[:compare])
       else
         Info.new(expected.is_a?(Graph) ? expected.identifier : info, info.to_s)
       end
@@ -32,9 +67,11 @@ module Matchers
 
     def failure_message_for_should
       info = @info.respond_to?(:information) ? @info.information : ""
-      if @actual.size != @expected.size
+      if @expected.is_a?(Graph) && @actual.size != @expected.size
         "Graph entry count differs:\nexpected: #{@expected.size}\nactual:   #{@actual.size}"
-      elsif @actual.identifier != @expected.identifier
+      elsif @expected.is_a?(Array) && @actual.size != @expected.length
+        "Graph entry count differs:\nexpected: #{@expected.length}\nactual:   #{@actual.size}"
+      elsif @expected.is_a?(Graph) && @actual.identifier != @expected.identifier
         "Graph identifiers differ:\nexpected: #{@expected.identifier}\nactual:   #{@actual.identifier}"
       else
         "Graph differs\n"

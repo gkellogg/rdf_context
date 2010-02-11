@@ -68,6 +68,8 @@ module RdfXMLHelper
       "]"
     end
     
+    def compare; :graph; end
+    
     # Read in file, and apply modifications reference either .html or .xhtml
     def input
       File.read(inputDocument)
