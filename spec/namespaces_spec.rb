@@ -66,6 +66,32 @@ describe "Namespace" do
     end
   end
   
+  describe "normalization" do
+    {
+      %w(http://foo ) =>  "http://foo",
+      %w(http://foo a) => "http://fooa",
+
+      %w(http://foo/ ) =>  "http://foo/",
+      %w(http://foo/ a) => "http://foo/a",
+
+      %w(http://foo# ) =>  "http://foo#",
+      %w(http://foo# a) => "http://foo#a",
+
+      %w(http://foo/bar ) =>  "http://foo/bar",
+      %w(http://foo/bar a) => "http://foo/bara",
+
+      %w(http://foo/bar/ ) =>  "http://foo/bar/",
+      %w(http://foo/bar/ a) => "http://foo/bar/a",
+
+      %w(http://foo/bar# ) =>  "http://foo/bar#",
+      %w(http://foo/bar# a) => "http://foo/bar#a",
+    }.each_pair do |input, result|
+      it "should create <#{result}> from <#{input[0]}> and '#{input[1]}'" do
+        (Namespace.new(input[0], "test") + input[1].to_s).should == result
+      end
+    end
+  end
+
   it "should be be equivalent" do
     Namespace.new("http://a", "aa").should == Namespace.new("http://a", "aa")
   end

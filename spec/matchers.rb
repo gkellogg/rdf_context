@@ -17,10 +17,10 @@ module Matchers
       @info = if info.respond_to?(:about)
         info
       elsif info.is_a?(Hash)
-        identifier = info[:identifier] || expected.is_a?(Graph) ? expected.identifier : URIRef.new(info[:about])
+        identifier = info[:identifier] || expected.is_a?(Graph) ? expected.identifier : info[:about]
         Info.new(identifier, info[:information] || "", info[:trace])
       else
-        Info.new(expected.is_a?(Graph) ? expected.identifier : URIRef.new(info), info.to_s)
+        Info.new(expected.is_a?(Graph) ? expected.identifier : info, info.to_s)
       end
       @expected = normalize(expected)
     end

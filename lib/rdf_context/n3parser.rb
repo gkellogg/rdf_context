@@ -28,6 +28,8 @@ module RdfContext
       parser = N3GrammerParser.new
 
       @doc = stream.respond_to?(:read) ? stream.read : stream
+      @default_ns = Namespace.new("#{uri}#", "")  if uri
+      add_debug("@default_ns", "#{@default_ns.inspect}")
       
       document = parser.parse(@doc)
       unless document
@@ -42,7 +44,8 @@ module RdfContext
     protected
 
     def namespace(uri, prefix)
-      uri = @uri if uri == '#'
+      add_debug("namesspace", "'#{prefix}' <#{uri}>")
+      uri = @default_ns.uri if uri == '#'
       @graph.bind(Namespace.new(uri, prefix))
     end
 
@@ -53,11 +56,11 @@ module RdfContext
         
         if s.respond_to?(:subject)
           subject = process_expression(s.subject)
-          add_debug(*s.info("process_statements[#{subject}]"))
+          add_debug(*s.info("process_statements(#{subject})"))
           properties = process_properties(s.property_list)
           properties.each do |p|
             predicate = process_verb(p.verb)
-            add_debug(*p.info("process_statements[#{subject}][#{predicate}]"))
+            add_debug(*p.info("process_statements(#{subject}, #{predicate})"))
             objects = process_objects(p.object_list)
             objects.each do |object|
               if p.verb.respond_to?(:invert)
@@ -69,14 +72,17 @@ module RdfContext
           end
         elsif s.respond_to?(:declaration)
           if s.respond_to?(:nprefix)
-            add_debug(*s.info("process_statements[namespace]"))
-            uri = process_uri(s.explicituri.uri)
+            add_debug(*s.info("process_statements(namespace)"))
+            uri = process_uri(s.explicituri.uri, false)
             namespace(uri, s.nprefix.text_value)
-          else
-            add_debug(*s.info("process_statements[base]"))
+          elsif s.respond_to?(:base)
+            add_debug(*s.info("process_statements(base)"))
             # Base, set or update document URI
-            @uri = process_uri(s)
-            add_debug("", "base = #{@uri}")
+            uri = s.explicituri.uri.text_value
+            @default_ns = Namespace.new(process_uri(uri, false), "")  # Don't normalize
+            add_debug("@default_ns", "#{@default_ns.inspect}")
+            @uri = process_uri(uri)
+            add_debug("@base", "#{@uri}")
             @uri
           end
         end
@@ -146,9 +152,11 @@ module RdfContext
       end
     end
 
-    def process_uri(uri)
+    def process_uri(uri, normalize = true)
       uri = uri.text_value if uri.respond_to?(:text_value)
-      URIRef.new(uri, @uri)
+      # If we're not normalizing, take non-normalized URI from @default_ns
+      base_uri = @default_ns ? @default_ns.uri : @uri
+      URIRef.new(uri, base_uri, :normalize => normalize)
     end
     
     def process_properties(properties)
@@ -205,7 +213,8 @@ module RdfContext
         # A special case
         RDF_NS + localname.to_s
       else
-        URIRef.new(localname, @uri)
+        @default_ns ||= Namespace.new("#{@uri}#", "")
+        @default_ns + localname
       end
       add_debug(*expression.info("build_uri: #{uri.inspect}"))
       uri

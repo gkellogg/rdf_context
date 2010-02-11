@@ -56,7 +56,7 @@ describe "ConjunctiveGraph" do
   it "should parse into new context" do
     n3_string = "<http://example.org/> <http://xmlns.com/foaf/0.1/name> \"Gregg Kellogg\" . "
     graph = subject.parse(n3_string, "http://foo.bar", :type => :n3)
-    graph.identifier.should == "http://foo.bar"
+    graph.identifier.should == "http://foo.bar/"
     subject.size.should == 1
     t = subject.triples.first
     t.subject.to_s.should == "http://example.org/"

@@ -9,6 +9,7 @@
 * Add QuotedGraph and AggregateGraph
 * Allow Triple#subject to be like an object, allowing literals and graphs
 * Replaced some (&:meth) spells with {|c| c.meth} for Ruby 1.8.6 compatibility
+* Fix URI generation, performing normalizations for normal URI refs, and not for Namespace URIs.
 
 === 0.4.8
 * Add Duration and support in Literal

@@ -6,7 +6,7 @@ describe "N3 parser" do
   
   describe "with simple ntriples" do
     it "should parse simple triple" do
-      n3_string = "<http://example.org/> <http://xmlns.com/foaf/0.1/name> \"Tom Morris\" . "
+      n3_string = %(<http://example.org/> <http://xmlns.com/foaf/0.1/name> "Tom Morris" .)
       @parser.parse(n3_string)
       @parser.graph[0].subject.to_s.should == "http://example.org/"
       @parser.graph[0].predicate.to_s.should == "http://xmlns.com/foaf/0.1/name"
@@ -90,7 +90,7 @@ describe "N3 parser" do
           it "should raise error for '#{n3}'" do
             pending do
               lambda {
-                @parser.parse("@prefix xsd: <http://www.w3.org/2001/XMLSchema#> . #{n3}", "http://example.com")
+                @parser.parse("@prefix xsd: <http://www.w3.org/2001/XMLSchema#> . #{n3}", "http://a/b")
               }.should raise_error(error)
             end
           end
@@ -206,88 +206,104 @@ describe "N3 parser" do
       it "should map <> to document uri" do
         n3doc = "@prefix : <> ."
         @parser.parse(n3doc, "http://the.document.itself")
-        @parser.graph.nsbinding.should == {"", Namespace.new("http://the.document.itself", "")}
+        @parser.graph.nsbinding.should == {"" => Namespace.new("http://the.document.itself", "", true)}
       end
 
       it "should use <> as a prefix and as a triple node" do
         n3 = %(@prefix : <> . <> a :a.)
         nt = %(
-        <http://example.com/> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.com/a> .
+        <http://a/b> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://a/b#a> .
         )
-        @parser.parse(n3, "http://example.com/").should be_equivalent_graph(nt, :about => "http://example.com/", :trace => @parser.debug)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
       
       it "should use <#> as a prefix and as a triple node" do
         n3 = %(@prefix : <#> . <#> a :a.)
         nt = %(
-        <http://example.com#> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.com#a> .
+        <http://a/b#> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://a/b#a> .
         )
-        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
       
       it "should generate rdf:type for 'a'" do
         n3 = %(@prefix a: <http://foo/a#> . a:b a <http://www.w3.org/2000/01/rdf-schema#resource> .)
         nt = %(<http://foo/a#b> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#resource> .)
-        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
       
       it "should generate rdf:type for '@a'" do
         n3 = %(@prefix a: <http://foo/a#> . a:b @a <http://www.w3.org/2000/01/rdf-schema#resource> .)
         nt = %(<http://foo/a#b> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#resource> .)
-        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
       
       it "should generate inverse predicate for 'is xxx of'" do
         n3 = %("value" is :prop of :b . :b :prop "value"  .)
         nt = %(:b :prop "value" .)
-        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
       
       it "should generate inverse predicate for '@is xxx @of'" do
-        n3 = %("value" @is :prop @of :b . :b :prop "value"  .)
+        n3 = %("value" @is :prop @of :b . :b :prop "value" .)
         nt = %(:b :prop "value" .)
-        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
       
       it "should generate inverse predicate for 'is xxx of' with object list" do
         n3 = %("value" is :prop of :b, :c . )
         nt = %(:b :prop "value" . :c :prop "value" .)
-        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
       
       it "should generate predicate for 'has xxx'" do
         n3 = %(@prefix a: <http://foo/a#> . a:b has :pred a:c .)
         nt = %(<http://foo/a#b> :pred <http://foo/a#c> .)
-        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
       
       it "should generate predicate for '@has xxx'" do
         n3 = %(@prefix a: <http://foo/a#> . a:b @has :pred a:c .)
         nt = %(<http://foo/a#b> :pred <http://foo/a#c> .)
-        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+          @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
       
       it "should create log:implies predicate for '=>'" do
         n3 = %(@prefix a: <http://foo/a#> . _:a => a:something .)
         nt = %(_:a <http://www.w3.org/2000/10/swap/log#implies> <http://foo/a#something> .)
-        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
       
       it "should create log:implies inverse predicate for '<='" do
         n3 = %(@prefix a: <http://foo/a#> . _:a <= a:something .)
         nt = %(<http://foo/a#something> <http://www.w3.org/2000/10/swap/log#implies> _:a .)
-        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
       
       it "should create owl:sameAs predicate for '='" do
         n3 = %(@prefix a: <http://foo/a#> . _:a = a:something .)
         nt = %(_:a <http://www.w3.org/2002/07/owl#sameAs> <http://foo/a#something> .)
-        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
     end
     
     describe "namespaces" do
-      it "should set absolute base"
+      it "should set absolute base" do
+        n3 = %(@base <http://foo/bar> . <> :a <b> . <#c> :d </e>.)
+        nt = %(<http://foo/bar> <http://foo/bara> <http://foo/b> . <http://foo/bar#c> <http://foo/bard> <http://foo/e> .)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
+      end
+      
+      it "should set absolute base (trailing /)" do
+        n3 = %(@base <http://foo/bar/> . <> :a <b> . <#c> :d </e>.)
+        nt = %(<http://foo/bar/> <http://foo/bar/a> <http://foo/bar/b> . <http://foo/bar/#c> <http://foo/bar/d> <http://foo/e> .)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
+      end
+      
+      it "should set absolute base (trailing #)" do
+        n3 = %(@base <http://foo/bar#> . <> :a <b> . <#c> :d </e>.)
+        nt = %(<http://foo/bar> <http://foo/bar#a> <http://foo/b> . <http://foo/bar#c> <http://foo/bar#d> <http://foo/e> .)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
+      end
       
       it "should set relative base"
       
@@ -300,7 +316,7 @@ describe "N3 parser" do
       it "should be able to bind _ as namespace" do
         n3 = %(@prefix _: <http://underscore/> . _:a a _:p.)
         nt = %(<http://underscore/a> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://underscore/p> .)
-        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
     end
     
@@ -329,7 +345,7 @@ describe "N3 parser" do
         <http://underscore/a> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> :p .
         _:a <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> :p .
         )
-        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
       
       it "should allow a prefix to be redefined" do
@@ -344,9 +360,21 @@ describe "N3 parser" do
         <http://host/A#b> <http://host/A#p> <http://host/A#v> .
         <http://host/Z#b> <http://host/Z#p> <http://host/Z#v> .
         )
-        pending do
-          @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
-        end
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
+      end
+
+      it "should process sequential @base declarations (swap base.n3)" do
+        n3 = %(
+        @base <http://example.com/ontolgies>. <a> :b <foo/bar#baz>.
+        @base <path/DFFERENT/>. <a2> :b2 <foo/bar#baz2>.
+        @prefix : <#>. <d3> :b3 <e3>.
+        )
+        nt = %(
+        <http://example.com/a> <http://example.com/ontolgiesb> <http://example.com/foo/bar#baz> .
+        <http://example.com/path/DFFERENT/a2> <http://example.com/path/DFFERENT/b2> <http://example.com/path/DFFERENT/foo/bar#baz2> .
+        <http://example.com/path/DFFERENT/d3> <http://example.com/path/DFFERENT/#b3> <http://example.com/path/DFFERENT/e3> .
+        )
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
     end
     
@@ -356,19 +384,19 @@ describe "N3 parser" do
       it "should create BNode for [] as subject" do
         n3 = %(@prefix a: <http://foo/a#> . [] a:p a:v .)
         nt = %(_:bnode0 <http://foo/a#p> <http://foo/a#v> .)
-        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
       
       it "should create BNode for [] as object" do
         n3 = %(@prefix a: <http://foo/a#> . a:s a:p [] .)
         nt = %(<http://foo/a#s> <http://foo/a#p> _:bnode0 .)
-        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
       
       it "should create statements with BNode subjects using [ pref obj]" do
         n3 = %(@prefix a: <http://foo/a#> . [ a:p a:v ] .)
         nt = %(_:bnode0 <http://foo/a#p> <http://foo/a#v> .)
-        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
       
       it "should create BNode as a single object" do
@@ -378,7 +406,7 @@ describe "N3 parser" do
         _:bnode0 <http://foo/a#qq> "2" .
         <http://foo/a#b> <http://foo/a#oneRef> _:bnode0 .
         )
-        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
       
       it "should create a shared BNode" do
@@ -397,7 +425,7 @@ describe "N3 parser" do
         _:bnode0 <http://foo/a#qq> "2" .
         _:a :pred _:bnode0 .
         )
-        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
       
       it "should create nested BNodes" do
@@ -414,14 +442,14 @@ describe "N3 parser" do
         _:bnode1 <http://foo/a#p5> "v4" .
         <http://foo/a#a> <http://foo/a#p> _:bnode1 .
         )
-        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
 
       it "should create bnode for path x.p" do
         n3 = %(:x2.:y2 :p2 "3" .)
         nt = %(:x2 :y2 _:bnode0 . _:bnode0 :p2 "3" .)
         pending do
-          @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+          @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
         end
       end
       
@@ -429,7 +457,7 @@ describe "N3 parser" do
         n3 = %(:x2!:y2 :p2 "3" .)
         nt = %(:x2 :y2 _:bnode0 . _:bnode0 :p2 "3" .)
         pending do
-          @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+          @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
         end
       end
       
@@ -437,7 +465,7 @@ describe "N3 parser" do
         n3 = %(:x2^:y2 :p2 "3" .)
         nt = %(_:bnode0 :y2 :x2 . _:bnode0 :p2 "3" .)
         pending do
-          @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+          @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
         end
       end
       
@@ -454,7 +482,7 @@ describe "N3 parser" do
         _:bnode1 <http://foo/loc#zip> _:bnode2 .
         )
         pending do
-          @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+          @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
         end
       end
 
@@ -470,7 +498,7 @@ describe "N3 parser" do
         _:bnode1 <http://foo/fam#mother> _:bnode0 .
         )
         pending do
-          @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+          @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
         end
       end
 
@@ -487,7 +515,7 @@ describe "N3 parser" do
         _:bnode1 :q2 "5" .
         )
         pending do
-          @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+          @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
         end
       end
 
@@ -502,7 +530,7 @@ describe "N3 parser" do
         :r :p _:bnode1 .
         )
         pending do
-          @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+          @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
         end
       end
     end
@@ -530,7 +558,7 @@ describe "N3 parser" do
         <http://foo/a#b> <http://foo/a#p2> <http://foo/a#v1> .
         <http://foo/a#b> <http://foo/a#p3> <http://foo/a#v2> .
         )
-        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
     end
     
@@ -539,7 +567,7 @@ describe "N3 parser" do
         n3 = %(@prefix :<http://example.com/>. :empty :set ().)
         nt = %(
         <http://example.com/empty> <http://example.com/set> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .)
-        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
       
       it "should parse list with single element" do
@@ -549,7 +577,7 @@ describe "N3 parser" do
         _:bnode0 <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
         <http://example.com/gregg> <http://example.com/wrote> _:bnode0 .
         )
-        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
       
       it "should parse list with multiple elements" do
@@ -563,7 +591,7 @@ describe "N3 parser" do
         _:bnode2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
         <http://example.com/gregg> <http://example.com/name> _:bnode0 .
         )
-        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
       
       it "should parse unattached lists" do
@@ -582,13 +610,13 @@ describe "N3 parser" do
         _:bnode2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> "3" .
         _:bnode2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
         )
-        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
       
       it "should add property to nil list" do
         n3 = %(@prefix a: <http://foo/a#> . () a:prop "nilProp" .)
         nt = %(<http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> <http://foo/a#prop> "nilProp" .)
-        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
       it "should parse with compound items" do
         n3 = %(
@@ -616,7 +644,7 @@ describe "N3 parser" do
         <http://foo/a#a> <http://foo/a#p> _:bnode1 .
         <http://resource1> <http://foo/a#p> "value" .
         )
-        @parser.parse(n3, "http://example.com").should be_equivalent_graph(nt, :about => "http://example.com", :trace => @parser.debug)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
       
     end
@@ -646,7 +674,7 @@ describe "N3 parser" do
           :foo a rdfs:Class.
           :bar :d :c.
           :a :d :c.
-          ), "http://example.com")
+          ), "http://a/b")
         end
         
         it "should have 3 namespaces" do
@@ -664,7 +692,7 @@ describe "N3 parser" do
           :foo a rdfs:Resource.
           :bar rdfs:isDefinedBy [ a log:Formula ].
           :a :d :e.
-          ), "http://example.com")
+          ), "http://a/b")
         end
         
         it "should have 4 namespaces" do

@@ -36,11 +36,11 @@ $verbose = false
 base_uri  = "http://example.com"
 store = :list_store
 opts = GetoptLong.new(
-#  ["--verbose", GetoptLong::NO_ARGUMENT],
-#  ["--quiet", GetoptLong::NO_ARGUMENT],
+  ["--verbose", GetoptLong::NO_ARGUMENT],
+  ["--quiet", GetoptLong::NO_ARGUMENT],
   ["--debug", GetoptLong::NO_ARGUMENT],
-#  ["--format", GetoptLong::REQUIRED_ARGUMENT],
-#  ["--store", GetoptLong::REQUIRED_ARGUMENT],
+  ["--format", GetoptLong::REQUIRED_ARGUMENT],
+  ["--store", GetoptLong::REQUIRED_ARGUMENT],
   ["--uri", GetoptLong::REQUIRED_ARGUMENT]
 )
 opts.each do |opt, arg|

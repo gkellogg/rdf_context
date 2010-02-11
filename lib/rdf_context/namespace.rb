@@ -1,7 +1,7 @@
 module RdfContext
   # From RdfContext
   class Namespace
-    attr_accessor :prefix, :uri, :fragment
+    attr_accessor :prefix, :fragment
  
     ## 
     # Creates a new namespace given a URI and the prefix.
@@ -19,9 +19,14 @@ module RdfContext
     # @author Tom Morris, Pius Uzamere
     def initialize(uri, prefix, fragment = nil)
       prefix = prefix.to_s
-      @uri = uri.is_a?(URIRef) ? uri : URIRef.new(uri)
+
       @fragment = fragment
-      @fragment = uri.to_s.match(/\#$/) ? true : false if fragment.nil?
+      if uri.to_s.match(/^(.*)\#$/)
+        # Remove frag hash from URI so URIRef doesn't screw it up
+        uri = $1
+        @fragment ||= true
+      end
+      @uri = uri.is_a?(URIRef) ? uri : URIRef.new(uri, :normalize => false, :namespace => self)
 
       raise ParserException, "Invalid prefix '#{prefix}'" unless prefix_valid?(prefix)
       @prefix = prefix
@@ -43,14 +48,21 @@ module RdfContext
       self + methodname
     end
 
-    # Construct a URIRef from a namespace as in method_missing, but without method collision issues
+    # Construct a URIRef from a namespace as in method_missing, but without method collision issues.
+    # Rules are somewhat different than for normal URI unions, as the raw URI is used as the source,
+    # not a normalized URI, and the result is not normalized
     def +(suffix)
       prefix = @uri.to_s
-      prefix += '#' if fragment && !prefix.match(/\#$/)
+      prefix += '#' if @fragment && !prefix.index("#")
       suffix = suffix.to_s.sub(/_$/, '')
-      URIRef.new(prefix + suffix)
+      URIRef.new(prefix + suffix, :normalize => false, :namespace => self)
     end
 
+    # Make sure to attach fragment
+    def uri
+      self + ""
+    end
+    
     # Bind this namespace to a Graph
     def bind(graph)
       graph.bind(self)
@@ -58,7 +70,7 @@ module RdfContext
 
     # Compare namespaces
     def eql?(other)
-      @prefix == other.prefix && @uri == other.uri && @fragment == other.fragment
+      @prefix == other.prefix && self.uri == other.uri && @fragment == other.fragment
     end
     alias_method :==, :eql?
 
@@ -73,7 +85,7 @@ module RdfContext
     end
     
     def inspect
-      "Namespace[abbr='#{prefix}',uri='#{uri}']"
+      "Namespace[abbr='#{prefix}',uri='#{@uri}']"
     end
     
     private

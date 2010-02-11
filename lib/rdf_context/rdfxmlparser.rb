@@ -176,7 +176,7 @@ module RdfContext
         if attr.uri == RDF_TYPE
           # If there is an attribute a in propertyAttr with a.URI == rdf:type
           # then u:=uri(identifier:=resolve(a.string-value))
-          # and the following tiple is added to the graph:
+          # and the following triple is added to the graph:
           u = URIRef.new(attr.value, ec.base)
           add_triple(attr, subject, RDF_TYPE, u)
         elsif is_propertyAttr?(attr)

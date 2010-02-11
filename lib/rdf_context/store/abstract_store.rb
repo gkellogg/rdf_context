@@ -38,7 +38,7 @@ module RdfContext
       uri = namespace.uri.to_s
       @uri_binding[uri] = namespace unless namespace.prefix.to_s.empty?
       @uri_binding[uri] ||= namespace
-      @nsbinding[namespace.prefix.to_s] ||= namespace
+      @nsbinding[namespace.prefix.to_s] = namespace
     end
 
     # Namespace for prefix

@@ -373,7 +373,7 @@ module RdfContext
         # we force a non-nil name, otherwise it generates a new name
         BNode.new(suffix || "", @named_bnodes)
       elsif curie.to_s.empty?
-        add_debug(nil, "curie_to_resource_or_bnode #{URIRef.new(subject)}")
+        add_debug(nil, "curie_to_resource_or_bnode #{subject}")
         # Empty curie resolves to current subject (No, an empty curie should be ignored)
 #        URIRef.new(subject)
         nil

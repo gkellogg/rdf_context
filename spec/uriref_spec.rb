@@ -15,18 +15,6 @@ describe "URI References" do
     end.should_not raise_error
   end
   
-  # it "do not contain any control characters (#x00 - #x1F, #x74-#x9F)" do
-  #   lambda do
-  #     f = URIRef.new("http://tommorris.org/blog/")
-  #     f.test_string("http://tommorris.org/blog")
-  #   end.should_not raise_error
-  #   
-  #   lambda do
-  #     f = URIRef.new("http://xmlns.com/foaf/0.1/knows")
-  #     f.test_string("http://xmlns.com/foaf/0.1/knows")
-  #   end.should_not raise_error
-  # end
-  
   it "should return the 'last fragment' name" do
     fragment = URIRef.new("http://example.org/foo#bar")
     fragment.short_name.should == "bar"
@@ -42,24 +30,10 @@ describe "URI References" do
     URIRef.new("foo", "http://example.org").should == "http://example.org/foo"
   end
   
-  it "should produce a valid URI character sequence (per RFC 2396 §2.1) representing an absolute URI with optional fragment identifier" do
-    pending "TODO: figure out a series of tests for RFC 2396 §2.1 adherence"
-  end
-  
-  it "should throw errors on suspicious protocols and non-protocols" do
-    lambda do
-      URIRef.new("javascript:alert(\"pass\")")
-    end.should raise_error
-  end
-  
   it "must not be a relative URI" do
     lambda do
       URIRef.new("foo")
     end.should raise_error
-  end
-  
-  it "should discourage use of %-escaped characters" do
-    pending "TODO: figure out a way to discourage %-escaped character usage"
   end
   
   it "should allow another URIRef to be added" do
@@ -96,12 +70,51 @@ describe "URI References" do
 
     it "should find with trailing #" do
       ex = Namespace.new("http://example.org/foo#", "ex")
+      ex2 = ex.bar.namespace(ex.uri.to_s => ex)
       ex.bar.namespace(ex.uri.to_s => ex).should == ex
     end
 
     it "should find with trailing word" do
       ex = Namespace.new("http://example.org/foo", "ex")
       ex.bar.namespace(ex.uri.to_s => ex).should == ex
+    end
+  end
+  
+  describe "normalization" do
+    {
+      %w(http://foo ) =>  "http://foo/",
+      %w(http://foo a) => "http://foo/a",
+      %w(http://foo /a) => "http://foo/a",
+      %w(http://foo #a) => "http://foo/#a",
+
+      %w(http://foo/ ) =>  "http://foo/",
+      %w(http://foo/ a) => "http://foo/a",
+      %w(http://foo/ /a) => "http://foo/a",
+      %w(http://foo/ #a) => "http://foo/#a",
+
+      %w(http://foo# ) =>  "http://foo/", # Special case for Addressable
+      %w(http://foo# a) => "http://foo/a",
+      %w(http://foo# /a) => "http://foo/a",
+      %w(http://foo# #a) => "http://foo/#a",
+
+      %w(http://foo/bar ) =>  "http://foo/bar",
+      %w(http://foo/bar a) => "http://foo/a",
+      %w(http://foo/bar /a) => "http://foo/a",
+      %w(http://foo/bar #a) => "http://foo/bar#a",
+
+      %w(http://foo/bar/ ) =>  "http://foo/bar/",
+      %w(http://foo/bar/ a) => "http://foo/bar/a",
+      %w(http://foo/bar/ /a) => "http://foo/a",
+      %w(http://foo/bar/ #a) => "http://foo/bar/#a",
+
+      %w(http://foo/bar# ) =>  "http://foo/bar",
+      %w(http://foo/bar# a) => "http://foo/a",
+      %w(http://foo/bar# /a) => "http://foo/a",
+      %w(http://foo/bar# #a) => "http://foo/bar#a",
+    }.each_pair do |input, result|
+      it "should create <#{result}> from <#{input[0]}> and '#{input[1]}'" do
+        URIRef.new(input[1], input[0]).to_s.should == result
+      end
     end
   end
   
