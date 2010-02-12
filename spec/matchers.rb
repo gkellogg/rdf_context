@@ -43,7 +43,7 @@ module Matchers
         when Parser then graph.graph
         else
           triples = [graph].flatten.join("\n")
-          N3Parser.parse(graph.to_s, @info.about, :strict => true)
+          N3Parser.parse(graph.to_s, @info.about, :strict => false)
         end
       end
     end

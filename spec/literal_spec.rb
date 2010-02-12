@@ -119,8 +119,6 @@ describe "Literals: " do
 
     it "should have string contents" do subject.contents.should == "true" end
     it "should have native contents" do subject.to_native.should == true end
-    it "should coerce 1" do Literal.typed("1", XSD_NS.boolean).contents.should == "true" end
-    it "should coerce 1" do Literal.typed("0", XSD_NS.boolean).contents.should == "false" end
   end
     
   describe "an integer" do
@@ -392,6 +390,45 @@ describe "Literals: " do
     end
   end
   
+  describe "valid content" do
+    [
+      Literal.typed("true", XSD_NS.boolean),
+      Literal.typed("false", XSD_NS.boolean),
+      Literal.typed("1", XSD_NS.boolean),
+      Literal.typed("1", XSD_NS.integer),
+      Literal.typed("-1", XSD_NS.integer),
+      Literal.typed("+1", XSD_NS.integer),
+      Literal.typed("1", XSD_NS.decimal),
+      Literal.typed("1.0", XSD_NS.decimal),
+      Literal.typed("123.456", XSD_NS.decimal),
+      Literal.typed("1", XSD_NS.double),
+      Literal.typed("1.0", XSD_NS.double),
+      Literal.typed("123.456", XSD_NS.double),
+      Literal.typed("1.0e+1", XSD_NS.double),
+      Literal.typed("1.0e-10", XSD_NS.double),
+      Literal.typed("123.456e4", XSD_NS.double),
+    ].each do |lit|
+      it "should validate '#{lit.to_n3}'" do
+        lit.valid?.should be_true
+      end
+    end
+  end
+  
+  describe "invalid content" do
+    [
+      Literal.typed("foo", XSD_NS.boolean),
+      Literal.typed("xyz", XSD_NS.integer),
+      Literal.typed("12xyz", XSD_NS.integer),
+      Literal.typed("12.xyz", XSD_NS.decimal),
+      Literal.typed("xy.z", XSD_NS.double),
+      Literal.typed("+1.0z", XSD_NS.double),
+    ].each do |lit|
+      it "should detect invalid encoding for '#{lit.to_n3}'" do
+        lit.valid?.should be_false
+      end
+    end
+  end
+
   describe "Encodings" do
     specify "integer" do
       Literal::Encoding.integer.should == Literal::Encoding.new("http://www.w3.org/2001/XMLSchema#int")

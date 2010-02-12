@@ -133,12 +133,23 @@ module RdfContext
       # Encode literal contents
       def encode_contents(contents, options)
         case @value
-        when XSD_NS.boolean   then %w(1 true).include?(contents.to_s) ? "true" : "false"
+        when XSD_NS.boolean   then contents.to_s
         when XSD_NS.time      then contents.is_a?(Time) ? contents.strftime("%H:%M:%S%Z").sub(/\+00:00|UTC/, "Z") : contents.to_s
         when XSD_NS.dateTime  then contents.is_a?(DateTime) ? contents.strftime("%Y-%m-%dT%H:%M:%S%Z").sub(/\+00:00|UTC/, "Z") : contents.to_s
         when XSD_NS.date      then contents.is_a?(Date) ? contents.strftime("%Y-%m-%d%Z").sub(/\+00:00|UTC/, "Z") : contents.to_s
         when XSD_NS.duration  then contents.is_a?(Duration) ? contents.to_s(:xml) : contents.to_s
         else                       contents.to_s
+        end
+      end
+      
+      # Validate format of content
+      def valid?(contents)
+        case @value
+        when XSD_NS.boolean   then %w(1 true 0 false).include?(contents.to_s)
+        when XSD_NS.decimal   then !!contents.to_s.match(/^[\+\-]?\d+(\.\d+)?$/)
+        when XSD_NS.double    then !!contents.to_s.match(/^[\+\-]?\d+(\.\d+([eE][\+\-]?\d+)?)?$/)
+        when XSD_NS.integer   then !!contents.to_s.match(/^[\+\-]?\d+$/)
+        else                       true
         end
       end
     end
@@ -364,6 +375,10 @@ module RdfContext
 
     def inspect
       "#{self.class}[#{self.to_n3}]"
+    end
+    
+    def valid?
+      encoding.valid?(@contents)
     end
     
     # Output literal in TriX format

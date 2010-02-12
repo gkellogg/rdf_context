@@ -85,14 +85,12 @@ describe "N3 parser" do
           %(:y :p1 "xyz"^^xsd:integer .) => %r(Typed literal has an invalid lexical value: .* "xyz"),
           %(:y :p1 "12xyz"^^xsd:integer .) => %r(Typed literal has an invalid lexical value: .* "12xyz"),
           %(:y :p1 "xy.z"^^xsd:double .) => %r(Typed literal has an invalid lexical value: .* "xy\.z"),
-          %(:y :p1 ""+1.0z"^^xsd:double .) => %r(Typed literal has an invalid lexical value: .* "\+1.0z"),
+          %(:y :p1 "+1.0z"^^xsd:double .) => %r(Typed literal has an invalid lexical value: .* "\+1.0z"),
         }.each_pair do |n3, error|
           it "should raise error for '#{n3}'" do
-            pending do
-              lambda {
-                @parser.parse("@prefix xsd: <http://www.w3.org/2001/XMLSchema#> . #{n3}", "http://a/b")
-              }.should raise_error(error)
-            end
+            lambda {
+              @parser.parse("@prefix xsd: <http://www.w3.org/2001/XMLSchema#> . #{n3}", "http://a/b")
+            }.should raise_error(error)
           end
         end
       end
@@ -197,12 +195,6 @@ describe "N3 parser" do
         @parser.graph[0].object.class.should == RdfContext::Literal
       end
 
-      it "should map <#> to document uri" do
-        n3doc = "@prefix : <#> ."
-        @parser.parse(n3doc, "http://the.document.itself")
-        @parser.graph.nsbinding.should == {"", Namespace.new("http://the.document.itself#", "")}
-      end
-
       it "should map <> to document uri" do
         n3doc = "@prefix : <> ."
         @parser.parse(n3doc, "http://the.document.itself")
@@ -287,6 +279,26 @@ describe "N3 parser" do
         nt = %(_:a <http://www.w3.org/2002/07/owl#sameAs> <http://foo/a#something> .)
         @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
+      
+      {
+        %(:a :b @true)  => %(<http://a/b#a> <http://a/b#b> "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .),
+        %(:a :b @false)  => %(<http://a/b#a> <http://a/b#b> "false"^^<http://www.w3.org/2001/XMLSchema#boolean> .),
+        %(:a :b 1)  => %(<http://a/b#a> <http://a/b#b> "1"^^<http://www.w3.org/2001/XMLSchema#integer> .),
+        %(:a :b -1)  => %(<http://a/b#a> <http://a/b#b> "-1"^^<http://www.w3.org/2001/XMLSchema#integer> .),
+        %(:a :b +1)  => %(<http://a/b#a> <http://a/b#b> "+1"^^<http://www.w3.org/2001/XMLSchema#integer> .),
+        %(:a :b 1.0)  => %(<http://a/b#a> <http://a/b#b> "1.0"^^<http://www.w3.org/2001/XMLSchema#decimal> .),
+        %(:a :b 1.0e1)  => %(<http://a/b#a> <http://a/b#b> "1.0e1"^^<http://www.w3.org/2001/XMLSchema#double> .),
+        %(:a :b 1.0e-1)  => %(<http://a/b#a> <http://a/b#b> "1.0e-1"^^<http://www.w3.org/2001/XMLSchema#double> .),
+        %(:a :b 1.0e+1)  => %(<http://a/b#a> <http://a/b#b> "1.0e+1"^^<http://www.w3.org/2001/XMLSchema#double> .),
+      }.each_pair do |n3, nt|
+        it "should create typed literal for '#{n3}'" do
+          @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
+        end
+      end
+      
+      it "should do something for @forAll"
+
+      it "should do something for @forSome"
     end
     
     describe "namespaces" do
@@ -317,14 +329,38 @@ describe "N3 parser" do
         @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug, :compare => :array)
       end
       
-      it "should set relative base"
+      it "should set relative base" do
+        n3 = %(
+        @base <http://example.org/products/>.
+        <> :a <b>, <#c>.
+        @base <prod123/>.
+        <> :a <b>, <#c>.
+        @base <../>.
+        <> :a <d>, <#e>.
+        )
+        nt = %(
+        <http://example.org/products/> <http://example.org/products/a> <http://example.org/products/b> .
+        <http://example.org/products/> <http://example.org/products/a> <http://example.org/products/#c> .
+        <http://example.org/products/prod123/> <http://example.org/products/prod123/a> <http://example.org/products/prod123/b> .
+        <http://example.org/products/prod123/> <http://example.org/products/prod123/a> <http://example.org/products/prod123/#c> .
+        <http://example.org/products/> <http://example.org/products/a> <http://example.org/products/d> .
+        <http://example.org/products/> <http://example.org/products/a> <http://example.org/products/#e> .
+        )
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug, :compare => :array)
+      end
       
-      it "should bind named namespace"
+      it "should bind named namespace" do
+        n3doc = "@prefix ns: <http://the/namespace#> ."
+        @parser.parse(n3doc, "http://a/b")
+        @parser.graph.nsbinding.should == {"ns", Namespace.new("http://the/namespace#", "ns")}
+      end
       
-      it "should bind default namespace"
-      
-      it "should bind empty prefix to <%> by default"
-      
+      it "should bind empty prefix to <%> by default" do
+        n3doc = "@prefix : <#> ."
+        @parser.parse(n3doc, "http://the.document.itself")
+        @parser.graph.nsbinding.should == {"" => Namespace.new("http://the.document.itself#", "")}
+      end
+
       it "should be able to bind _ as namespace" do
         n3 = %(@prefix _: <http://underscore/> . _:a a _:p.)
         nt = %(<http://underscore/a> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://underscore/p> .)
@@ -333,17 +369,54 @@ describe "N3 parser" do
     end
     
     describe "keywords" do
-      it "should require @ for keywords if keywords set to empty"
+      [
+        %(prefix :<>.),
+        %(base <>.),
+        %(keywords a.),
+        %(:a is :b of :c.),
+        %(:a @is :b of :c.),
+        %(:a is :b @of :c.),
+        %(:a has :b :c.),
+      ].each do |n3|
+        it "should require @ if keywords set to empty for '#{n3}'" do
+          lambda do
+            @parser.parse("@keywords . #{n3}", "http://a/b")
+          end.should raise_error(/unqualified keyword '\w+' used without @keyword directive/)
+        end
+      end
       
-      it "should recognize keywords without @"
+      {
+        %(:a a :b)  => %(<http://a/b#a> <http://a/b#a> <http://a/b#b> .),
+        %(:a :b true) => %(<http://a/b#a> <http://a/b#b> <http://a/b#true> .),
+        %(:a :b false) => %(<http://a/b#a> <http://a/b#b> <http://a/b#false> .),
+        %(c :a :t)  => %(<http://a/b#c> <http://a/b#a> <http://a/b#t> .),
+        %(:c a :t)  => %(<http://a/b#c> <http://a/b#a> <http://a/b#t> .),
+        %(:c :a t)  => %(<http://a/b#c> <http://a/b#a> <http://a/b#t> .),
+      }.each_pair do |n3, nt|
+        it "should use default_ns for '#{n3}'" do
+          @parser.parse("@keywords . #{n3}", "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug, :compare => :array)
+        end
+      end
+
+      {
+        %(@keywords true. :a :b true.) => %(<http://a/b#a> <http://a/b#b> "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .),
+        %(@keywords false. :a :b false.) => %(<http://a/b#a> <http://a/b#b> "false"^^<http://www.w3.org/2001/XMLSchema#boolean> .),
+        %(@keywords a. :a a :b.) => %(<http://a/b#a> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://a/b#b> .),
+        %(@keywords is. :a is :b @of :c.) => %(<http://a/b#c> <http://a/b#b> <http://a/b#a> .),
+        %(@keywords of. :a @is :b of :c.) => %(<http://a/b#c> <http://a/b#b> <http://a/b#a> .),
+        %(@keywords has. :a has :b :c.) => %(<http://a/b#a> <http://a/b#b> <http://a/b#c> .),
+      }  .each_pair do |n3, nt|
+          it "should use keyword for '#{n3}'" do
+            @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug, :compare => :array)
+          end
+        end
       
-      it "should map keyword to local URI if keywords set to empty"
-      
-      it "should map identifier to local URI if keywords set to empty"
-      
-      it "should require raise error if non-keyword identifier entered without @keywords directive"
-      
-      it "should recognize 'is', 'of', and 'a' as keywords with no @keywords directive"
+      it "should raise error if unknown keyword set" do
+        n3 = %(@keywords foo.)
+        lambda do
+          @parser.parse(n3, "http://a/b")
+        end.should raise_error(ParserException, "undefined keywords used: foo")
+      end
     end
     
     describe "declaration ordering" do
@@ -391,7 +464,10 @@ describe "N3 parser" do
     end
     
     describe "BNodes" do
-      it "should create BNode for identifier with '_' prefix"
+      it "should create BNode for identifier with '_' prefix" do
+        n3 = %(@prefix a: <http://foo/a#> . _:a a:p a:v .)
+        nt = %(_:bnode0 <http://foo/a#p> <http://foo/a#v> .)
+      end
       
       it "should create BNode for [] as subject" do
         n3 = %(@prefix a: <http://foo/a#> . [] a:p a:v .)

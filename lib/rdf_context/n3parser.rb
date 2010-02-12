@@ -6,6 +6,7 @@ Treetop.load(File.join(File.dirname(__FILE__), "n3_grammar"))
 module RdfContext
   class Parser; end
   class N3Parser < Parser
+    N3_KEYWORDS = %w(a is of has keywords prefix base true false forSome forAny)
 
     # Parse N3 document from a string or input stream to closure or graph.
     #
@@ -30,7 +31,7 @@ module RdfContext
       @doc = stream.respond_to?(:read) ? stream.read : stream
       @default_ns = Namespace.new("#{uri}#", "")  if uri
       add_debug("@default_ns", "#{@default_ns.inspect}")
-      
+
       document = parser.parse(@doc)
       unless document
         reason = parser.failure_reason
@@ -73,10 +74,12 @@ module RdfContext
         elsif s.respond_to?(:declaration)
           if s.respond_to?(:nprefix)
             add_debug(*s.info("process_statements(namespace)"))
+            keyword_check("prefix") if s.text_value.index("prefix") == 0
             uri = process_uri(s.explicituri.uri, false)
             namespace(uri, s.nprefix.text_value)
           elsif s.respond_to?(:base)
             add_debug(*s.info("process_statements(base)"))
+            keyword_check("base") if s.text_value.index("base") == 0
             # Base, set or update document URI
             uri = s.explicituri.uri.text_value
             @default_ns = Namespace.new(process_uri(uri, false), "")  # Don't normalize
@@ -84,9 +87,24 @@ module RdfContext
             @uri = process_uri(uri)
             add_debug("@base", "#{@uri}")
             @uri
+          elsif s.respond_to?(:keywords)
+            add_debug(*s.info("process_statements(keywords)"))
+            keyword_check("keywords") if s.text_value.index("keywords") == 0
+            @keywords = process_barename_csl(s.barename_csl) ||[]
+            add_debug("@keywords", @keywords.inspect)
+            if (@keywords & N3_KEYWORDS) != @keywords
+              raise ParserException, "undefined keywords used: #{(@keywords - N3_KEYWORDS).to_sentence}" if @strict
+            end
           end
         end
       end
+    end
+    
+    def process_barename_csl(list)
+      #add_debug(*list.info("process_barename_csl(list)"))
+      res = [list.fragid.text_value] if list.respond_to?(:fragid)
+      rest = process_barename_csl(list.barename_csl_tail) if list.respond_to?(:barename_csl_tail)
+      rest ? res + rest : res
     end
 
     def process_anonnode(anonnode)
@@ -124,10 +142,24 @@ module RdfContext
     def process_verb(verb)
       add_debug(*verb.info("process_verb"))
       case verb.text_value
-      when "a", "@a"  then RDF_TYPE
-      when "="        then OWL_NS.sameAs
-      when "=>"       then LOG_NS.implies
-      when "<="       then LOG_NS.implies
+      when "a"
+        # If "a" is a keyword, then it's RDF_TYPE, otherwise it's expanded from the default namespace
+        if @keywords.nil? || @keywords.include?("a")
+          RDF_TYPE
+        else
+          build_uri("a")
+        end
+      when "@a"           then RDF_TYPE
+      when "="            then OWL_NS.sameAs
+      when "=>"           then LOG_NS.implies
+      when "<="           then LOG_NS.implies
+      when /^(@?is)\s+.*\s+(@?of)$/
+        keyword_check("is") if $1 == "is"
+        keyword_check("of") if $2 == "of"
+        process_expression(verb.prop)
+      when /^has\s+/
+        keyword_check("has")
+        process_expression(verb.prop)
       else
         if verb.respond_to?(:prop)
           process_expression(verb.prop)
@@ -147,6 +179,24 @@ module RdfContext
         process_anonnode(expression)
       elsif expression.respond_to?(:literal)
         process_literal(expression)
+      elsif expression.respond_to?(:numericliteral)
+        process_numeric_literal(expression)
+      elsif expression.respond_to?(:boolean)
+        barename = expression.text_value.to_s
+        if @keywords && !@keywords.include?(barename)
+          build_uri(barename)
+        else
+          Literal.typed(barename.delete("@"), XSD_NS.boolean)
+        end
+      elsif expression.respond_to?(:barename)
+        barename = expression.text_value.to_s
+        
+        # Should only happen if @keywords is defined, and text_value is not a defined keyword
+        case barename
+        when "true"   then Literal.typed("true", XSD_NS.boolean)
+        when "false"  then Literal.typed("false", XSD_NS.boolean)
+        else               build_uri(barename)
+        end
       else
         build_uri(expression)
       end
@@ -202,12 +252,20 @@ module RdfContext
 
       # Evaluate text_value to remove redundant escapes
       #puts string.elements[1].text_value.dump
-      Literal.n3_encoded(string.elements[1].text_value, language, encoding)
+      lit = Literal.n3_encoded(string.elements[1].text_value, language, encoding)
+      raise ParserException, %(Typed literal has an invalid lexical value: #{encoding.to_n3} "#{lit.contents}") if @strict && !lit.valid?
+      lit
+    end
+    
+    def process_numeric_literal(object)
+      add_debug(*object.info("process_numeric_literal"))
+
+      Literal.typed(object.text_value, XSD_NS.send(object.numericliteral))
     end
     
     def build_uri(expression)
       prefix = expression.respond_to?(:nprefix) ? expression.nprefix.text_value.to_s : ""
-      localname = expression.localname.text_value
+      localname = expression.respond_to?(:localname) ? expression.localname.text_value : expression.to_s
 
       uri = if @graph.nsbinding[prefix]
         @graph.nsbinding[prefix] + localname.to_s
@@ -220,8 +278,15 @@ module RdfContext
         @default_ns ||= Namespace.new("#{@uri}#", "")
         @default_ns + localname
       end
-      add_debug(*expression.info("build_uri: #{uri.inspect}"))
+      add_debug(*expression.info("build_uri: #{uri.inspect}")) if expression.respond_to?(:info)
       uri
+    end
+    
+    # Is this an allowable keyword?
+    def keyword_check(kw)
+      unless (@keywords || %w(a is of has)).include?(kw)
+        raise ParserException, "unqualified keyword '#{kw}' used without @keyword directive" if @strict
+      end
     end
   end
 end

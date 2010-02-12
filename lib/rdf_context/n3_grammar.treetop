@@ -1,49 +1,63 @@
 grammar N3Grammer
+  # Entry point to grammer
   rule document
     statements
   end
-  
-  rule statements
-    (space / statement space* ('.' space*)? )*
+
+  rule alpha
+    [a-zA-Z]
+  end
+
+  rule alphanumeric
+    alpha / [0-9] / "_"
+  end
+
+  rule barename_csl
+    space+ fragid barename_csl_tail
+    / ""
+  end
+
+  rule barename_csl_tail
+    space* "," space* fragid space* barename_csl_tail
+    / ""
+  end
+
+  rule boolean
+    "@"* ("true" / "false")
   end
   
-  rule statement
-    declaration
-    / existential
-    / simpleStatement
-    / universal
+  rule comment
+    '#' (![\n\r] .)*
+  end
+
+  rule declaration
+    "@"? 'keywords' barename_csl {
+      def declaration; true; end
+      def keywords; true;end
+    }
+    / "@"? 'base' space+ explicituri:explicituri {
+      def declaration; true; end
+      def base; true; end
+    }
+    / "@"? 'prefix' space+ nprefix:nprefix? ':' space* explicituri:explicituri {
+      def declaration; true; end
+    }
   end
   
-  rule simpleStatement
-    subject space+ property_list
+  rule decimal
+    integer "." [0-9]+
+  end
+  
+  rule double
+    decimal [eE] integer
   end
   
   rule existential
     "@"? "forSome" symbol_csl
   end
   
-  rule universal
-    "@"? "forAll" symbol_csl
-  end
-  
-  rule subject
-    expression
-  end
-  
-  rule verb
-    "@"? "has" space+ prop                    # has xxx
-    / "@"? "is" space+ prop space+ "@"? "of" { # is xxx of
-      def invert; true; end
-    }
-    / "@"? "a" !":"                           # has rdf:type
-    / "=>"                                    # has log:implies
-    / "<=" { def invert; true; end }          # is log:implies of
-    / "="                                     # has owl:sameAs
-    / prop                                    # has xxx of -- shorthand
-  end
-  
-  rule prop
-    expression
+  rule explicituri
+   "<" uri:URI_Reference ">"
   end
   
   rule expression
@@ -53,10 +67,53 @@ grammar N3Grammer
     / pathitem space* "^" space* expression
   end
 
+  rule fragid
+    alpha alphanumeric*
+  end
+
+  rule hexdigit
+    [0-9a-fA-F]
+  end
+  
+  rule integer
+     [+-]? [0-9]+
+  end
+  
+  rule language
+    [a-z]+ ( "-" [a-z0-9]+ )*
+  end
+
+  rule literal
+    (string_single / string_multi) ("^^" symbol / "@" language )?
+  end
+  
+  rule localname
+    fragid
+  end
+  
+  rule nprefix
+    ((alpha / "_") alphanumeric*)
+  end
+
+  rule numericliteral
+    double { def numericliteral; "double"; end}
+    / decimal { def numericliteral; "decimal"; end}
+    / integer { def numericliteral; "integer"; end}
+  end
+  
+  rule object
+    expression
+  end
+  
+  rule object_list
+    object space* "," space* object_list
+    / object
+  end
+
   rule pathitem
     boolean { def boolean; true; end }
     / literal { def literal; true; end }
-    / numericliteral  { def literal; true; end }
+    / numericliteral
     #/ quickvariable
     / symbol
     / "[" space* "]" { def anonnode; true; end }
@@ -70,101 +127,39 @@ grammar N3Grammer
     / ""
   end
   
+  rule prop
+    expression
+  end
+  
   rule property_list
     verb space+ object_list space* ";"+ space* property_list
     / verb space+ object_list space* ";"*
     / '.'
   end
 
-  rule declaration
-    '@base' space+ explicituri:explicituri {
-      def declaration; true; end
-      def base; true; end
-    }
-    / '@keywords' space+ barename_list {
-      def declaration; true; end
-      def keywords; true;end
-    }
-    / '@prefix' space+ nprefix:nprefix? ':' space* explicituri:explicituri {
-      def declaration; true; end
-    }
-  end
-  
-  rule barename_list
-    fragid
-    / barename_list space* "," space* fragid
-  end
-  
-  rule symbol_csl
-    symbol
-    / symbol space* "," space* symbol_csl
-  end
-  
-  rule symbol
-    qname / explicituri
-  end
-  
-  rule explicituri
-   "<" uri:URI_Reference ">"
-  end
-  
   rule qname
-    nprefix ":" localname / ':' localname
+    nprefix ":" localname / ':' localname / localname { def barename; true; end }
   end
   
-  rule object
-    expression
-  end
-  
-  rule object_list
-    object space* "," space* object_list
-    / object
-  end
-
-  rule literal
-    (string_single / string_multi) ("^^" symbol / "@" language )?
-  end
-  
-  rule boolean
-    "@"* ("true" / "false")
-  end
-  
-  rule language
-    [a-z]+ ( "-" [a-z0-9]+ )*
-  end
-
-  rule localname
-    fragid
-  end
-  
-  rule URI_Reference
-    [^{}<>]*
-  end
-  
-  rule nprefix
-    ((alpha / "_") alphanumeric*)
-  end
-
-  rule fragid
-    alpha alphanumeric*
-  end
-
-  rule alpha
-    [a-zA-Z]
-  end
-  
-  rule alphanumeric
-    alpha / [0-9] / "_"
+  rule simpleStatement
+    subject space+ property_list
   end
   
   rule space
     [ \t\n\r]+ / comment
   end
   
-  rule comment
-    '#' (![\n\r] .)*
+  rule statement
+    declaration
+    / existential
+    / simpleStatement
+    / universal
   end
-
+  
+  rule statements
+    (space / statement space* ('.' space*)? )*
+  end
+  
   # " constant-value-with-escaping "
   rule string_single
     '""' !["] / '"' string_single_char+ '"'
@@ -180,26 +175,6 @@ grammar N3Grammer
     / .)
   end
 
-  rule hexdigit
-    [0-9a-fA-F]
-  end
-  
-  rule numericliteral
-    integer / decimal / double
-  end
-  
-  rule decimal
-    integer "." [0-9]+
-  end
-  
-  rule double
-    decimal [eE] integer
-  end
-  
-  rule integer
-     [+-]? [0-9]+
-  end
-  
   # """ constant value with escaping including single or double occurrences of quotes and/or newlines """ 
   rule string_multi
     '"""' string_multi_char* '"""'
@@ -209,4 +184,37 @@ grammar N3Grammer
     !'"""' . # something like this; need to think about it some more  
   end
     
+  rule subject
+    expression
+  end
+  
+  rule symbol
+    qname / explicituri
+  end
+  
+  rule symbol_csl
+    symbol
+    / symbol space* "," space* symbol_csl
+  end
+  
+  rule verb
+    "@"? "has" space+ prop                    # has xxx
+    / "@"? "is" space+ prop space+ "@"? "of" { # is xxx of
+      def invert; true; end
+    }
+    / "@"? "a" !":"                           # has rdf:type
+    / "=>"                                    # has log:implies
+    / "<=" { def invert; true; end }          # is log:implies of
+    / "="                                     # has owl:sameAs
+    / prop                                    # has xxx of -- shorthand
+  end
+  
+  rule universal
+    "@"? "forAll" symbol_csl
+  end
+  
+  rule URI_Reference
+    [^{}<>]*
+  end
+  
 end
