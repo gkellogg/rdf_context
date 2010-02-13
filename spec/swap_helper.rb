@@ -1,11 +1,11 @@
 require 'matchers'
 
-module RdfXMLHelper
+module SWAPHelper
   # Class representing test cases in format http://www.w3.org/2000/10/rdf-tests/rdfcore/testSchema#
   class TestCase
     include Matchers
     
-    TEST_DIR = File.join(File.dirname(__FILE__), 'rdfcore')
+    TEST_DIR = File.join(File.dirname(__FILE__), 'swap_test')
     
     attr_accessor :about
     attr_accessor :approval
@@ -37,7 +37,7 @@ module RdfXMLHelper
           self.rdf_type = statement.object.short_name
         elsif statement.predicate.short_name =~ /Document\Z/i
           #puts "#{statement.predicate.short_name}: #{statement.object.inspect}"
-          self.send("#{statement.predicate.short_name}=", statement.object.to_s.sub(/^.*rdfcore/, TEST_DIR))
+          self.send("#{statement.predicate.short_name}=", statement.object.to_s.sub(/^.*swap\/test/, TEST_DIR))
           if statement.predicate.short_name == "inputDocument"
             self.about ||= statement.object
             self.name ||= statement.object.short_name
@@ -99,10 +99,10 @@ module RdfXMLHelper
       @@positive_entailment_tests = []
       @@negative_entailment_tests = []
 
-      manifest = File.read(File.join(TEST_DIR, "Manifest.rdf"))
-      parser = RdfXmlParser.new
+      manifest = File.read(File.join(TEST_DIR, "n3parser.tests"))
+      parser = Parser.new
       begin
-        parser.parse(manifest, "http://www.w3.org/2000/10/rdf-tests/rdfcore/Manifest.rdf")
+        parser.parse(manifest, "http://www.w3.org/2000/10/swap/test/n3parser.tests")
       rescue
         raise "Parse error: #{$!}\n\t#{parser.debug.join("\t\n")}\n\n"
       end

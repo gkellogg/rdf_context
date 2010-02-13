@@ -45,7 +45,7 @@ grammar N3Grammer
   end
   
   rule decimal
-    integer "." [0-9]+
+    integer '.' [0-9]+
   end
   
   rule double
@@ -61,10 +61,10 @@ grammar N3Grammer
   end
   
   rule expression
-    pathitem
-    / pathitem space* "." expression
+    pathitem space* '.' expression  
     / pathitem space* "!" space* expression
-    / pathitem space* "^" space* expression
+    / pathitem space* "^" space* expression { def reverse; true; end }
+    / pathitem
   end
 
   rule fragid
@@ -134,7 +134,7 @@ grammar N3Grammer
   rule property_list
     verb space+ object_list space* ";"+ space* property_list
     / verb space+ object_list space* ";"*
-    / '.'
+    / ""
   end
 
   rule qname
@@ -143,6 +143,7 @@ grammar N3Grammer
   
   rule simpleStatement
     subject space+ property_list
+    / subject
   end
   
   rule space

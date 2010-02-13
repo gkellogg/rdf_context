@@ -34,6 +34,7 @@ module RdfContext
 
       document = parser.parse(@doc)
       unless document
+        puts parser.inspect if $DEBUG
         reason = parser.failure_reason
         raise ParserException.new(reason)
       end
@@ -71,6 +72,10 @@ module RdfContext
               end
             end
           end
+        elsif s.respond_to?(:anonnode)
+          process_anonnode(s)
+        elsif s.respond_to?(:pathitem)
+          process_path(s)
         elsif s.respond_to?(:declaration)
           if s.respond_to?(:nprefix)
             add_debug(*s.info("process_statements(namespace)"))
@@ -171,7 +176,9 @@ module RdfContext
 
     def process_expression(expression)
       add_debug(*expression.info("process_expression"))
-      if expression.respond_to?(:uri)
+      if expression.respond_to?(:pathitem) && expression.respond_to?(:expression)
+        process_path(expression)  # Returns last object in chain
+      elsif expression.respond_to?(:uri)
         process_uri(expression.uri)
       elsif expression.respond_to?(:localname)
         build_uri(expression)
@@ -202,6 +209,50 @@ module RdfContext
       end
     end
 
+    # Process a path, such as:
+    #   :a.:b means [is :b of :a]
+    #   :a!:b means [is :b of :a]
+    #   :a^:b means [:b :a]
+    #
+    # Elements may be strug together, with the last element the verb applied to the previous expression:
+    #   :a.:b.:c means [is :c of [ is :b of :a]]
+    #   :a!:b^:c meands [:c [ is :b of :a]]
+    def process_path(path)
+      add_debug(*path.info("process_path"))
+
+      object = process_expression(path.pathitem)
+      
+      # Create a list of direction/predicate pairs
+      path_list = process_path_list(path.expression, path.respond_to?(:reverse))
+      #puts path_list.inspect
+      # Now we should have the following
+      # [
+      #   [:forward, b]
+      #   [:forward, c]
+      # ]
+      path_list.each do |p|
+        reverse, pred = p
+        bnode = BNode.new
+        if reverse
+          add_triple("path(#{reverse})", bnode, pred, object)
+        else
+          add_triple("path(#{reverse})", object, pred, bnode)
+        end
+        object = bnode
+      end
+      object
+    end
+
+    # Returns array of [:forward/:reverse, element] pairs
+    def process_path_list(path, reverse)
+      add_debug(*path.info("process_path_list(#{reverse})"))
+      if path.respond_to?(:pathitem)
+        [[reverse, process_expression(path.pathitem)]] + process_path_list(path.expression, path.respond_to?(:reverse))
+      else
+        [[reverse, process_expression(path)]]
+      end
+    end
+    
     def process_uri(uri, normalize = true)
       uri = uri.text_value if uri.respond_to?(:text_value)
       # Use non-normalized URI from @default_ns when constructing URIs

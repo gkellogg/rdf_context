@@ -481,6 +481,12 @@ describe "N3 parser" do
         @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
       
+      it "should create BNode for [] as statement" do
+        n3 = %([:a :b] .)
+        nt = %(_:bnode0 <http://a/b#a> <http://a/b#b> .)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
+      end
+      
       it "should create statements with BNode subjects using [ pref obj]" do
         n3 = %(@prefix a: <http://foo/a#> . [ a:p a:v ] .)
         nt = %(_:bnode0 <http://foo/a#p> <http://foo/a#v> .)
@@ -536,25 +542,19 @@ describe "N3 parser" do
       it "should create bnode for path x.p" do
         n3 = %(:x2.:y2 :p2 "3" .)
         nt = %(:x2 :y2 _:bnode0 . _:bnode0 :p2 "3" .)
-        pending do
-          @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
-        end
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
       
       it "should create bnode for path x!p" do
         n3 = %(:x2!:y2 :p2 "3" .)
         nt = %(:x2 :y2 _:bnode0 . _:bnode0 :p2 "3" .)
-        pending do
-          @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
-        end
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
       
-      it "should craete bnode for path x^p" do
+      it "should create bnode for path x^p" do
         n3 = %(:x2^:y2 :p2 "3" .)
         nt = %(_:bnode0 :y2 :x2 . _:bnode0 :p2 "3" .)
-        pending do
-          @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
-        end
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
       
       it "should decode :joe!fam:mother!loc:office!loc:zip as Joe's mother's office's zipcode" do
@@ -569,9 +569,7 @@ describe "N3 parser" do
         _:bnode0 <http://foo/loc#office> _:bnode1 .
         _:bnode1 <http://foo/loc#zip> _:bnode2 .
         )
-        pending do
-          @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
-        end
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
 
       it "should decode :joe!fam:mother^fam:mother Anyone whose mother is Joe's mother." do
@@ -585,9 +583,7 @@ describe "N3 parser" do
         :joe <http://foo/fam#mother> _:bnode0 .
         _:bnode1 <http://foo/fam#mother> _:bnode0 .
         )
-        pending do
-          @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
-        end
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
 
       it "should decode path with property list." do
@@ -602,9 +598,7 @@ describe "N3 parser" do
         _:bnode1 :q2 "4" .
         _:bnode1 :q2 "5" .
         )
-        pending do
-          @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
-        end
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
 
       it "should decode path as object." do
