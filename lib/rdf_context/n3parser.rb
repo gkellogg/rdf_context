@@ -28,7 +28,7 @@ module RdfContext
       @callback = block
       parser = N3GrammerParser.new
 
-      @doc = stream.respond_to?(:read) ? stream.read : stream
+      @doc = stream.respond_to?(:read) ? (stream.rewind; stream.read) : stream
       @default_ns = Namespace.new("#{uri}#", "")  if uri
       add_debug("@default_ns", "#{@default_ns.inspect}")
 

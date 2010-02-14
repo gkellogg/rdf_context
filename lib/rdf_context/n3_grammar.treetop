@@ -5,11 +5,11 @@ grammar N3Grammer
   end
 
   rule alpha
-    [a-zA-Z]
+    [a-zA-Z_]
   end
 
   rule alphanumeric
-    alpha / [0-9] / "_"
+    alpha / [0-9]
   end
 
   rule barename_csl
@@ -53,7 +53,7 @@ grammar N3Grammer
   end
   
   rule existential
-    "@"? "forSome" symbol_csl
+    "@"? "forSome" space+ symbol_csl
   end
   
   rule explicituri
@@ -132,8 +132,8 @@ grammar N3Grammer
   end
   
   rule property_list
-    verb space+ object_list space* ";"+ space* property_list
-    / verb space+ object_list space* ";"*
+    verb space* object_list space* ";"+ space* property_list
+    / verb space* object_list space* ";"*
     / ""
   end
 
@@ -143,7 +143,7 @@ grammar N3Grammer
   
   rule simpleStatement
     subject space+ property_list
-    / subject
+    / subject # For [] and a.b
   end
   
   rule space
@@ -194,8 +194,8 @@ grammar N3Grammer
   end
   
   rule symbol_csl
-    symbol
-    / symbol space* "," space* symbol_csl
+    symbol space* "," space* symbol_csl
+    / symbol
   end
   
   rule verb
@@ -211,7 +211,7 @@ grammar N3Grammer
   end
   
   rule universal
-    "@"? "forAll" symbol_csl
+    "@"? "forAll" space+ symbol_csl
   end
   
   rule URI_Reference

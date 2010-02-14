@@ -31,6 +31,7 @@ class Parse
 end
 
 mode = ARGV.shift
+raise "Mode must be one of 'parse'" unless mode == "parse"
 
 $verbose = false
 base_uri  = "http://example.com"

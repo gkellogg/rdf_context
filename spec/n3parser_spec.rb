@@ -624,6 +624,11 @@ describe "N3 parser" do
     end
     
     describe "object lists" do
+      it "should create 2 statements for simple list" do
+        n3 = %(:a :b :c, :d)
+        nt = %(<http://a/b#a> <http://a/b#b> <http://a/b#c> . <http://a/b#a> <http://a/b#b> <http://a/b#d> .)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
+      end
     end
     
     describe "property lists" do
@@ -731,7 +736,87 @@ describe "N3 parser" do
       
     end
     
-    # n3p tests taken from http://inamidst.com/n3p/test/
+    # W3C Test suite from http://www.w3.org/2000/10/swap/test/n3parser.tests
+    describe "w3c swap tests" do
+      require 'rdf_helper'
+
+      def self.positive_tests
+        RdfHelper::TestCase.positive_parser_tests(SWAP_TEST, SWAP_DIR) rescue []
+      end
+
+      def self.negative_tests
+        RdfHelper::TestCase.negative_parser_tests(SWAP_TEST, SWAP_DIR) rescue []
+      end
+
+      # Negative parser tests should raise errors.
+      describe "positive parser tests" do
+        positive_tests.each do |t|
+          #next unless t.about.uri.to_s =~ /rdfms-rdf-names-use/
+          #next unless t.name =~ /11/
+          #puts t.inspect
+          specify "test #{t.about.uri.to_s} against #{t.outputDocument}" do
+            begin
+              t.run_test do |rdf_string, parser|
+                parser.parse(rdf_string, t.about.uri.to_s, :strict => true, :debug => [])
+              end
+            rescue #Spec::Expectations::ExpectationNotMetError => e
+              pending() {  raise }
+            end
+          end
+        end
+      end
+
+      describe "negative parser tests" do
+        negative_tests.each do |t|
+          #next unless t.about.uri.to_s =~ /rdfms-empty-property-elements/
+          #next unless t.name =~ /1/
+          #puts t.inspect
+          specify "test #{t.about.uri.to_s}" do
+            t.run_test do |rdf_string, parser|
+              begin
+                lambda do
+                  parser.parse(rdf_string, t.about.uri.to_s, :strict => true, :debug => [])
+                  parser.graph.should be_equivalent_graph("", t)
+                end.should raise_error(RdfException)
+              rescue Spec::Expectations::ExpectationNotMetError => e
+                pending() {  raise }
+              end
+            end
+          end
+        end
+      end
+    end
+
+    # W3C Test suite from http://www.w3.org/2000/10/swap/test/regression.n3
+    describe "w3c cwm tests" do
+      require 'rdf_helper'
+
+      def self.test_cases
+        RdfHelper::TestCase.test_cases(CWM_TEST, SWAP_DIR) rescue []
+      end
+
+      # Negative parser tests should raise errors.
+      test_cases.each do |t|
+        #next unless t.about.uri.to_s =~ /rdfms-rdf-names-use/
+        #next unless t.name =~ /11/
+        #puts t.inspect
+        specify "test #{t.name}: " + (t.description || "#{t.inputDocument} against #{t.outputDocument}") do
+          begin
+            t.run_test do |rdf_string, parser|
+              parser.parse(rdf_string, t.about.uri.to_s, :strict => true, :debug => [])
+            end
+          rescue #Spec::Expectations::ExpectationNotMetError => e
+            if t.status == "pending"
+              pending() {  raise } 
+            else
+              raise
+            end
+          end
+        end
+      end
+    end
+
+     # n3p tests taken from http://inamidst.com/n3p/test/
     describe "with real data tests" do
       dirs = %w(misc lcsh rdflib n3p)
       dirs.each do |dir|

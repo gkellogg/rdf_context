@@ -1,6 +1,7 @@
 === 0.5.0
-* Fully compliant N3 parser with extnensive tests, including SWAP test suite.
-  * Supports Formulae, paths, keywords, and all the trimmings.
+* Fully compliant N3 parser (n3-rdf level) with extnensive tests, including SWAP test suite.
+  * Supports paths, keywords, all semantic expressions.
+  * No support yet for Formulae, variables, rules or automatic reification
 * Fixed bug in URIRef#namespace & to_qname when namespace does not have a trailing / or #
 * URIRef#short_name may return a different value after a namespace is assigned.
 * Graph#qname(uri) as alternative to uri.qname, has namespaces available.

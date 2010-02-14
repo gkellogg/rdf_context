@@ -2,7 +2,7 @@ require 'rdf/redland'
 
 module Matchers
   class BeEquivalentGraph
-    Info = Struct.new(:about, :information, :trace, :compare)
+    Info = Struct.new(:about, :information, :trace, :compare, :inputDocument, :outputDocument)
     def normalize(graph)
       case @info.compare
       when :array
@@ -41,9 +41,12 @@ module Matchers
         case graph
         when Graph then graph
         when Parser then graph.graph
+        when IO, StringIO
+          Parser.parse(graph, @info.about)
         else
-          triples = [graph].flatten.join("\n")
-          N3Parser.parse(graph.to_s, @info.about, :strict => false)
+          parser = Parser.new(:struct => true)
+          fmt = parser.detect_format(graph.to_s)
+          parser.parse(graph.to_s, @info.about, :type => fmt)
         end
       end
     end
@@ -76,7 +79,9 @@ module Matchers
       else
         "Graph differs\n"
       end +
-      "\n\n#{info + "\n" unless info.empty?}" +
+      "\n#{info + "\n" unless info.empty?}" +
+      (@info.inputDocument ? "Input file: #{@info.inputDocument}\n" : "") +
+      (@info.outputDocument ? "Output file: #{@info.outputDocument}\n" : "") +
       "Unsorted Expected:\n#{@expected.to_ntriples}" +
       "Unsorted Results:\n#{@actual.to_ntriples}" +
       (@info.trace ? "\nDebug:\n#{@info.trace}" : "")

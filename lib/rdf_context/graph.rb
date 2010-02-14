@@ -349,7 +349,7 @@ module RdfContext
     def eql?(other)
       puts "eql? size #{self.size} vs #{other.size}" if $DEBUG
       return false if !other.is_a?(Graph) || self.size != other.size
-      return false unless other.identifier.to_s == identifier.to_s
+      return false unless other.identifier.to_s == identifier.to_s unless other.identifier.is_a?(BNode) && identifier.is_a?(BNode)
       
       bn_self = bnodes.values.sort
       bn_other = other.bnodes.values.sort

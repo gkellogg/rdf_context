@@ -1,5 +1,3 @@
-require 'matchers'
-
 module RdfaHelper
   # Class representing test cases in format http://www.w3.org/2006/03/test-description#
   class TestCase
@@ -26,7 +24,6 @@ module RdfaHelper
     attr_accessor :expectedResults
     attr_accessor :parser
     
-    @@test_cases = []
     @@suite = ""
     
     def initialize(statements, suite)
@@ -160,17 +157,17 @@ module RdfaHelper
     end
     
     def self.test_cases(suite)
-      @@test_cases = [] unless @@suite == suite
-      return @@test_cases unless @@test_cases.empty?
+      @test_cases = [] unless @suite == suite
+      return @test_cases unless @test_cases.empty?
       
-      @@suite = suite # Process the given test suite
-      @@manifest_url = "#{BASE_MANIFEST_URL}#{suite}-manifest.rdf"
+      @suite = suite # Process the given test suite
+      @manifest_url = "#{BASE_MANIFEST_URL}#{suite}-manifest.rdf"
       
       manifest_str = File.read(File.join(TEST_DIR, "#{suite}-manifest.rdf"))
       parser = RdfXmlParser.new
       
       begin
-        parser.parse(manifest_str, @@manifest_url)
+        parser.parse(manifest_str, @manifest_url)
       rescue
         raise "Parse error: #{$!}\n\t#{parser.debug.to_a.join("\t\n")}\n\n"
       end
@@ -183,7 +180,7 @@ module RdfaHelper
         hash
       end
       
-      @@test_cases = test_hash.values.map {|statements| TestCase.new(statements, suite)}.
+      @test_cases = test_hash.values.map {|statements| TestCase.new(statements, suite)}.
         compact.
         sort_by{|t| t.name }
     end

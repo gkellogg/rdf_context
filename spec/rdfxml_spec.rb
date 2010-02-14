@@ -285,8 +285,9 @@ EOF
       graph = @parser.parse(rdf_string, uri, :strict => true)
 
       nt_string = File.read(filepath.sub('.rdf', '.nt'))
+      nt_graph = N3Parser.parse(nt_string, uri)
 
-      graph.should be_equivalent_graph(nt_string, :about => uri, :trace => @parser.debug)
+      graph.should be_equivalent_graph(nt_graph, :about => uri, :trace => @parser.debug)
     end
 
     before(:all) do
@@ -307,15 +308,14 @@ EOF
 
   # W3C Test suite from http://www.w3.org/2000/10/rdf-tests/rdfcore/
   describe "w3c rdfcore tests" do
-    require 'rdfxml_helper'
-    include RdfXMLHelper
+    require 'rdf_helper'
     
     def self.positive_tests
-      RdfXMLHelper::TestCase.positive_parser_tests rescue []
+      RdfHelper::TestCase.positive_parser_tests(RDFCORE_TEST, RDFCORE_DIR) rescue []
     end
 
     def self.negative_tests
-      []#RdfXMLHelper::TestCase.negative_parser_tests rescue []
+      RdfHelper::TestCase.negative_parser_tests(RDFCORE_TEST, RDFCORE_DIR) rescue []
     end
     
     # Negative parser tests should raise errors.
@@ -324,7 +324,7 @@ EOF
         #next unless t.about.uri.to_s =~ /rdfms-rdf-names-use/
         #next unless t.name =~ /11/
         #puts t.inspect
-        specify "test #{t.about.uri.to_s}" do
+        specify "test #{t.name}: " + (t.description || "#{t.inputDocument} against #{t.outputDocument}") do
           t.run_test do |rdf_string, parser|
             parser.parse(rdf_string, t.about.uri.to_s, :strict => true, :debug => [])
           end
@@ -337,7 +337,7 @@ EOF
         #next unless t.about.uri.to_s =~ /rdfms-empty-property-elements/
         #next unless t.name =~ /1/
         #puts t.inspect
-        specify "test #{t.about.uri.to_s}" do
+        specify "test #{t.name}: " + (t.description || t.inputDocument) do
           t.run_test do |rdf_string, parser|
             lambda do
               parser.parse(rdf_string, t.about.uri.to_s, :strict => true, :debug => [])

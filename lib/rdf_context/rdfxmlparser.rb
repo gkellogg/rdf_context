@@ -66,6 +66,7 @@ module RdfContext
         element.namespaces.each do |attr_name,attr_value|
           abbr, suffix = attr_name.to_s.split(":")
           if abbr == "xmlns"
+            attr_value = URIRef.new(attr_value, self.base) if attr_value.match(/^\#/)
             mappings[suffix] = Namespace.new(attr_value, suffix)
             @graph.bind(mappings[suffix])
           end

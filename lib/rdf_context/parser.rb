@@ -93,6 +93,7 @@ module RdfContext
 
     # Heuristically detect the format of the uri
     def detect_format(stream, uri = nil)
+      uri ||= stream.path if stream.respond_to?(:path)
       format = case uri.to_s
       when /\.(rdf|xml)$/      then :rdfxml
       when /\.(html|xhtml)$/   then :rdfa
