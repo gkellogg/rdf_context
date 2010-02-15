@@ -107,7 +107,7 @@ module RdfContext
     
     def process_barename_csl(list)
       #add_debug(*list.info("process_barename_csl(list)"))
-      res = [list.fragid.text_value] if list.respond_to?(:fragid)
+      res = [list.barename.text_value] if list.respond_to?(:barename)
       rest = process_barename_csl(list.barename_csl_tail) if list.respond_to?(:barename_csl_tail)
       rest ? res + rest : res
     end
@@ -316,7 +316,10 @@ module RdfContext
     
     def build_uri(expression)
       prefix = expression.respond_to?(:nprefix) ? expression.nprefix.text_value.to_s : ""
-      localname = expression.respond_to?(:localname) ? expression.localname.text_value : expression.to_s
+      localname = expression.localname.text_value if expression.respond_to?(:localname)
+      localname ||= (expression.respond_to?(:text_value) ? expression.text_value : expression).to_s.sub(/^:/, "")
+
+#      add_debug(*expression.info("build_uri(#{prefix.inspect}, #{localname.inspect})"))
 
       uri = if @graph.nsbinding[prefix]
         @graph.nsbinding[prefix] + localname.to_s
@@ -327,7 +330,7 @@ module RdfContext
         RDF_NS + localname.to_s
       else
         @default_ns ||= Namespace.new("#{@uri}#", "")
-        @default_ns + localname
+        @default_ns + localname.to_s
       end
       add_debug(*expression.info("build_uri: #{uri.inspect}")) if expression.respond_to?(:info)
       uri

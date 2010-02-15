@@ -1,3 +1,4 @@
+#encoding: utf-8'
 grammar N3Grammer
   # Entry point to grammer
   rule document
@@ -5,7 +6,12 @@ grammar N3Grammer
   end
 
   rule alpha
-    [a-zA-Z_]
+    [A-Z_a-z]
+#    / [\u0370-\u037d]
+#    / [\u037f-\u1fff]
+#    / [\u200c-\u200d\u2070-\u218f\u2c00-\u2fef]
+#    / [\u3001-\ud7ff\uf900-\ufdcf\ufdf0-\ufffd]
+#    / [\U00010000-\U000effff]
   end
 
   rule alphanumeric
@@ -13,12 +19,12 @@ grammar N3Grammer
   end
 
   rule barename_csl
-    space+ fragid barename_csl_tail
+    space+ barename barename_csl_tail
     / ""
   end
 
   rule barename_csl_tail
-    space* "," space* fragid space* barename_csl_tail
+    space* "," space* barename space* barename_csl_tail
     / ""
   end
 
@@ -67,8 +73,8 @@ grammar N3Grammer
     / pathitem
   end
 
-  rule fragid
-    alpha alphanumeric*
+  rule barename
+    alpha (alphanumeric / '-')*
   end
 
   rule hexdigit
@@ -88,11 +94,11 @@ grammar N3Grammer
   end
   
   rule localname
-    fragid
+    alpha (alphanumeric / '-')*
   end
   
   rule nprefix
-    ((alpha / "_") alphanumeric*)
+    alpha (alphanumeric / '-')*
   end
 
   rule numericliteral
@@ -138,7 +144,7 @@ grammar N3Grammer
   end
 
   rule qname
-    nprefix ":" localname / ':' localname / localname { def barename; true; end }
+    nprefix ":" localname / ':' localname* / localname { def barename; true; end }
   end
   
   rule simpleStatement

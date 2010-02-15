@@ -278,14 +278,46 @@ module RdfContext
     end
     alias_method :find, :triples
     
-    # Returns ordered rdf:_n objects for a given subject
+    # Returns ordered rdf:_n objects or rdf:first, rdf:rest for a given subject
     def seq(subject)
-      return [] unless self.contains(Triple.new(subject, RDF_TYPE, RDF_NS.Seq))
-      
-      self.triples(Triple.new(subject, nil, nil)).
-        select { |t| t.predicate.to_s.index(RDF_NS._.to_s) == 0 }.
-        sort { |a, |b| a.predicate.short_name.to_i <=> b.predicate.short_name.to_i }.
-        map { |t| t.object}
+      props = properties(subject)
+      rdf_type = props[RDF_TYPE.to_s] || []
+
+      if rdf_type.include?(RDF_NS.Seq)
+        props.keys.select {|k| k.match(/#{RDF_NS.uri}_(\d)$/)}.
+          sort_by {|i| i.sub(RDF_NS._.to_s, "").to_i}.
+          map {|key| props[key]}.
+          flatten
+      elsif self.triples(Triple.new(subject, RDF_NS.first, nil))
+        # N3-style first/rest chain
+        list = []
+        while subject != RDF_NS.nil
+          props = properties(subject)
+          list += props[RDF_NS.first.to_s]
+          subject = props[RDF_NS.rest.to_s].first
+        end
+        list
+      else
+        []
+      end
+    end
+
+    # Resource properties
+    #
+    # Properties arranged as a hash with the predicate Term as index to an array of resources
+    #
+    def properties(subject)
+      @properties ||= {}
+      @properties[subject.to_s] ||= begin
+        hash = Hash.new
+        self.triples(Triple.new(subject, nil, nil)).map do |t, ctx|
+          pred = t.predicate.to_s
+
+          hash[pred] ||= []
+          hash[pred] << t.object
+        end
+        hash
+      end
     end
     
     # Return an n3 identifier for the Graph
@@ -319,6 +351,11 @@ module RdfContext
     # @param [Resource, Regexp, String] object:: Type resource
     def get_by_type(object)
       triples(Triple.new(nil, RDF_TYPE, object)).map {|t, ctx| t.subject}
+    end
+    
+    # Get type(s) of subject, returns a list of symbols
+    def type_of(subject)
+      triples(Triple.new(subject, RDF_TYPE, nil)).map {|t, ctx| t.object}
     end
     
     # Merge a graph into this graph

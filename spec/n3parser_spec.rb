@@ -296,6 +296,12 @@ describe "N3 parser" do
         end
       end
       
+      it "should accept empty localname" do
+        n3 = %(: : : .)
+        nt = %(<http://a/b#> <http://a/b#> <http://a/b#> .)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug, :compare => :array)
+      end
+      
       it "should do something for @forAll"
 
       it "should do something for @forSome"
@@ -736,7 +742,7 @@ describe "N3 parser" do
       
     end
     
-    # W3C Test suite from http://www.w3.org/2000/10/swap/test/n3parser.tests
+    # W3C N3 Test suite from http://www.w3.org/2000/10/swap/test/n3parser.tests
     describe "w3c swap tests" do
       require 'rdf_helper'
 
@@ -787,7 +793,7 @@ describe "N3 parser" do
       end
     end
 
-    # W3C Test suite from http://www.w3.org/2000/10/swap/test/regression.n3
+    # CWM suite from http://www.w3.org/2000/10/swap/test/regression.n3
     describe "w3c cwm tests" do
       require 'rdf_helper'
 

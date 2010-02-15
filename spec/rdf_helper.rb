@@ -2,6 +2,8 @@ module RdfHelper
   # Class representing test cases in format http://www.w3.org/2000/10/rdf-tests/rdfcore/testSchema#
   class TestCase
     include Matchers
+    MF_NS = Namespace.new("http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#", "mf")
+    QT_NS = Namespace.new("http://www.w3.org/2001/sw/DataAccess/tests/test-query#", "qt")
     
     attr_accessor :about
     attr_accessor :approval
@@ -21,11 +23,18 @@ module RdfHelper
     attr_accessor :warning
     attr_accessor :parser
     
-    def initialize(triples, uri_prefix, test_dir)
+    def initialize(triples, uri_prefix, test_dir, options = {})
+      case options[:test_type]
+      when :mf
+        parse_mf(triples, uri_prefix, test_dir, options[:graph])
+      else
+        parse_w3c(triples, uri_prefix, test_dir)
+      end
+    end
+    
+    def parse_w3c(triples, uri_prefix, test_dir)
       triples.each do |statement|
         next if statement.subject.is_a?(BNode)
-#        self.about ||= statement.subject
-#        self.name ||= statement.subject.short_name
         
         if statement.is_type?
           self.rdf_type = statement.object.short_name
@@ -45,6 +54,18 @@ module RdfHelper
           self.send("#{statement.predicate.short_name}=", statement.object.to_s)
         end
       end
+    end
+
+    def parse_mf(subject, uri_prefix, test_dir, graph)
+      props = graph.properties(subject)
+      @name = (props[MF_NS.name.to_s] || []).first.to_s
+      @description =  (props[RDFS_NS.comment.to_s] || []).first.to_s
+      @outputDocument = (props[MF_NS.result.to_s] || []).first
+      @outputDocument = @outputDocument.to_s.sub(uri_prefix, test_dir) if @outputDocument
+      action = (props[MF_NS.action.to_s] || []).first
+      a_props = graph.properties(action)
+      @about = (a_props[QT_NS.data.to_s] || []).first
+      @inputDocument = @about.to_s.sub(uri_prefix, test_dir)
     end
     
     def inspect
@@ -119,29 +140,49 @@ module RdfHelper
       end
       graph = parser.graph
       
-      # Group by subject
-      test_hash = graph.triples.inject({}) do |hash, st|
-        a = hash[st.subject] ||= []
-        a << st
-        hash
-      end
-      
       uri_base = Addressable::URI.join(test_uri, ".").to_s
-      @test_cases = test_hash.values.map do |statements|
-        TestCase.new(statements, uri_base, test_dir)
-      end.
+
+      # If this is a turtle test (type mf:Manifest) parse with
+      # alternative test case
+      case graph.type_of(test_uri).first
+      when MF_NS.Manifest
+        # Get test entries
+        entries = graph.triples(Triple.new(test_uri, MF_NS.entries, nil)) || []
+        entries = entries.first
+        raise "No entires found for MF Manifest" unless entries.is_a?(Triple)
+        
+        @test_cases = graph.seq(entries.object).map do |subject|
+          TestCase.new(subject, uri_base, test_dir, :test_type => :mf, :graph => graph)
+        end
+      else
+        # One of:
+        #   http://www.w3.org/2000/10/rdf-tests/rdfcore/testSchema
+        #   http://www.w3.org/2000/10/swap/test.n3#
+        #   http://www.w3.org/2004/11/n3test#
+        # Group by subject
+        test_hash = graph.triples.inject({}) do |hash, st|
+          a = hash[st.subject] ||= []
+          a << st
+          hash
+        end
+
+        @test_cases = test_hash.values.map do |statements|
+          TestCase.new(statements, uri_base, test_dir)
+        end
+     end.
       compact.
       sort_by{|t| t.name.to_s}
-      
-      @test_cases.each do |tc|
-        next if tc.status && tc.status != "APPROVED"
-        case tc.rdf_type
-        when "PositiveParserTest" then @positive_parser_tests << tc
-        when "NegativeParserTest" then @negative_parser_tests << tc
-        when "PositiveEntailmentTest" then @positive_entailment_tests << tc
-        when "NegativeEntailmentTest" then @negative_entailment_tests << tc
-        end
-      end
+
+
+     @test_cases.each do |tc|
+       next if tc.status && tc.status != "APPROVED"
+       case tc.rdf_type
+       when "PositiveParserTest" then @positive_parser_tests << tc
+       when "NegativeParserTest" then @negative_parser_tests << tc
+       when "PositiveEntailmentTest" then @positive_entailment_tests << tc
+       when "NegativeEntailmentTest" then @negative_entailment_tests << tc
+       end
+     end
     end
     def self.test_cases(test_uri = nil, test_dir = nil);                parse_test_cases(test_uri, test_dir); @test_cases; end
     def self.positive_parser_tests(test_uri = nil, test_dir = nil);     parse_test_cases(test_uri, test_dir); @positive_parser_tests; end

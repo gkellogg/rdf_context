@@ -332,6 +332,41 @@ HERE
         subject.to_rdfxml.should be_equivalent_xml(rdfxml)
       end
     end
+
+    describe "rdf:_n sequences" do
+      subject {
+        g = Graph.new(:store => ListStore.new)
+        g.add_triple(@ex.Seq, RDF_TYPE, RDF_NS.Seq)
+        g.add_triple(@ex.Seq, RDF_NS._1, @ex.john)
+        g.add_triple(@ex.Seq, RDF_NS._2, @ex.jane)
+        g.add_triple(@ex.Seq, RDF_NS._3, @ex.rick)
+        g.bind(@ex)
+        g
+      }
+      
+      it "should return object list" do
+        subject.seq(@ex.Seq).should == [@ex.john, @ex.jane, @ex.rick]
+      end
+    end
+    
+    describe "rdf:first/rdf:rest sequences" do
+      subject {
+        a, b = BNode.new("a"), BNode.new("b"), BNode.new("c")
+        g = Graph.new(:store => ListStore.new)
+        g.add_triple(@ex.List, RDF_NS.first, @ex.john)
+        g.add_triple(@ex.List, RDF_NS.rest, a)
+        g.add_triple(a, RDF_NS.first, @ex.jane)
+        g.add_triple(a, RDF_NS.rest, b)
+        g.add_triple(b, RDF_NS.first,  @ex.rick)
+        g.add_triple(b, RDF_NS.rest, RDF_NS.nil)
+        g.bind(@ex)
+        g
+      }
+      
+      it "should return object list" do
+        subject.seq(@ex.List).should == [@ex.john, @ex.jane, @ex.rick]
+      end
+    end
   end
 
   describe "which are merged" do
