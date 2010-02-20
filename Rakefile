@@ -50,10 +50,17 @@ Spec::Rake::SpecTask.new(:spec) do |spec|
 end
 
 desc "Run specs through RCov"
-Spec::Rake::SpecTask.new(:rcov) do |spec|
+Spec::Rake::SpecTask.new("spec:rcov") do |spec|
   spec.libs << 'lib' << 'spec'
   spec.pattern = 'spec/*_spec.rb'
   spec.rcov = true
+end
+
+desc "Generate HTML report specs"
+Spec::Rake::SpecTask.new("doc:spec") do |spec|
+  spec.libs << 'lib' << 'spec'
+  spec.spec_files = FileList['spec/*_spec.rb']
+  spec.spec_opts = ["--format", "html:doc/spec.html"]
 end
 
 task :spec => :check_dependencies
@@ -61,17 +68,15 @@ task :spec => :check_dependencies
 task :default => :spec
 
 require 'rake/rdoctask'
-Rake::RDocTask.new do |rdoc|
+Rake::RDocTask.new("doc:rdoc") do |rdoc|
   if File.exist?('VERSION')
     version = File.read('VERSION')
   else
-    version = RdfaParser::VERSION
+    version = RdfContext::VERSION
   end
 
-  rdoc.rdoc_dir = 'rdoc'
+  rdoc.rdoc_dir = 'doc/rdoc'
   rdoc.title = "rdf_context #{version}"
   rdoc.rdoc_files.include('README*', "History.txt")
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
-
-# vim: syntax=Ruby

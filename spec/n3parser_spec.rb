@@ -1,3 +1,4 @@
+# coding: utf-8
 require File.join(File.dirname(__FILE__), 'spec_helper')
 include RdfContext
 
@@ -40,21 +41,32 @@ describe "N3 parser" do
 
     describe "with literal encodings" do
       {
-        'Dürst' => '_:a <http://example.org/named> "D\u00FCrst" .',
-        'simple literal' => '<http://example.org/resource7> <http://example.org/property> "simple literal" .',
-        'backslash:\\' => '<http://example.org/resource8> <http://example.org/property> "backslash:\\\\" .',
-        'dquote:"' => '<http://example.org/resource9> <http://example.org/property> "dquote:\"" .',
-        "newline:\n" => '<http://example.org/resource10> <http://example.org/property> "newline:\n" .',
-        "return\r" => '<http://example.org/resource11> <http://example.org/property> "return\r" .',
-        "tab:\t" => '<http://example.org/resource12> <http://example.org/property> "tab:\t" .',
-        "é" => '<http://example.org/resource16> <http://example.org/property> "\u00E9" .',
-        "€" => '<http://example.org/resource17> <http://example.org/property> "\u20AC" .',
+        'Dürst' => ':a :b "D\u00FCrst" .',
+        'simple literal' => ':a :b  "simple literal" .',
+        'backslash:\\' => ':a :b  "backslash:\\\\" .',
+        'dquote:"' => ':a :b  "dquote:\"" .',
+        "newline:\n" => ':a :b  "newline:\n" .',
+        "return\r" => ':a :b  "return\r" .',
+        "tab:\t" => ':a :b  "tab:\t" .',
+        "é" => ':a :b  "\u00E9" .',
+        "€" => ':a :b  "\u20AC" .',
       }.each_pair do |contents, triple|
         specify "test #{contents}" do
-          @parser.parse(triple)
+          @parser.parse(triple, "http://a/b")
           @parser.graph.should_not be_nil
           @parser.graph.size.should == 1
           @parser.graph[0].object.contents.should == contents
+        end
+      end
+      
+      it "should parse long literal with escape" do
+        n3 = %(@prefix : <http://example.org/foo#> . :a :b "\\U00015678another" .)
+        if defined?(::Encoding)
+          @parser.parse(n3)
+          @parser.graph[0].object.contents.should == "\u{15678}another"
+        else
+          lambda { @parser.parse(n3) }.should raise_error(RdfException, "Long Unicode escapes no supported in Ruby 1.8")
+          pending("Not supported in Ruby 1.8")
         end
       end
 
@@ -78,6 +90,10 @@ describe "N3 parser" do
           baz
           <html:i xmlns:html="http://www.w3.org/1999/xhtml">more</html:i>
        )
+      end
+      
+      it "should parse long literal ending in double quote" do
+        @parser.parse(%(:a :b """ \"""" .), "http://a/b")
       end
       
       describe "having illegal content" do
@@ -302,6 +318,12 @@ describe "N3 parser" do
         @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug, :compare => :array)
       end
       
+      it "should accept prefix with empty local name" do
+        n3 = %(@prefix foo : <#> . foo: foo: foo: .)
+        nt = %(<http://a/b#> <http://a/b#> <http://a/b#> .)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug, :compare => :array)
+      end
+      
       it "should do something for @forAll"
 
       it "should do something for @forSome"
@@ -358,7 +380,7 @@ describe "N3 parser" do
       it "should bind named namespace" do
         n3doc = "@prefix ns: <http://the/namespace#> ."
         @parser.parse(n3doc, "http://a/b")
-        @parser.graph.nsbinding.should == {"ns", Namespace.new("http://the/namespace#", "ns")}
+        @parser.graph.nsbinding.should == {"ns" => Namespace.new("http://the/namespace#", "ns")}
       end
       
       it "should bind empty prefix to <%> by default" do

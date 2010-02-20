@@ -3,8 +3,9 @@ require File.join(File.dirname(__FILE__), 'store_helper')
 
 describe "SQLite3 Store" do
   before(:all) do
-    Dir.mkdir(File.dirname(__FILE__) + "/tmp")
-    @dbfile = File.join(File.dirname(__FILE__), "tmp", "sqlite3.db")
+    FileUtils.rm_rf(TMP_DIR)
+    Dir.mkdir(TMP_DIR)
+    @dbfile = File.join(TMP_DIR, "sqlite3.db")
     @identifier = URIRef.new("http://identifier")
   end
   
@@ -13,11 +14,11 @@ describe "SQLite3 Store" do
   end
   
   after(:all) do
-    FileUtils.rm_rf(File.dirname(__FILE__) + "/tmp")
+    FileUtils.rm_rf(TMP_DIR)
   end
   
   after(:each) do
-    FileUtils.rm(@dbfile) if File.exists?(@dbfile)
+    FileUtils.rm(@dbfile) if File.file?(@dbfile)
   end
   
   subject { @store }

@@ -43,7 +43,7 @@ module RdfContext
        | \\\\u[0-9a-fA-F]
       )
       (  [0-9a-zA-Z_\.-]
-       | \\\\u([0-9a-fA-F]{4})  # \u followed by a sequence of four hex digits
+       | \\\\u([0-9a-fA-F]{4})
       )*
     $},
     Regexp::EXTENDED)

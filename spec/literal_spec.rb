@@ -1,3 +1,4 @@
+# coding: utf-8
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
 describe "Literals: " do
@@ -15,14 +16,23 @@ describe "Literals: " do
     
     describe "should handle specific cases" do
       {
-        '"Gregg"' => Literal.untyped("Gregg"),
+        '"Gregg"'                     => Literal.untyped("Gregg"),
         '"\u677E\u672C \u540E\u5B50"' => Literal.untyped("松本 后子"),
-        '"D\u00FCrst"' => Literal.untyped("Dürst")
+        '"D\u00FCrst"'                => Literal.untyped("Dürst"),
       }.each_pair do |encoded, literal|
         it "should encode '#{literal.contents}'" do
           literal.to_n3.should == encoded
         end
       end
+
+      # Ruby 1.9 only
+      {
+         '"\U00015678another"'         => Literal.untyped("\u{15678}another"),
+       }.each_pair do |encoded, literal|
+         it "should encode '#{literal.contents}'" do
+           literal.to_n3.should == encoded
+         end
+       end if defined?(::Encoding)
     end
 
     describe "encodings" do
@@ -391,25 +401,43 @@ describe "Literals: " do
   end
   
   describe "valid content" do
-    [
-      Literal.typed("true", XSD_NS.boolean),
-      Literal.typed("false", XSD_NS.boolean),
-      Literal.typed("1", XSD_NS.boolean),
-      Literal.typed("1", XSD_NS.integer),
-      Literal.typed("-1", XSD_NS.integer),
-      Literal.typed("+1", XSD_NS.integer),
-      Literal.typed("1", XSD_NS.decimal),
-      Literal.typed("1.0", XSD_NS.decimal),
-      Literal.typed("123.456", XSD_NS.decimal),
-      Literal.typed("1", XSD_NS.double),
-      Literal.typed("1.0", XSD_NS.double),
-      Literal.typed("123.456", XSD_NS.double),
-      Literal.typed("1.0e+1", XSD_NS.double),
-      Literal.typed("1.0e-10", XSD_NS.double),
-      Literal.typed("123.456e4", XSD_NS.double),
-    ].each do |lit|
+    {
+      Literal.typed("true", XSD_NS.boolean) => %("true"^^<http://www.w3.org/2001/XMLSchema#boolean>),
+      Literal.typed("false", XSD_NS.boolean) => %("false"^^<http://www.w3.org/2001/XMLSchema#boolean>),
+      Literal.typed("1", XSD_NS.boolean) => %("true"^^<http://www.w3.org/2001/XMLSchema#boolean>),
+      Literal.typed("01", XSD_NS.integer) => %("true"^^<http://www.w3.org/2001/XMLSchema#boolean>),
+      Literal.typed("1", XSD_NS.integer) => %("1"^^<http://www.w3.org/2001/XMLSchema#integer>),
+      Literal.typed("-1", XSD_NS.integer) => %("-1"^^<http://www.w3.org/2001/XMLSchema#integer>),
+      Literal.typed("+1", XSD_NS.integer) => %("1"^^<http://www.w3.org/2001/XMLSchema#integer>),
+      
+      Literal.typed("1", XSD_NS.decimal) => %("1.0"^^<http://www.w3.org/2001/XMLSchema#decimal>),
+      Literal.typed("-1", XSD_NS.decimal) => %("-1.0"^^<http://www.w3.org/2001/XMLSchema#decimal>),
+      Literal.typed("1.", XSD_NS.decimal) => %("1.0"^^<http://www.w3.org/2001/XMLSchema#decimal>),
+      Literal.typed("1.0", XSD_NS.decimal) => %("1.0"^^<http://www.w3.org/2001/XMLSchema#decimal>),
+      Literal.typed("1.00", XSD_NS.decimal) => %("1.0"^^<http://www.w3.org/2001/XMLSchema#decimal>),
+      Literal.typed("+001.00", XSD_NS.decimal) => %("1.0"^^<http://www.w3.org/2001/XMLSchema#decimal>),
+      Literal.typed("123.456", XSD_NS.decimal) => %("123.456"^^<http://www.w3.org/2001/XMLSchema#decimal>),
+      
+      Literal.typed("1", XSD_NS.double) => %("1.0E0"^^<http://www.w3.org/2001/XMLSchema#double>),
+      Literal.typed("-1", XSD_NS.double) => %("-1.0E0"^^<http://www.w3.org/2001/XMLSchema#double>),
+      Literal.typed("+01.000", XSD_NS.double) => %("1.0E0"^^<http://www.w3.org/2001/XMLSchema#double>),
+      Literal.typed("1.", XSD_NS.double) => %("1.00E0"^^<http://www.w3.org/2001/XMLSchema#double>),
+      Literal.typed("1.0", XSD_NS.double) => %("1.00E0"^^<http://www.w3.org/2001/XMLSchema#double>),
+      Literal.typed("123.456", XSD_NS.double) => %("123.4560E0"^^<http://www.w3.org/2001/XMLSchema#double>),
+      Literal.typed("1.0e+1", XSD_NS.double) => %("1.00E0"^^<http://www.w3.org/2001/XMLSchema#double>),
+      Literal.typed("1.0e-10", XSD_NS.double) => %("1.0E-10"^^<http://www.w3.org/2001/XMLSchema#double>),
+      Literal.typed("123.456e4", XSD_NS.double) => %("123.456E4"^^<http://www.w3.org/2001/XMLSchema#double>),
+    }.each_pair do |lit, n3|
       it "should validate '#{lit.to_n3}'" do
         lit.valid?.should be_true
+      end
+
+      it "should canonicalize '#{lit.to_n3}'" do
+        begin
+          lit.to_ntriples.should == n3
+        rescue #Spec::Expectations::ExpectationNotMetError => e
+          pending() {  raise }
+        end
       end
     end
   end

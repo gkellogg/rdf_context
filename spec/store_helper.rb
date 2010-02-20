@@ -1,3 +1,4 @@
+# coding: utf-8
 shared_examples_for "Store" do
   before(:all) do
     @ex = Namespace.new("http://example.org/", "ex")

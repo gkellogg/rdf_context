@@ -1,5 +1,3 @@
-require 'rdf/redland'
-
 module Matchers
   class BeEquivalentGraph
     Info = Struct.new(:about, :information, :trace, :compare, :inputDocument, :outputDocument)
@@ -31,7 +29,8 @@ module Matchers
             map {|t| t.gsub(/^\s*(.*)\s*$/, '\1')}.
             reject {|t2| t2.match(/^\s*$/)}.
             compact.
-            sort
+            sort.
+            uniq
         end
         
         # Implement to_ntriples on array, to simplify logic later
@@ -77,7 +76,7 @@ module Matchers
       elsif @expected.is_a?(Graph) && @actual.identifier != @expected.identifier
         "Graph identifiers differ:\nexpected: #{@expected.identifier}\nactual:   #{@actual.identifier}"
       else
-        "Graph differs\n"
+        "Graph differs#{@info.compare == :array ? '(array)' : ''}\n"
       end +
       "\n#{info + "\n" unless info.empty?}" +
       (@info.inputDocument ? "Input file: #{@info.inputDocument}\n" : "") +
@@ -96,47 +95,51 @@ module Matchers
   end
 
   # Run expected SPARQL query against actual
-  class PassQuery
-    def initialize(expected, info)
-      @expected = expected
-      @query = Redland::Query.new(expected)
-      @info = info
-    end
-    def matches?(actual)
-      @actual = actual
-      @expected_results = @info.respond_to?(:expectedResults) ? @info.expectedResults : true
-      model = Redland::Model.new
-      ntriples_parser = Redland::Parser.ntriples
-      ntriples_parser.parse_string_into_model(model, actual.to_ntriples, "http://www.w3.org/2006/07/SWD/RDFa/testsuite/xhtml1-testcases/")
+  if $redland_enabled
+    class PassQuery
+      def initialize(expected, info)
+        @expected = expected
+        @query = Redland::Query.new(expected)
+        @info = info
+      end
+      def matches?(actual)
+        @actual = actual
+        @expected_results = @info.respond_to?(:expectedResults) ? @info.expectedResults : true
+        model = Redland::Model.new
+        ntriples_parser = Redland::Parser.ntriples
+        ntriples_parser.parse_string_into_model(model, actual.to_ntriples, "http://www.w3.org/2006/07/SWD/RDFa/testsuite/xhtml1-testcases/")
 
-      @results = @query.execute(model)
-      if @expected_results
-        @results.is_boolean? && @results.get_boolean?
-      else
-        @results.nil? || @results.is_boolean? && !@results.get_boolean?
+        @results = @query.execute(model)
+        if @expected_results
+          @results.is_boolean? && @results.get_boolean?
+        else
+          @results.nil? || @results.is_boolean? && !@results.get_boolean?
+        end
+      end
+      def failure_message_for_should
+        info = @info.respond_to?(:information) ? @info.information : ""
+        "#{info + "\n" unless info.empty?}" +
+        if @results.nil?
+          "Query failed to return results"
+        elsif !@results.is_boolean?
+          "Query returned non-boolean results"
+        elsif @expected_results
+          "Query returned false"
+        else
+          "Query returned true (expected false)"
+        end +
+        "\n#{@expected}" +
+        "\n#{@info.input}" +
+        "\nResults:\n#{@actual.to_ntriples}" +
+        "\nDebug:\n#{@info.trace}"
       end
     end
-    def failure_message_for_should
-      info = @info.respond_to?(:information) ? @info.information : ""
-      "#{info + "\n" unless info.empty?}" +
-      if @results.nil?
-        "Query failed to return results"
-      elsif !@results.is_boolean?
-        "Query returned non-boolean results"
-      elsif @expected_results
-        "Query returned false"
-      else
-        "Query returned true (expected false)"
-      end +
-      "\n#{@expected}" +
-      "\n#{@info.input}" +
-      "\nResults:\n#{@actual.to_ntriples}" +
-      "\nDebug:\n#{@info.trace}"
-    end
-  end
 
-  def pass_query(expected, info = "")
-    PassQuery.new(expected, info)
+    def pass_query(expected, info = "")
+      PassQuery.new(expected, info)
+    end
+  else
+    def pass_query(expect, info = ""); false; end
   end
 
   class BeValidXML

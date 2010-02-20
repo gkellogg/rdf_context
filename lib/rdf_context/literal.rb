@@ -4,7 +4,6 @@ begin
 rescue LoadError
 end
 
-require 'parsedate'
 require File.join(File.dirname(__FILE__), 'duration')
 
 module RdfContext
@@ -134,6 +133,10 @@ module RdfContext
       def encode_contents(contents, options)
         case @value
         when XSD_NS.boolean   then contents.to_s
+#        when XSD_NS.boolean   then %w(1 true).include?(contents.to_s) ? "true" : "false"
+#        when XSD_NS.integer   then contents.to_i.to_s
+#        when XSD_NS.decmial   then "%f" % contents.to_f
+#        when XSD_NS.double    then contents.to_s
         when XSD_NS.time      then contents.is_a?(Time) ? contents.strftime("%H:%M:%S%Z").sub(/\+00:00|UTC/, "Z") : contents.to_s
         when XSD_NS.dateTime  then contents.is_a?(DateTime) ? contents.strftime("%Y-%m-%dT%H:%M:%S%Z").sub(/\+00:00|UTC/, "Z") : contents.to_s
         when XSD_NS.date      then contents.is_a?(Date) ? contents.strftime("%Y-%m-%d%Z").sub(/\+00:00|UTC/, "Z") : contents.to_s
@@ -146,8 +149,8 @@ module RdfContext
       def valid?(contents)
         case @value
         when XSD_NS.boolean   then %w(1 true 0 false).include?(contents.to_s)
-        when XSD_NS.decimal   then !!contents.to_s.match(/^[\+\-]?\d+(\.\d+)?$/)
-        when XSD_NS.double    then !!contents.to_s.match(/^[\+\-]?\d+(\.\d+([eE][\+\-]?\d+)?)?$/)
+        when XSD_NS.decimal   then !!contents.to_s.match(/^[\+\-]?\d+(\.\d*)?$/)
+        when XSD_NS.double    then !!contents.to_s.match(/^[\+\-]?\d+(\.\d*([eE][\+\-]?\d+)?)?$/)
         when XSD_NS.integer   then !!contents.to_s.match(/^[\+\-]?\d+$/)
         else                       true
         end

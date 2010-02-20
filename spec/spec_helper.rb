@@ -1,3 +1,4 @@
+# coding: utf-8
 begin
   require 'spec'
   require 'active_support'
@@ -9,6 +10,12 @@ rescue LoadError
   require 'active_support'
 end
 
+begin
+  require 'rdf/redland'
+  $redland_enabled = true
+rescue LoadError
+end
+
 ActiveSupport::XmlMini.backend = 'Nokogiri'
 
 $:.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
@@ -17,6 +24,8 @@ require 'rdf_context'
 require 'matchers'
 
 include RdfContext
+
+TMP_DIR = File.join(File.dirname(__FILE__), 'tmp')
 
 SWAP_DIR = File.join(File.dirname(__FILE__), 'swap_test')
 SWAP_TEST = "http://www.w3.org/2000/10/swap/test/n3parser.tests"

@@ -22,6 +22,7 @@ module RdfHelper
     attr_accessor :status
     attr_accessor :warning
     attr_accessor :parser
+    attr_accessor :compare
     
     def initialize(triples, uri_prefix, test_dir, options = {})
       case options[:test_type]
@@ -85,29 +86,32 @@ module RdfHelper
       "]"
     end
     
-    def compare; :graph; end
-    
     # Read in file, and apply modifications reference either .html or .xhtml
     def input
-      @input ||= File.open(inputDocument)
+      @input ||= File.read(inputDocument)
     end
 
     def output
-      @output ||= outputDocument && File.open(outputDocument)
+      @output ||= outputDocument && File.read(outputDocument)
     end
 
     # Run test case, yields input for parser to create triples
-    def run_test
+    def run_test(options = {})
       rdf_string = input
 
       # Run
       @parser = Parser.new
       yield(rdf_string, @parser)
 
-      if output
+      return unless output
+
+      if self.compare == :array
+        @parser.graph.should be_equivalent_graph(self.output, self)
+      else
         output_parser = Parser.new
         output_fmt = output_parser.detect_format(self.output, self.outputDocument)
         output_parser.parse(self.output, about, :type => output_fmt)
+
         @parser.graph.should be_equivalent_graph(output_parser, self)
       end
     end

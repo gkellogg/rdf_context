@@ -469,8 +469,8 @@ HERE
         h_dest = list.upcase.scan(/\w\d/).inject({}) {|hash, ad| hash[ad[0,1]] = ad[1,1]; hash}
         subject.send(:bnode_permutations, h_source, h_dest) do |hash|
           perm = ""
-          hash.each_pair {|k, v| perm << "#{k}#{v}"}
-          puts "perm: #{perm}"
+          #puts hash.inspect
+          hash.keys.sort.each {|k| perm << "#{k}#{hash[k]}"}
           perms.should include(perm)
           perms -= [perm]
         end
