@@ -79,7 +79,7 @@ module RdfaHelper
     
     # Read in file, and apply modifications to create a properly formatted HTML
     def input
-      f = self.name + ".txt"
+      f = self.inputDocument
       found_head = false
       namespaces = ""
       body = File.readlines(File.join(TEST_DIR, "tests", f)).map do |line|
@@ -129,6 +129,9 @@ module RdfaHelper
       suite == "xhtml" ? body : body.gsub(HTMLRE, '\1.html')
     end
     
+    def inputDocument; self.name + ".txt"; end
+    def outputDocument; self.name + ".sparql"; end
+
     # Run test case, yields input for parser to create triples
     def run_test
       rdfa_string = input

@@ -21,7 +21,7 @@ describe "N3 parser" do
           end
         rescue #Spec::Expectations::ExpectationNotMetError => e
           if t.status == "pending"
-            pending() {  raise } 
+            pending("Formulae not supported") {  raise } 
           else
             raise
           end

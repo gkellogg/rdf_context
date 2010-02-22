@@ -402,42 +402,80 @@ describe "Literals: " do
   
   describe "valid content" do
     {
-      Literal.typed("true", XSD_NS.boolean) => %("true"^^<http://www.w3.org/2001/XMLSchema#boolean>),
-      Literal.typed("false", XSD_NS.boolean) => %("false"^^<http://www.w3.org/2001/XMLSchema#boolean>),
-      Literal.typed("1", XSD_NS.boolean) => %("true"^^<http://www.w3.org/2001/XMLSchema#boolean>),
-      Literal.typed("01", XSD_NS.integer) => %("true"^^<http://www.w3.org/2001/XMLSchema#boolean>),
-      Literal.typed("1", XSD_NS.integer) => %("1"^^<http://www.w3.org/2001/XMLSchema#integer>),
-      Literal.typed("-1", XSD_NS.integer) => %("-1"^^<http://www.w3.org/2001/XMLSchema#integer>),
-      Literal.typed("+1", XSD_NS.integer) => %("1"^^<http://www.w3.org/2001/XMLSchema#integer>),
-      
-      Literal.typed("1", XSD_NS.decimal) => %("1.0"^^<http://www.w3.org/2001/XMLSchema#decimal>),
-      Literal.typed("-1", XSD_NS.decimal) => %("-1.0"^^<http://www.w3.org/2001/XMLSchema#decimal>),
-      Literal.typed("1.", XSD_NS.decimal) => %("1.0"^^<http://www.w3.org/2001/XMLSchema#decimal>),
-      Literal.typed("1.0", XSD_NS.decimal) => %("1.0"^^<http://www.w3.org/2001/XMLSchema#decimal>),
-      Literal.typed("1.00", XSD_NS.decimal) => %("1.0"^^<http://www.w3.org/2001/XMLSchema#decimal>),
-      Literal.typed("+001.00", XSD_NS.decimal) => %("1.0"^^<http://www.w3.org/2001/XMLSchema#decimal>),
-      Literal.typed("123.456", XSD_NS.decimal) => %("123.456"^^<http://www.w3.org/2001/XMLSchema#decimal>),
-      
-      Literal.typed("1", XSD_NS.double) => %("1.0E0"^^<http://www.w3.org/2001/XMLSchema#double>),
-      Literal.typed("-1", XSD_NS.double) => %("-1.0E0"^^<http://www.w3.org/2001/XMLSchema#double>),
-      Literal.typed("+01.000", XSD_NS.double) => %("1.0E0"^^<http://www.w3.org/2001/XMLSchema#double>),
-      Literal.typed("1.", XSD_NS.double) => %("1.00E0"^^<http://www.w3.org/2001/XMLSchema#double>),
-      Literal.typed("1.0", XSD_NS.double) => %("1.00E0"^^<http://www.w3.org/2001/XMLSchema#double>),
-      Literal.typed("123.456", XSD_NS.double) => %("123.4560E0"^^<http://www.w3.org/2001/XMLSchema#double>),
-      Literal.typed("1.0e+1", XSD_NS.double) => %("1.00E0"^^<http://www.w3.org/2001/XMLSchema#double>),
-      Literal.typed("1.0e-10", XSD_NS.double) => %("1.0E-10"^^<http://www.w3.org/2001/XMLSchema#double>),
-      Literal.typed("123.456e4", XSD_NS.double) => %("123.456E4"^^<http://www.w3.org/2001/XMLSchema#double>),
+      "true"  => %("true"^^<http://www.w3.org/2001/XMLSchema#boolean>),
+      "false" => %("false"^^<http://www.w3.org/2001/XMLSchema#boolean>),
+      "tRuE"  => %("true"^^<http://www.w3.org/2001/XMLSchema#boolean>),
+      "FaLsE" => %("false"^^<http://www.w3.org/2001/XMLSchema#boolean>),
+      "1"     => %("true"^^<http://www.w3.org/2001/XMLSchema#boolean>),
+      "0"     => %("false"^^<http://www.w3.org/2001/XMLSchema#boolean>),
     }.each_pair do |lit, n3|
-      it "should validate '#{lit.to_n3}'" do
-        lit.valid?.should be_true
+      it "should validate boolean '#{lit}'" do
+        Literal.typed(lit, XSD_NS.boolean).valid?.should be_true
       end
 
-      it "should canonicalize '#{lit.to_n3}'" do
-        begin
-          lit.to_ntriples.should == n3
-        rescue #Spec::Expectations::ExpectationNotMetError => e
-          pending() {  raise }
-        end
+      it "should canonicalize boolean '#{lit}'" do
+        Literal.typed(lit, XSD_NS.boolean).to_ntriples.should == n3
+      end
+    end
+
+    {
+      "01" => %("1"^^<http://www.w3.org/2001/XMLSchema#integer>),
+      "1"  => %("1"^^<http://www.w3.org/2001/XMLSchema#integer>),
+      "-1" => %("-1"^^<http://www.w3.org/2001/XMLSchema#integer>),
+      "+1" => %("1"^^<http://www.w3.org/2001/XMLSchema#integer>),
+    }.each_pair do |lit, n3|
+      it "should validate integer '#{lit}'" do
+        Literal.typed(lit, XSD_NS.integer).valid?.should be_true
+      end
+
+      it "should canonicalize integer '#{lit}'" do
+        Literal.typed(lit, XSD_NS.integer).to_ntriples.should == n3
+      end
+    end
+
+    {
+      "1"                              => %("1.0"^^<http://www.w3.org/2001/XMLSchema#decimal>),
+      "-1"                             => %("-1.0"^^<http://www.w3.org/2001/XMLSchema#decimal>),
+      "1."                             => %("1.0"^^<http://www.w3.org/2001/XMLSchema#decimal>),
+      "1.0"                            => %("1.0"^^<http://www.w3.org/2001/XMLSchema#decimal>),
+      "1.00"                           => %("1.0"^^<http://www.w3.org/2001/XMLSchema#decimal>),
+      "+001.00"                        => %("1.0"^^<http://www.w3.org/2001/XMLSchema#decimal>),
+      "123.456"                        => %("123.456"^^<http://www.w3.org/2001/XMLSchema#decimal>),
+      "2.345"                          => %("2.345"^^<http://www.w3.org/2001/XMLSchema#decimal>),
+      "1.000000000"                    => %("1.0"^^<http://www.w3.org/2001/XMLSchema#decimal>),
+      "2.3"                            => %("2.3"^^<http://www.w3.org/2001/XMLSchema#decimal>),
+      "2.234000005"                    => %("2.234000005"^^<http://www.w3.org/2001/XMLSchema#decimal>),
+      "2.2340000000000005"             => %("2.2340000000000005"^^<http://www.w3.org/2001/XMLSchema#decimal>),
+      "2.23400000000000005"            => %("2.234"^^<http://www.w3.org/2001/XMLSchema#decimal>),
+      "2.23400000000000000000005"      => %("2.234"^^<http://www.w3.org/2001/XMLSchema#decimal>),
+      "1.2345678901234567890123457890" => %("1.2345678901234567"^^<http://www.w3.org/2001/XMLSchema#decimal>),
+    }.each_pair do |lit, n3|
+      it "should validate decimal '#{lit}'" do
+        Literal.typed(lit, XSD_NS.decimal).valid?.should be_true
+      end
+
+      it "should canonicalize decimal '#{lit}'" do
+        Literal.typed(lit, XSD_NS.decimal).to_ntriples.should == n3
+      end
+    end
+    
+    {
+      "1"         => %("1.0E0"^^<http://www.w3.org/2001/XMLSchema#double>),
+      "-1"        => %("-1.0E0"^^<http://www.w3.org/2001/XMLSchema#double>),
+      "+01.000"   => %("1.0E0"^^<http://www.w3.org/2001/XMLSchema#double>),
+      "1."        => %("1.0E0"^^<http://www.w3.org/2001/XMLSchema#double>),
+      "1.0"       => %("1.0E0"^^<http://www.w3.org/2001/XMLSchema#double>),
+      "123.456"   => %("1.23456E2"^^<http://www.w3.org/2001/XMLSchema#double>),
+      "1.0e+1"    => %("1.0E1"^^<http://www.w3.org/2001/XMLSchema#double>),
+      "1.0e-10"   => %("1.0E-10"^^<http://www.w3.org/2001/XMLSchema#double>),
+      "123.456e4" => %("1.23456E6"^^<http://www.w3.org/2001/XMLSchema#double>),
+    }.each_pair do |lit, n3|
+      it "should validate double '#{lit}'" do
+        Literal.typed(lit, XSD_NS.double).valid?.should be_true
+      end
+
+      it "should canonicalize double '#{lit}'" do
+        Literal.typed(lit, XSD_NS.double).to_ntriples.should == n3
       end
     end
   end

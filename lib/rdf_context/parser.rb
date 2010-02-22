@@ -131,9 +131,8 @@ module RdfContext
     # @param [XML Node, any] node:: XML Node or string for showing context
     # @param [String] message::
     def add_debug(node, message)
-      return unless $verbose || $DEBUG
       puts "#{node_path(node)}: #{message}" if $DEBUG
-      @debug << "#{node_path(node)}: #{message}" if @debug
+      @debug << "#{node_path(node)}: #{message}" if @debug.is_a?(Array)
     end
 
     # add a triple, object can be literal or URI or bnode

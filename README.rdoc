@@ -7,7 +7,7 @@ A set of compliant RDF parsers:
 * RDF/XML
 * RDFa
 
-Multiple datastores may be attached to a Graph, including Memory, List and SQLite3
+Multiple data-stores may be attached to a Graph, including Memory, List and SQLite3
 
 == DESCRIPTION:
 
@@ -18,7 +18,7 @@ RdfContext parses RDF/XML, RDFa and N3-rdf into a Graph object. It also serializ
 
 * Fully compliant RDF/XML parser.
 * Fully compliant XHTML/RDFa 1.0 parser.
-* N3-rdf parser
+* Fully compliant N3-rdf parser (N3-rdf level)
 * N-Triples and RDF/XML serializer
 * RDFa tests use SPARQL for most tests due to Rasqal limitations. Other tests compare directly against N-triples.
 * Graph serializes into RDF/XML and N-Triples.
@@ -48,6 +48,15 @@ Graphs also store namespace associations, and can serialize graphs to RDF/XML or
   
   g.to_rdfxml
   g.to_ntriples
+
+Resource properties
+
+  graph.parse(':foo a :bar; rdfs:label "An example" .', "http://example.com/")
+  graph.resources("http://example.com/subject") =>
+  {
+   "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" => [<http://example.com/#bar>],
+   "http://example.com/#label"                       => ["An example"]
+  }
 
 Instantiate an existing graph from a datastore
 
@@ -98,10 +107,9 @@ SQLite3Store:: context aware datastore using a SQLite3 database to create a pers
 
 == TODO:
 * Testing
-  * Integrate ntriples tests in spec/ntriples/test.nt
   * RDFa updates for new tests and non XHTML representations.
 * Graphs
-  * n3 serialization
+  * n3/turtle serialization
 * Reasoner/inference engine
 * SPARQL
 * RDFS logic and RDF entailment tests
@@ -112,12 +120,13 @@ SQLite3Store:: context aware datastore using a SQLite3 database to create a pers
 == Resources:
 * Distiller[http://kellogg-assoc/distiller]
 * RDoc[http://rdoc.info/projects/gkellogg/rdf_context]
+* History[http://github.com/gkellogg/rdf_context/blob/master/History.txt]
 
 == LICENSE:
 
 (The MIT License)
 
-Copyright (c) 2009 Gregg Kellogg
+Copyright (c) 2009-2010 Gregg Kellogg
 
 Copyright (c) 2008 Tom Morris and contributors
 

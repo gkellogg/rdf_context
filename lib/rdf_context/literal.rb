@@ -131,12 +131,25 @@ module RdfContext
       
       # Encode literal contents
       def encode_contents(contents, options)
+        return contents.to_s unless valid?(contents)
+        
         case @value
-        when XSD_NS.boolean   then contents.to_s
-#        when XSD_NS.boolean   then %w(1 true).include?(contents.to_s) ? "true" : "false"
-#        when XSD_NS.integer   then contents.to_i.to_s
-#        when XSD_NS.decmial   then "%f" % contents.to_f
-#        when XSD_NS.double    then contents.to_s
+        when XSD_NS.boolean then %(1 true).include?(contents.to_s.downcase) ? "true" : "false"
+        when XSD_NS.integer then contents.to_i.to_s
+        when XSD_NS.decimal
+          # Can't use simple %f transformation do to special requirements from N3 tests in representation
+          i, f = contents.to_s.split(".")
+          f = f.to_s[0,16]  # Truncate after 15 decimal places
+          i.sub!(/^\+?0+(\d)$/, '\1')
+          f.sub!(/0*$/, '')
+          f = "0" if f.empty?
+          "#{i}.#{f}"
+        when XSD_NS.double
+          i, f, e = ("%.16E" % contents.to_f).split(/[\.E]/)
+          f.sub!(/0*$/, '')
+          f = "0" if f.empty?
+          e.sub!(/^\+?0+(\d)$/, '\1')
+          "#{i}.#{f}E#{e}"
         when XSD_NS.time      then contents.is_a?(Time) ? contents.strftime("%H:%M:%S%Z").sub(/\+00:00|UTC/, "Z") : contents.to_s
         when XSD_NS.dateTime  then contents.is_a?(DateTime) ? contents.strftime("%Y-%m-%dT%H:%M:%S%Z").sub(/\+00:00|UTC/, "Z") : contents.to_s
         when XSD_NS.date      then contents.is_a?(Date) ? contents.strftime("%Y-%m-%d%Z").sub(/\+00:00|UTC/, "Z") : contents.to_s
@@ -148,7 +161,7 @@ module RdfContext
       # Validate format of content
       def valid?(contents)
         case @value
-        when XSD_NS.boolean   then %w(1 true 0 false).include?(contents.to_s)
+        when XSD_NS.boolean   then %w(1 true 0 false).include?(contents.to_s.downcase)
         when XSD_NS.decimal   then !!contents.to_s.match(/^[\+\-]?\d+(\.\d*)?$/)
         when XSD_NS.double    then !!contents.to_s.match(/^[\+\-]?\d+(\.\d*([eE][\+\-]?\d+)?)?$/)
         when XSD_NS.integer   then !!contents.to_s.match(/^[\+\-]?\d+$/)

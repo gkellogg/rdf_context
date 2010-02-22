@@ -32,6 +32,7 @@ module RdfContext
       @default_ns = Namespace.new("#{uri}#", "")  if uri
       add_debug("@default_ns", "#{@default_ns.inspect}")
 
+      @graph.allow_n3 = true
       document = parser.parse(@doc)
       unless document
         puts parser.inspect if $DEBUG
@@ -281,6 +282,8 @@ module RdfContext
       result = []
       if objects.respond_to?(:object)
         result << process_expression(objects.object)
+      elsif objects.respond_to?(:pathitem)
+        result << process_expression(objects)
       elsif objects.respond_to?(:expression)
         result << process_expression(objects.expression)
         result << process_objects(objects.path_list) if objects.respond_to?(:path_list)

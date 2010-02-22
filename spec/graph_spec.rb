@@ -194,6 +194,7 @@ HERE
     end
     
     it "should find predicate bnodes" do
+      subject.allow_n3 = true
       c = BNode.new("c")
       subject << Triple.new(URIRef.new("http://foo"), c, Literal.untyped("BNode predicate"))
       subject.bnodes.length.should == 3
@@ -452,10 +453,11 @@ HERE
         end
     
         it "should be true for equivalent graphs with different BNode predicates" do
+          subject.allow_n3 = true
           subject.add_triple(@ex.a, BNode.new("knows", @bn_ctx), @ex.b)
           subject.add_triple(@ex.b, BNode.new("knows", @bn_ctx), @ex.a)
 
-          f = Graph.new(:store => s, :identifier => subject.identifier)
+          f = Graph.new(:store => s, :identifier => subject.identifier, :allow_n3 => true)
           f.add_triple(@ex.a, BNode.new("knows", @bn_ctx), @ex.b)
           f.add_triple(@ex.b, BNode.new("knows", @bn_ctx), @ex.a)
           subject.should == f

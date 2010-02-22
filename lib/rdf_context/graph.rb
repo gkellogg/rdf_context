@@ -13,6 +13,7 @@ module RdfContext
     attr_reader :nsbinding
     attr_reader :identifier
     attr_reader :store
+    attr_accessor :allow_n3
 
     # Create a Graph with the given store and identifier.
     #
@@ -31,6 +32,7 @@ module RdfContext
     # @param [Hash] options:: Options
     # <em>options[:store]</em>:: storage, defaults to a new ListStore instance. May be symbol :list_store or :memory_store
     # <em>options[:identifier]</em>:: Identifier for this graph, BNode or URIRef
+    # <em>options[:allow_n3]</em>:: Allow N3-specific triples: Literals as subject, BNodes as predicate
     def initialize(options = {})
       @nsbinding = {}
 
@@ -41,6 +43,8 @@ module RdfContext
       when :memory_store  then MemoryStore.new
       else                     ListStore.new
       end
+      
+      @allow_n3 = options[:allow_n3]
       
       @identifier = Triple.coerce_node(options[:identifier]) || BNode.new
     end
@@ -137,7 +141,8 @@ module RdfContext
       # Add bindings for predicates not already having bindings
       tmp_ns = "ns0"
       predicates.each do |p|
-        unless p.namespace(uri_bindings)
+        raise "Attempt to serialize graph containing non-strict RDF compiant BNode as predicate" unless p.is_a?(URIRef)
+        if !p.namespace(uri_bindings)
           uri_bindings[p.base] = Namespace.new(p.base, tmp_ns)
           rdf_attrs["xmlns:#{tmp_ns}"] = p.base
           tmp_ns = tmp_ns.succ
@@ -241,6 +246,7 @@ module RdfContext
     # @param [Triple] t:: the triple to be added to the graph
     # @return [Graph]:: Returns the graph
     def << (triple)
+      triple.validate_rdf unless @allow_n3 # Only add triples if n3-mode is set
       @store.add(triple, self)
       self
     end
@@ -260,7 +266,10 @@ module RdfContext
     def add(*triples)
       options = triples.last.is_a?(Hash) ? triples.pop : {}
       ctx = options[:context] || @default_context || self
-      triples.each {|t| @store.add(t, ctx)}
+      triples.each do |t|
+        t.validate_rdf unless @allow_n3 # Only add triples if n3-mode is set
+        @store.add(t, ctx)
+      end
       self
     end
     
@@ -304,8 +313,15 @@ module RdfContext
 
     # Resource properties
     #
-    # Properties arranged as a hash with the predicate Term as index to an array of resources
+    # Properties arranged as a hash with the predicate Term as index to an array of resources or literals
     #
+    # Example:
+    #   graph.parse(':foo a :bar; rdfs:label "An example" .', "http://example.com/")
+    #   graph.resources("http://example.com/subject") =>
+    #   {
+    #     "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" => [<http://example.com/#bar>],
+    #     "http://example.com/#label"                       => ["An example"]
+    #   }
     def properties(subject)
       @properties ||= {}
       @properties[subject.to_s] ||= begin
@@ -442,8 +458,10 @@ module RdfContext
     # <em>options[:debug]</em>:: Array to place debug messages
     # <em>options[:type]</em>:: One of _rdfxml_, _html_, or _n3_
     # <em>options[:strict]</em>:: Raise Error if true, continue with lax parsing, otherwise
+    # <em>options[:allow_n3]</em>:: Allow N3-specific triples: Literals as subject, BNodes as predicate
     # @return [Graph]:: Returns the graph containing parsed triples
     def parse(stream, uri = nil, options = {}, &block) # :yields: triple
+      @allow_n3 ||= options[:allow_n3]
       Parser.parse(stream, uri, options.merge(:graph => self), &block)
     end
   end

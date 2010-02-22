@@ -74,6 +74,12 @@ module RdfContext
       Triple.new(subject, predicate, object)
     end
     
+    # Validate that this triple is legal RDF, not extended for Notation-3
+    def validate_rdf
+      raise InvalidNode, "Triple has illegal RDF subject #{subject.inspect}" unless subject.is_a?(URIRef) || subject.is_a?(BNode)
+      raise InvalidPredicate, "Triple has illegal RDF predicate #{predicate.inspect}" unless predicate.is_a?(URIRef)
+    end
+    
     # For indexes
     def hash
       [subject, predicate, object].hash

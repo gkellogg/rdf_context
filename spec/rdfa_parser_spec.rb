@@ -114,15 +114,13 @@ describe "RDFa parser" do
       describe "that are approved" do
         test_cases(suite).each do |t|
           next unless t.status == "approved"
-          #next unless t.name =~ /0115/
+          #next unless t.name =~ /0140/
           #puts t.inspect
           specify "test #{t.name}: #{t.title}#{",  (negative test)" unless t.expectedResults}" do
-            begin
-              t.run_test do |rdfa_string, rdfa_parser|
-                rdfa_parser.parse(rdfa_string, t.informationResourceInput, :debug => [])
-              end
-            rescue Spec::Expectations::ExpectationNotMetError => e
-              raise
+            #puts t.input
+            #puts t.results
+            t.run_test do |rdfa_string, rdfa_parser|
+              rdfa_parser.parse(rdfa_string, t.informationResourceInput, :debug => [])
             end
           end
         end
@@ -130,7 +128,7 @@ describe "RDFa parser" do
       describe "that are unreviewed" do
         test_cases(suite).each do |t|
           next unless t.status == "unreviewed"
-          next unless t.name =~ /017\d/
+          #next unless t.name =~ /017\d/
           #puts t.inspect
           specify "test #{t.name}: #{t.title}#{",  (negative test)" unless t.expectedResults}" do
             begin
