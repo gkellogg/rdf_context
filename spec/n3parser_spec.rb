@@ -93,22 +93,9 @@ describe "N3 parser" do
       end
       
       it "should parse long literal ending in double quote" do
-        @parser.parse(%(:a :b """ \"""" .), "http://a/b")
-      end
-      
-      describe "having illegal content" do
-        {
-          %(:y :p1 "xyz"^^xsd:integer .) => %r(Typed literal has an invalid lexical value: .* "xyz"),
-          %(:y :p1 "12xyz"^^xsd:integer .) => %r(Typed literal has an invalid lexical value: .* "12xyz"),
-          %(:y :p1 "xy.z"^^xsd:double .) => %r(Typed literal has an invalid lexical value: .* "xy\.z"),
-          %(:y :p1 "+1.0z"^^xsd:double .) => %r(Typed literal has an invalid lexical value: .* "\+1.0z"),
-        }.each_pair do |n3, error|
-          it "should raise error for '#{n3}'" do
-            lambda {
-              @parser.parse("@prefix xsd: <http://www.w3.org/2001/XMLSchema#> . #{n3}", "http://a/b")
-            }.should raise_error(error)
-          end
-        end
+        @parser.parse(%(:a :b """ \\"""" .), "http://a/b")
+        @parser.graph.size.should == 1
+        @parser.graph[0].object.contents.should == ' "'
       end
     end
 
@@ -121,6 +108,17 @@ describe "N3 parser" do
       triple.subject.identifier.should =~ /anon/
       triple.predicate.should == "http://example.org/property"
       triple.object.should == "http://example.org/resource2"
+    end
+
+    it "should create named predicate bnode" do
+      @parser.parse("<http://example.org/resource2> _:anon <http://example.org/object> .")
+      @parser.graph.should_not be_nil
+      @parser.graph.size.should == 1
+      triple = @parser.graph[0]
+      triple.subject.should == "http://example.org/resource2"
+      triple.predicate.should be_a(BNode)
+      triple.predicate.identifier.should =~ /anon/
+      triple.object.should == "http://example.org/object"
     end
 
     it "should create named object bnode" do
@@ -184,6 +182,36 @@ describe "N3 parser" do
       @parser.graph[0].object.class.should == RdfContext::BNode
     end
 
+    describe "should create URIRefs" do
+      {
+        %(<http://example.org/joe> <http://xmlns.com/foaf/0.1/knows> <http://example.org/jane> .) => %(<http://example.org/joe> <http://xmlns.com/foaf/0.1/knows> <http://example.org/jane> .),
+        %(<joe> <knows> <jane> .) => %(<http://a/joe> <http://a/knows> <http://a/jane> .),
+        %(:joe :knows :jane .) => %(<http://a/b#joe> <http://a/b#knows> <http://a/b#jane> .),
+        %(<#D%C3%BCrst>  a  "URI percent ^encoded as C3, BC".) => %(<http://a/b#D%C3%BCrst> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> "URI percent ^encoded as C3, BC" .),
+      }.each_pair do |n3, nt|
+        it "for '#{n3}'" do
+          @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug, :compare => :array)
+        end
+      end
+
+      {
+        %(<#Dürst>       a  "URI straight in UTF8".) => %(<http://a/b#D\\u00FCrst> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> "URI straight in UTF8" .),
+        %(:a :related :\u3072\u3089\u304C\u306A.) => %(<http://a/b#a> <http://a/b#related> <http://a/b#\\u3072\\u3089\\u304C\\u306A> .),
+      }.each_pair do |n3, nt|
+        it "for '#{n3}'" do
+          begin
+            @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug, :compare => :array)
+          rescue
+            if defined?(::Encoding)
+              raise
+            else
+              pending("Unicode URIs not supported in Ruby 1.8") {  raise } 
+            end
+          end
+        end
+      end
+    end
+    
     it "should create URIRefs" do
       n3doc = "<http://example.org/joe> <http://xmlns.com/foaf/0.1/knows> <http://example.org/jane> ."
       @parser.parse(n3doc)
@@ -195,6 +223,25 @@ describe "N3 parser" do
       n3doc = "<http://example.org/joe> <http://xmlns.com/foaf/0.1/name> \"Joe\"."
       @parser.parse(n3doc)
       @parser.graph[0].object.class.should == RdfContext::Literal
+    end
+  end
+  
+  describe "with illegal syntax" do
+    {
+      %(:y :p1 "xyz"^^xsd:integer .) => %r(Typed literal has an invalid lexical value: .* "xyz"),
+      %(:y :p1 "12xyz"^^xsd:integer .) => %r(Typed literal has an invalid lexical value: .* "12xyz"),
+      %(:y :p1 "xy.z"^^xsd:double .) => %r(Typed literal has an invalid lexical value: .* "xy\.z"),
+      %(:y :p1 "+1.0z"^^xsd:double .) => %r(Typed literal has an invalid lexical value: .* "\+1.0z"),
+      %(:a :b .) => %r(Illegal statment: ".*" missing object),
+      %(:a :b 'single quote' .) => RdfException,
+      %(:a "literal value" :b .) => InvalidPredicate,
+      %(@keywords prefix. :e prefix :f .) => %r(Keyword ".*" used as expression)
+    }.each_pair do |n3, error|
+      it "should raise error for '#{n3}'" do
+        lambda {
+          @parser.parse("@prefix xsd: <http://www.w3.org/2001/XMLSchema#> . #{n3}", "http://a/b")
+        }.should raise_error(error)
+      end
     end
   end
   
@@ -319,8 +366,8 @@ describe "N3 parser" do
       end
       
       it "should accept prefix with empty local name" do
-        n3 = %(@prefix foo : <#> . foo: foo: foo: .)
-        nt = %(<http://a/b#> <http://a/b#> <http://a/b#> .)
+        n3 = %(@prefix foo: <http://foo/bar#> . foo: foo: foo: .)
+        nt = %(<http://foo/bar#> <http://foo/bar#> <http://foo/bar#> .)
         @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug, :compare => :array)
       end
       
@@ -500,6 +547,12 @@ describe "N3 parser" do
       it "should create BNode for [] as subject" do
         n3 = %(@prefix a: <http://foo/a#> . [] a:p a:v .)
         nt = %(_:bnode0 <http://foo/a#p> <http://foo/a#v> .)
+        @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
+      end
+      
+      it "should create BNode for [] as predicate" do
+        n3 = %(@prefix a: <http://foo/a#> . a:s [] a:o .)
+        nt = %(<http://foo/a#s> _:bnode0 <http://foo/a#o> .)
         @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug)
       end
       
@@ -764,86 +817,6 @@ describe "N3 parser" do
       
     end
     
-    # W3C N3 Test suite from http://www.w3.org/2000/10/swap/test/n3parser.tests
-    describe "w3c swap tests" do
-      require 'rdf_helper'
-
-      def self.positive_tests
-        RdfHelper::TestCase.positive_parser_tests(SWAP_TEST, SWAP_DIR) rescue []
-      end
-
-      def self.negative_tests
-        RdfHelper::TestCase.negative_parser_tests(SWAP_TEST, SWAP_DIR) rescue []
-      end
-
-      # Negative parser tests should raise errors.
-      describe "positive parser tests" do
-        positive_tests.each do |t|
-          #next unless t.about.uri.to_s =~ /rdfms-rdf-names-use/
-          #next unless t.name =~ /11/
-          #puts t.inspect
-          specify "test #{t.about.uri.to_s} against #{t.outputDocument}" do
-            begin
-              t.run_test do |rdf_string, parser|
-                parser.parse(rdf_string, t.about.uri.to_s, :strict => true, :debug => [])
-              end
-            rescue #Spec::Expectations::ExpectationNotMetError => e
-              pending() {  raise }
-            end
-          end
-        end
-      end
-
-      describe "negative parser tests" do
-        negative_tests.each do |t|
-          #next unless t.about.uri.to_s =~ /rdfms-empty-property-elements/
-          #next unless t.name =~ /1/
-          #puts t.inspect
-          specify "test #{t.about.uri.to_s}" do
-            t.run_test do |rdf_string, parser|
-              begin
-                lambda do
-                  parser.parse(rdf_string, t.about.uri.to_s, :strict => true, :debug => [])
-                  parser.graph.should be_equivalent_graph("", t)
-                end.should raise_error(RdfException)
-              rescue Spec::Expectations::ExpectationNotMetError => e
-                pending() {  raise }
-              end
-            end
-          end
-        end
-      end
-    end
-
-    # CWM suite from http://www.w3.org/2000/10/swap/test/regression.n3
-    describe "w3c cwm tests" do
-      require 'rdf_helper'
-
-      def self.test_cases
-        RdfHelper::TestCase.test_cases(CWM_TEST, SWAP_DIR) rescue []
-      end
-
-      # Negative parser tests should raise errors.
-      test_cases.each do |t|
-        #next unless t.about.uri.to_s =~ /rdfms-rdf-names-use/
-        #next unless t.name =~ /11/
-        #puts t.inspect
-        specify "test #{t.name}: " + (t.description || "#{t.inputDocument} against #{t.outputDocument}") do
-          begin
-            t.run_test do |rdf_string, parser|
-              parser.parse(rdf_string, t.about.uri.to_s, :strict => true, :debug => [])
-            end
-          rescue #Spec::Expectations::ExpectationNotMetError => e
-            if t.status == "pending"
-              pending() {  raise } 
-            else
-              raise
-            end
-          end
-        end
-      end
-    end
-
      # n3p tests taken from http://inamidst.com/n3p/test/
     describe "with real data tests" do
       dirs = %w(misc lcsh rdflib n3p)
@@ -918,11 +891,6 @@ describe "N3 parser" do
     end
   end
 
-  it "should throw an exception when presented with a BNode as a predicate" do
-    n3doc = "_:a _:b _:c ."
-    lambda { @parser.parse(n3doc) }.should raise_error(RdfContext::Triple::InvalidPredicate)
-  end
-  
   it "should parse rdf_core testcase" do
     sampledoc = <<-EOF;
 <http://www.w3.org/2000/10/rdf-tests/rdfcore/xmlbase/Manifest.rdf#test001> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/10/rdf-tests/rdfcore/testSchema#PositiveParserTest> .

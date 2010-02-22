@@ -63,6 +63,7 @@ module RdfContext
           properties.each do |p|
             predicate = process_verb(p.verb)
             add_debug(*p.info("process_statements(#{subject}, #{predicate})"))
+            raise ParserException, %Q(Illegal statment: "#{predicate}" missing object) unless p.respond_to?(:object_list)
             objects = process_objects(p.object_list)
             objects.each do |object|
               if p.verb.respond_to?(:invert)
@@ -202,7 +203,10 @@ module RdfContext
         case barename
         when "true"   then Literal.typed("true", XSD_NS.boolean)
         when "false"  then Literal.typed("false", XSD_NS.boolean)
-        else               build_uri(barename)
+        else
+          # create URI using barename, unless it's in defined set, in which case it's an error
+          raise ParserException, %Q(Keyword "#{barename}" used as expression) if @keywords && @keywords.include?(barename)
+          build_uri(barename)
         end
       else
         build_uri(expression)
@@ -257,7 +261,7 @@ module RdfContext
       uri = uri.text_value if uri.respond_to?(:text_value)
       # Use non-normalized URI from @default_ns when constructing URIs
       if uri.match(/^\#/) && @default_ns
-        @default_ns + uri
+        @default_ns + uri.rdf_escape
       else
         base_uri = @default_ns ? @default_ns.uri : @uri
         URIRef.new(uri, base_uri, :normalize => normalize)
@@ -280,7 +284,7 @@ module RdfContext
       elsif objects.respond_to?(:expression)
         result << process_expression(objects.expression)
         result << process_objects(objects.path_list) if objects.respond_to?(:path_list)
-      elsif !objects.text_value.empty?
+      elsif !objects.text_value.empty? || objects.respond_to?(:nprefix)
         result << process_expression(objects)
       end
       result << process_objects(objects.object_list) if objects.respond_to?(:object_list)
@@ -322,15 +326,15 @@ module RdfContext
 #      add_debug(*expression.info("build_uri(#{prefix.inspect}, #{localname.inspect})"))
 
       uri = if @graph.nsbinding[prefix]
-        @graph.nsbinding[prefix] + localname.to_s
+        @graph.nsbinding[prefix] + localname.to_s.rdf_escape
       elsif prefix == '_'
         BNode.new(localname, @named_bnodes)
       elsif prefix == "rdf"
         # A special case
-        RDF_NS + localname.to_s
+        RDF_NS + localname.to_s.rdf_escape
       else
         @default_ns ||= Namespace.new("#{@uri}#", "")
-        @default_ns + localname.to_s
+        @default_ns + localname.to_s.rdf_escape
       end
       add_debug(*expression.info("build_uri: #{uri.inspect}")) if expression.respond_to?(:info)
       uri

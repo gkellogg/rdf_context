@@ -89,7 +89,7 @@ module RdfContext
       case predicate
       when Addressable::URI
         URIRef.new(predicate.to_s)
-      when URIRef
+      when URIRef, BNode
         predicate
       when String
         URIRef.new predicate
@@ -99,7 +99,7 @@ module RdfContext
         raise InvalidPredicate, "Predicate should be a URI"
       end
     rescue ParserException => e
-      raise InvalidPredicate, "Couldn't make a URIRef: #{e.message}"
+      raise InvalidPredicate, "#{predicate.class}: #{predicate.inspect} is not a valid predicate"
     end
 
     # Coerce a node (subject or object) to the appropriate RdfContext type.

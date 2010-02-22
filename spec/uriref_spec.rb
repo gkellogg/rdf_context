@@ -1,3 +1,4 @@
+# coding: utf-8
 require File.join(File.dirname(__FILE__), 'spec_helper')
 require 'webrick'
 include WEBrick
@@ -111,9 +112,12 @@ describe "URI References" do
       %w(http://foo/bar# a) => "http://foo/a",
       %w(http://foo/bar# /a) => "http://foo/a",
       %w(http://foo/bar# #a) => "http://foo/bar#a",
+
+      %w(http://foo/bar# #D%C3%BCrst) => "http://foo/bar#D%C3%BCrst",
+      %w(http://foo/bar# #Dürst) => "http://foo/bar#D%C3%BCrst",
     }.each_pair do |input, result|
       it "should create <#{result}> from <#{input[0]}> and '#{input[1]}'" do
-        URIRef.new(input[1], input[0]).to_s.should == result
+        URIRef.new(input[1], input[0], :normalize => true).to_s.should == result
       end
     end
   end

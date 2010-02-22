@@ -188,6 +188,17 @@ HERE
       xml.should include("Ralph Swick")
       xml.should include("Manu Sporny")
     end
+
+    it "should find bnodes" do
+      subject.bnodes.length.should == 2
+    end
+    
+    it "should find predicate bnodes" do
+      c = BNode.new("c")
+      subject << Triple.new(URIRef.new("http://foo"), c, Literal.untyped("BNode predicate"))
+      subject.bnodes.length.should == 3
+      subject.bnodes.should include(c)
+    end
   end
   
   describe "with namespaces" do
@@ -437,6 +448,16 @@ HERE
           f = Graph.new(:store => s, :identifier => subject.identifier)
           f.add_triple(@ex.a, @foaf.knows, BNode.new("a2", @bn_ctx))
           f.add_triple(BNode.new("a2", @bn_ctx), @foaf.knows, @ex.a)
+          subject.should == f
+        end
+    
+        it "should be true for equivalent graphs with different BNode predicates" do
+          subject.add_triple(@ex.a, BNode.new("knows", @bn_ctx), @ex.b)
+          subject.add_triple(@ex.b, BNode.new("knows", @bn_ctx), @ex.a)
+
+          f = Graph.new(:store => s, :identifier => subject.identifier)
+          f.add_triple(@ex.a, BNode.new("knows", @bn_ctx), @ex.b)
+          f.add_triple(@ex.b, BNode.new("knows", @bn_ctx), @ex.a)
           subject.should == f
         end
     

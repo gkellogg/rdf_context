@@ -59,6 +59,10 @@ module RdfContext
           bn[t.subject] ||= 0
           bn[t.subject] += 1
         end
+        if t.predicate.is_a?(BNode)
+          bn[t.predicate] ||= 0
+          bn[t.predicate] += 1
+        end
         if t.object.is_a?(BNode)
           bn[t.object] ||= 0
           bn[t.object] += 1

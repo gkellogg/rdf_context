@@ -368,9 +368,10 @@ module RdfContext
       
       graph.triples do |triple, context|
         # If triple contains bnodes, remap to new values
-        if triple.subject.is_a?(BNode) || triple.object.is_a?(BNode)
+        if triple.subject.is_a?(BNode) || triple.predicate.is_a?(BNode) || triple.object.is_a?(BNode)
           triple = triple.clone
           triple.subject = bn[triple.subject] if triple.subject.is_a?(BNode)
+          triple.predicate = bn[triple.predicate] if triple.predicate.is_a?(BNode)
           triple.object = bn[triple.object] if triple.object.is_a?(BNode)
         end
         self << triple
@@ -395,7 +396,7 @@ module RdfContext
       
       # Check each triple to see if it's contained in the other graph
       triples do |t, ctx|
-        next if t.subject.is_a?(BNode) || t.object.is_a?(BNode)
+        next if t.subject.is_a?(BNode) || t.predicate.is_a?(BNode) || t.object.is_a?(BNode)
         puts "eql? contains '#{t.to_ntriples}: #{other.contains?(t)}'" if $DEBUG
         return false unless other.contains?(t)
       end
@@ -406,11 +407,12 @@ module RdfContext
         # bn_map contains 1-1 mapping of bnodes from self to other
         catch :next_perm do
           triples do |t, ctx|
-            next unless t.subject.is_a?(BNode) || t.object.is_a?(BNode)
-            subject, object = t.subject, t.object
+            next unless t.subject.is_a?(BNode) || t.predicate.is_a?(BNode) || t.object.is_a?(BNode)
+            subject, predicate, object = t.subject, t.predicate, t.object
             subject = bn_map[subject] if bn_map.has_key?(subject)
+            predicate = bn_map[predicate] if bn_map.has_key?(predicate)
             object = bn_map[object] if bn_map.has_key?(object)
-            tn = Triple.new(subject, t.predicate, object)
+            tn = Triple.new(subject, predicate, object)
             puts "  eql? contains '#{tn.inspect}': #{other.contains?(tn)}" if $DEBUG
             next if other.contains?(tn)
           

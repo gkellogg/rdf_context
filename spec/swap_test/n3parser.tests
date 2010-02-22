@@ -30,10 +30,10 @@
 	n3test:outputDocument <n3/n3parser.tests_n3_10005.nt> ;
 	n3test:inputDocument		<syntax/djb1a.n3>.
 
-:n3_10006 a n3test:PositiveParserTest;
-	n3test:description	"we might as well be nice and self-referential";
-	n3test:outputDocument <n3/n3parser.tests_n3_10006.nt> ;
-	n3test:inputDocument		<>.
+#:n3_10006 a n3test:PositiveParserTest;
+#	n3test:description	"we might as well be nice and self-referential";
+#	n3test:outputDocument <n3/n3parser.tests_n3_10006.nt> ;
+#	n3test:inputDocument		<>.
 
 :n3_10007 a n3test:PositiveParserTest;
     n3test:description   	"Parse and generate simple contexts";

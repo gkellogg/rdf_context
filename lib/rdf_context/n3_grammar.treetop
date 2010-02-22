@@ -6,12 +6,7 @@ grammar N3Grammer
   end
 
   rule alpha
-    [A-Z_a-z]
-#    / [\u0370-\u037d]
-#    / [\u037f-\u1fff]
-#    / [\u200c-\u200d\u2070-\u218f\u2c00-\u2fef]
-#    / [\u3001-\ud7ff\uf900-\ufdcf\ufdf0-\ufffd]
-#    / [\U00010000-\U000effff]
+    [A-Z_a-z\p{Alpha}]
   end
 
   rule alphanumeric
@@ -140,11 +135,15 @@ grammar N3Grammer
   rule property_list
     verb space* object_list space* ";"+ space* property_list
     / verb space* object_list space* ";"*
+    / verb space* ";"* {def object_missing; true; end}
     / ""
   end
 
   rule qname
-    nprefix ":" localname / ':' localname* / localname { def barename; true; end }
+    nprefix ":" localname
+    / nprefix ':' { def text_value; ""; end }
+    / ':' localname*
+    / localname { def barename; true; end }
   end
   
   rule simpleStatement
@@ -175,7 +174,7 @@ grammar N3Grammer
   rule string_single_char
     !["\n\r] (
       ("\\"
-        [\\\"nrt]
+        [\\\"bfnrt]
       / ( "u" hexdigit hexdigit hexdigit hexdigit )
       / ( "U" "00" hexdigit hexdigit hexdigit hexdigit hexdigit hexdigit)
       )
@@ -184,13 +183,14 @@ grammar N3Grammer
 
   # """ constant value with escaping including single or double occurrences of quotes and/or newlines """ 
   rule string_multi
-    '"""' string_multi_char* '"""'
+    '"""' string_multi_single_char* '"""'
   end
 
-  rule string_multi_char
-    !'"""' . # something like this; need to think about it some more  
+  rule string_multi_single_char
+    "\\\""
+    / !('"""') .
   end
-    
+
   rule subject
     expression
   end

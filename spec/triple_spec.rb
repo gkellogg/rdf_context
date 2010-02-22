@@ -28,18 +28,33 @@ describe "Triples" do
       v = QuotedGraph.new
       Triple.new(v, RDF_TYPE, "obj").subject.should == v
     end
-    
-    it "should if not a URIRef or BNode, Literal or Typed Literal" do
-     lambda do
-       Triple.new({}, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new)
-      end.should raise_error
-    end
   end
 
-  it "should require that the predicate is a URIRef" do
-    lambda do
-      Triple.new(BNode.new, BNode.new, BNode.new)
-    end.should raise_error
+  describe "with predicates" do
+    it "should allow URIRef" do
+      v = URIRef.new("http://foo")
+      Triple.new(RDF_NS.Seq, v, "obj").predicate.should == v
+    end
+    
+    it "should allow BNode" do
+      v = BNode.new
+      Triple.new(RDF_NS.Seq, v, "obj").predicate.should == v
+    end
+    
+    it "should not allow Literal" do
+      v = Literal.untyped("foo")
+      lambda {Triple.new(RDF_NS.Seq, v, "obj")}.should raise_error
+    end
+    
+    it "should not allow Graph" do
+      v = Graph.new
+      lambda {Triple.new(RDF_NS.Seq, v, "obj")}.should raise_error
+    end
+    
+    it "should not allow QuotedGraph" do
+      v = QuotedGraph.new
+      lambda {Triple.new(RDF_NS.Seq, v, "obj")}.should raise_error
+    end
   end
 
   describe "with objects" do
@@ -66,13 +81,6 @@ describe "Triples" do
     it "should allow QuotedGraph" do
       v = QuotedGraph.new
       Triple.new(RDF_NS.Seq, RDF_TYPE, v).object.should == v
-    end
-    
-    it "should if not a URIRef or BNode, Literal or Typed Literal" do
-     lambda do
-       v = {}
-       Triple.new(RDF_NS.Seq, RDF_TYPE, v).object.should == v
-      end.should raise_error
     end
   end
 

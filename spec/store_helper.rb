@@ -15,6 +15,13 @@ shared_examples_for "Store" do
     subject.size.should == 2
   end
   
+  it "should allow you to add triples with bnodes" do
+    subject.add(Triple.new(BNode.new, @ex.b, @ex.c), nil)
+    subject.add(Triple.new(@ex.a, BNode.new, @ex.c), nil)
+    subject.add(Triple.new(@ex.a, @ex.b, BNode.new), nil)
+    subject.size.should == 3
+  end
+  
   it "should allow you to create and bind Namespace objects" do
     foaf = Namespace.new("http://xmlns.com/foaf/0.1/", "foaf")
     subject.bind(foaf).should == foaf
