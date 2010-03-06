@@ -19,7 +19,7 @@ RdfContext parses RDF/XML, RDFa and N3-rdf into a Graph object. It also serializ
 * Fully compliant RDF/XML parser.
 * Fully compliant XHTML/RDFa 1.0 parser.
 * Fully compliant N3-rdf parser (N3-rdf level)
-* N-Triples and RDF/XML serializer
+* Turtle, N-Triples and RDF/XML serializer
 * RDFa tests use SPARQL for most tests due to Rasqal limitations. Other tests compare directly against N-triples.
 * Graph serializes into RDF/XML and N-Triples.
 * ConjunctiveGraph, named Graphs and contextual storage modules.
@@ -40,7 +40,7 @@ a :store (defaults to :list_store)
 
   g.add(Triple.new(subject, predicate, object))
   
-Graphs also store namespace associations, and can serialize graphs to RDF/XML or N-triples
+Graphs also store namespace associations, and can serialize graphs to Turtle, RDF/XML, N-triples or a custom serializer
 
   g.bind(Namespace.new("http://example.com", "ex"))
   g.namespace("ex")
@@ -48,6 +48,12 @@ Graphs also store namespace associations, and can serialize graphs to RDF/XML or
   
   g.to_rdfxml
   g.to_ntriples
+  g.serialize(:format => :xml, :io => StringIO.new, :base => "http://base.example.com/") => IO Object, or string if none specified
+
+or, pass an instantiated Serializer object
+
+  ser = TurtleSerializer.new(g)
+  g.serialize(:format => ser, :io => StringIO.new, :base => "http://base.example.com/")
 
 Resource properties
 
@@ -83,6 +89,15 @@ or, parse directly into a graph
 
   g = Graph.new(:identifier => "http://example.com", :store => :sqlite3_store)
   g.parse(input, "http://example.com", :type => :rdfxml)
+
+=== Serializers
+AbstractSerializer class for XML, N-Triples and Turtle serializers. Turtle based on RecursiveSerializer.
+May be called from Graph via Graph#serialize, or instantiated and run separately:
+
+  g = Graph.new
+  s = TurtleSerializer.new(g)
+  stream = StringIO.new
+  s.serialize(stream, , "http://base.example.com/")
 
 === Data Stores
 ListStore:: simple non-context aware datastore based on Array

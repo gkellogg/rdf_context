@@ -3,6 +3,9 @@ require File.join(File.dirname(__FILE__), 'triple')
 require File.join(File.dirname(__FILE__), 'array_hacks')
 require File.join(File.dirname(__FILE__), 'store', 'list_store')
 require File.join(File.dirname(__FILE__), 'store', 'memory_store')
+require File.join(File.dirname(__FILE__), 'serializer', 'nt_serializer')
+require File.join(File.dirname(__FILE__), 'serializer', 'turtle_serializer')
+require File.join(File.dirname(__FILE__), 'serializer', 'xml_serializer')
 
 module RdfContext
   # A simple graph to hold triples.
@@ -97,6 +100,29 @@ module RdfContext
       @store.open(commit_pending_transaction)
     end
 
+    # Serialize graph using specified serializer class.
+    #
+    # @param [Hash] options:: Options
+    # <em>options[:format]</em>:: serializer, defaults to a new NTSerializer instance. Otherwise may be a symbol from :nt, :turtle, :xml
+    # <em>options[:io]</em>:: IO (or StringIO) object, otherwise serializes to a string
+    # <em>options[:base]</em>:: Base URI for output
+    #
+    # @returns [IO, String]:: Passed IO/StringIO object or a string
+    def serialize(options)
+      serializer = case options[:format]
+      when AbstractSerializer   then options[:serializer]
+      when :nt, :ntriples       then NTSerializer.new(self)
+      when :ttl, :turtle        then TurtleSerializer.new(self)
+      when :rdf, :xml, :rdfxml  then XmlSerializer.new(self)
+      else                           NTSerializer.new(self)
+      end
+      
+      io = options[:io] || StringIO.new
+      
+      serializer.serialize(io, options[:base])
+      options[:io] ? io : (io.rewind; io.read)
+    end
+    
     ## 
     # Exports the graph to RDF in N-Triples form.
     #
@@ -107,9 +133,7 @@ module RdfContext
     #
     # @author Tom Morris
     def to_ntriples
-      triples.collect do |t|
-        t.to_ntriples
-      end * "\n" + "\n"
+      serialize(:format => :nt)
     end
     
     # Output graph using to_ntriples
@@ -120,59 +144,7 @@ module RdfContext
     #
     # @return [String]:: The RDF/XML graph
     def to_rdfxml
-      replace_text = {}
-      rdfxml = ""
-      xml = builder = Builder::XmlMarkup.new(:target => rdfxml, :indent => 2)
-
-      extended_bindings = nsbinding.merge(
-        "rdf"   => RDF_NS,
-        "rdfs"  => RDFS_NS,
-        "xhv"   => XHV_NS,
-        "xml"   => XML_NS
-      )
-      rdf_attrs = extended_bindings.values.inject({}) { |hash, ns| hash.merge(ns.xmlns_attr => ns.uri.to_s)}
-      uri_bindings = self.uri_binding.merge(
-        RDF_NS.uri.to_s => RDF_NS,
-        RDFS_NS.uri.to_s => RDFS_NS,
-        XHV_NS.uri.to_s => XHV_NS,
-        XML_NS.uri.to_s => XML_NS
-      )
-      
-      # Add bindings for predicates not already having bindings
-      tmp_ns = "ns0"
-      predicates.each do |p|
-        raise "Attempt to serialize graph containing non-strict RDF compiant BNode as predicate" unless p.is_a?(URIRef)
-        if !p.namespace(uri_bindings)
-          uri_bindings[p.base] = Namespace.new(p.base, tmp_ns)
-          rdf_attrs["xmlns:#{tmp_ns}"] = p.base
-          tmp_ns = tmp_ns.succ
-        end
-      end
-
-      xml.instruct!
-      xml.rdf(:RDF, rdf_attrs) do
-        # Add statements for each subject
-        subjects.each do |s|
-          xml.rdf(:Description, (s.is_a?(BNode) ? "rdf:nodeID" : "rdf:about") => s) do
-            triples(Triple.new(s, nil, nil)) do |triple, context|
-              xml_args = triple.object.xml_args
-              qname = triple.predicate.to_qname(uri_bindings)
-              if triple.object.is_a?(Literal) && triple.object.xmlliteral?
-                replace_text["__replace_with_#{triple.object.object_id}__"] = xml_args[0]
-                xml_args[0] = "__replace_with_#{triple.object.object_id}__"
-              end
-              xml.tag!(qname, *xml_args)
-            end
-          end
-        end
-      end
-
-      # Perform literal substitutions
-      replace_text.each_pair do |match, value|
-        rdfxml.sub!(match, value)
-      end
-      
-      rdfxml
+      serialize(:format => :rdfxml)
     end
     
     ## 
@@ -401,7 +373,7 @@ module RdfContext
     #
     # We just follow Python RDFlib's lead and do a simple comparison
     def eql?(other)
-      puts "eql? size #{self.size} vs #{other.size}" if $DEBUG
+      #puts "eql? size #{self.size} vs #{other.size}" if $DEBUG
       return false if !other.is_a?(Graph) || self.size != other.size
       return false unless other.identifier.to_s == identifier.to_s unless other.identifier.is_a?(BNode) && identifier.is_a?(BNode)
       

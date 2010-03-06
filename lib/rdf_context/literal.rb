@@ -379,6 +379,10 @@ module RdfContext
       end
     end
     
+    def <=>(other)
+      self.to_s <=> other.to_s
+    end
+  
     def hash
       [@contents, @encoding, @lang].hash
     end

@@ -72,6 +72,10 @@ module RdfContext
       self.to_s == other.to_s
     end
     alias_method :==, :eql?
+    
+    def <=>(other)
+      self.to_s <=> other.to_s
+    end
   
     # Needed for uniq
     def hash; to_s.hash; end

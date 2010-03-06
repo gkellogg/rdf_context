@@ -252,7 +252,7 @@ module RdfContext
     end
 
     def size(context = nil)
-      context = nil if context == @identifier || (context.respond_to?(:identifier) && context.identifier == @identifier)
+      context = nil if (context.respond_to?(:identifier) ? context.identifier : context) == @identifier
 
       triples(Triple.new(nil, nil, nil), context).length
     end

@@ -105,7 +105,10 @@ module RdfHelper
 
       return unless output
 
-      if self.compare == :array
+      case self.compare
+      when :none
+        # Don't check output, just parse to graph
+      when :array
         @parser.graph.should be_equivalent_graph(self.output, self)
       else
         output_parser = Parser.new
