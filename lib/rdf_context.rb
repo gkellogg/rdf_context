@@ -15,10 +15,19 @@ rescue LoadError
   require 'treetop'
 end
 
-Dir.glob(File.join(File.dirname(__FILE__), 'rdf_context/**.rb')).sort.each { |f| require f }
+Dir.glob(File.join(File.dirname(__FILE__), 'rdf_context/*.rb')).sort.each { |f| require f }
 
 # Include Storage types, but be tollerant of failure to load as dependencies might not be available
-Dir.glob(File.join(File.dirname(__FILE__), "rdf_context/store/**.rb")).each do |f|
+Dir.glob(File.join(File.dirname(__FILE__), "rdf_context/store/*.rb")).each do |f|
+  begin
+    require f
+  rescue LoadError
+    puts "Error loading #{f}: #{$!}"
+  end
+end
+
+# Include Serializer types, but be tollerant of failure to load as dependencies might not be available
+Dir.glob(File.join(File.dirname(__FILE__), "rdf_context/serializer/*.rb")).each do |f|
   begin
     require f
   rescue LoadError
@@ -51,6 +60,7 @@ module RdfContext
   RDF_TYPE    = URIRef.new("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
   XML_LITERAL = Literal::Encoding.xmlliteral
 
+  DC_NS    = Namespace.new("http://purl.org/dc/elements/1.1/", "dc")
   OWL_NS      = Namespace.new("http://www.w3.org/2002/07/owl#", "owl")
   LOG_NS      = Namespace.new("http://www.w3.org/2000/10/swap/log#", "log")
   RDF_NS      = Namespace.new("http://www.w3.org/1999/02/22-rdf-syntax-ns#", "rdf")

@@ -3,6 +3,11 @@
 * Refactor serializers to be based on AbstractSerializer
 * Add Graph#serialize taking a serializer or symbol identifing a serialzer and a base URI
 * Add TurtleSerializer, along with AbstractSerializer, RecusiveSerializer, NTSerializer and XMLSerializer
+* Update XmlSerializer, and Graph#to_xml to do more intelligent generation of RDF/XML
+  * Control depth of recursive node generation with :max_depth
+  * Serialize rdf:type and untyped literals as attributes with :attributes => :untyped
+  * Serialize typed literals as attributes with :attributes => :typed
+* Added Literal#typed? and Literal#untyped? in addition to Literal#xmlliteral?
 
 === 0.5.0
 * Support for Ruby 1.9, 1.8.7 and 1.8.6.

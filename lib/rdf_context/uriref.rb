@@ -92,8 +92,7 @@ module RdfContext
     # Output URI as QName using URI binding
     def to_qname(uri_binding = {})
       ns = namespace(uri_binding)
-      sn = self.to_s.sub(ns.uri.to_s, "")
-      "#{ns.prefix}:#{sn}"
+      "#{ns.prefix}:#{short_name}"
     end
     
     def namespace(uri_binding = {})

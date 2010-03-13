@@ -15,20 +15,10 @@ module RdfContext
     
     def get_qname(uri)
       if uri.is_a?(URIRef)
-        @base && uri.to_s.match(/^#{@base}(.*)$/) do |md|
-          return "<#{md[1]}>"
-        end
+        md = uri.to_s.match(/^#{@base}(.*)$/) if @base
+        return "<#{md[1]}>" if md
         
-        begin
-          qn = @graph.qname(uri)
-        rescue RdfException
-          return false  # no namespace
-        end
-        # Local parts with . will mess up serialization
-        return false if qn.index('.')
-        
-        add_namespace(uri.namespace)
-        return qn
+        super(uri)
       end
     end
     
@@ -199,11 +189,16 @@ module RdfContext
       s_squared(subject) || s_default(subject)
     end
     
-    def serialize(stream, base = nil)
+    # Serialize the graph
+    #
+    # @param [IO, StreamIO] stream:: Stream in which to place serialized graph
+    # @param [Hash] options:: Options for parser
+    # <em>options[:base]</em>:: Base URI of graph, used to shorting URI references
+    def serialize(stream, options = {})
       puts "\nserialize: #{@graph.inspect}" if $DEBUG
       reset
       @stream = stream
-      @base = base
+      @base = options[:base]
       
       @graph.bind(RDF_NS)
       @graph.bind(RDFS_NS)
@@ -213,7 +208,7 @@ module RdfContext
 
       order_subjects.each do |subject|
         #puts "subj: #{subject.inspect}"
-        unless is_done(subject)
+        unless is_done?(subject)
           statement(subject)
         end
       end

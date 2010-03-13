@@ -429,10 +429,11 @@ module RdfContext
       encoding.xml_args(@contents, @lang)
     end
 
+    def untyped?; encoding == Encoding.the_null_encoding; end
+    def typed?; encoding != Encoding.the_null_encoding; end
+    
     # Is this an XMLLiteral?
-    def xmlliteral?
-      encoding.is_a?(XMLLiteral)
-    end
+    def xmlliteral?; encoding == Encoding.xmlliteral; end
     
     # Output literal contents as a string
     def to_s

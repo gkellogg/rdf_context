@@ -17,20 +17,13 @@ module RdfContext
     def top_classes; [RDFS_NS.Class]; end
     def predicate_order; [RDF_TYPE, RDFS_NS.label]; end
     
-    def add_namespace(ns)
-      @namespaces[ns.prefix] = ns
-    end
-
-    # Check to see if the subject should be serialized yet 
-    def check_subject(subject)
-      is_done(subject) ||
-      !@subjects.include(subject) ||
-      (@top_levels.include(subject) && @depth > 1) ||
-      (subject.is_a?(URIRef) && @depth > MAX_DEPTH)
+    def is_done?(subject)
+      @serialized.include?(subject)
     end
     
-    def is_done(subject)
-      @serialized.include?(subject)
+    # Mark a subject as done.
+    def subject_done(subject)
+      @serialized[subject] = true
     end
     
     def order_subjects
@@ -70,6 +63,31 @@ module RdfContext
       @references.fetch(node, 0)
     end
 
+    # Return a QName for the URI, or nil. Adds namespace of QName to defined namespaces
+    def get_qname(uri)
+      if uri.is_a?(URIRef)
+        begin
+          qn = @graph.qname(uri)
+        rescue RdfException
+          return false  # no namespace
+        end
+        # Local parts with . will mess up serialization
+        return false if qn.index('.')
+        
+        add_namespace(uri.namespace)
+        return qn
+      end
+    end
+    
+    def add_namespace(ns)
+      @namespaces[ns.prefix.to_s] = ns
+    end
+
+    # URI -> Namespace bindings (similar to graph) for looking up qnames
+    def uri_binding
+      @uri_binding ||= @namespaces.values.inject({}) {|hash, ns| hash[ns.uri.to_s] = ns; hash}
+    end
+
     def reset
       @depth = 0
       @lists = {}
@@ -84,7 +102,12 @@ module RdfContext
     # Sort the lists of values.  Return a sorted list of properties.
     def sort_properties(properties)
       properties.keys.each do |k|
-        properties[k] = properties[k].sort
+        properties[k] = properties[k].sort do |a, b|
+          a_li = a.is_a?(URIRef) && a.short_name =~ /^_\d+$/ ? a.to_i : a
+          b_li = b.is_a?(URIRef) && b.short_name =~ /^_\d+$/ ? b.to_i : b
+          
+          a_li <=> b_li
+        end
       end
       
       # Make sorted list of properties
@@ -104,11 +127,6 @@ module RdfContext
       end
     end
 
-    # Mark a subject as done.
-    def subject_done(subject)
-      @serialized[subject] = true
-    end
-    
     # Returns indent string multiplied by the depth
     def indent(modifier = 0)
       INDENT_STRING * (@depth + modifier)

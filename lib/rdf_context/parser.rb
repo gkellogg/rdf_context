@@ -28,7 +28,7 @@ module RdfContext
     # @param [String] uri:: the URI of the document
     # @param [Hash] options::  Options from
     # <em>options[:debug]</em>:: Array to place debug messages
-    # <em>options[:type]</em>:: One of _rdfxml_, _html_, or _n3_
+    # <em>options[:type]</em>:: One of _rdfxml_, _html_, or _n3_ (among others)
     # <em>options[:strict]</em>:: Raise Error if true, continue with lax parsing, otherwise
     # @return [Graph]:: Returns the graph containing parsed triples
     # @raise [Error]:: Raises RdfError if _strict_
@@ -62,9 +62,9 @@ module RdfContext
         
         # Create a delegate of a specific parser class
         @delegate ||= case options[:type].to_s
-        when "n3", "ntriples", "turtle" then N3Parser.new(options)
-        when "rdfa", "html", "xhtml"    then RdfaParser.new(options)
-        when "xml", "rdf", "rdfxml"     then RdfXmlParser.new(options)
+        when "n3", "ntriples", "turtle", "ttl", "n3", "notation3" then N3Parser.new(options)
+        when "rdfa", "html", "xhtml"                        then RdfaParser.new(options)
+        when "xml", "rdf", "rdfxml"                         then RdfXmlParser.new(options)
         else
           RdfXmlParser.new(options)
           # raise ParserException.new("type option must be one of :rdfxml, :html, or :n3")

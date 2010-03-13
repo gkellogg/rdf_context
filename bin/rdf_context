@@ -10,7 +10,7 @@ class Parse
     graph_opts[:store] = store if store
     parser = Parser.new(:graph => Graph.new(graph_opts))
     parser.parse(file.respond_to?(:read) ? file : File.open(file), base_uri, :strict => true)
-    output = parser.graph.serialize(:format => $format.to_sym)
+    output = parser.graph.serialize(:format => $format.to_sym, :base => base_uri)
     puts output unless $quiet
 
     puts parser.debug.join("\n\t") if $verbose
@@ -29,6 +29,7 @@ mode = ARGV.shift
 raise "Mode must be one of 'parse'" unless mode == "parse"
 
 $verbose = false
+$format = "ttl"
 base_uri  = "http://example.com"
 store = :list_store
 opts = GetoptLong.new(

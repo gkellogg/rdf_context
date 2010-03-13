@@ -107,6 +107,8 @@ module RdfContext
     # <em>options[:io]</em>:: IO (or StringIO) object, otherwise serializes to a string
     # <em>options[:base]</em>:: Base URI for output
     #
+    # Other options are parser specific.
+    #
     # @returns [IO, String]:: Passed IO/StringIO object or a string
     def serialize(options)
       serializer = case options[:format]
@@ -119,7 +121,7 @@ module RdfContext
       
       io = options[:io] || StringIO.new
       
-      serializer.serialize(io, options[:base])
+      serializer.serialize(io, options)
       options[:io] ? io : (io.rewind; io.read)
     end
     
@@ -262,14 +264,15 @@ module RdfContext
     # Returns ordered rdf:_n objects or rdf:first, rdf:rest for a given subject
     def seq(subject)
       props = properties(subject)
-      rdf_type = props[RDF_TYPE.to_s] || []
+      rdf_type = (props[RDF_TYPE.to_s] || []).map {|t| t.to_s}
 
-      if rdf_type.include?(RDF_NS.Seq)
+      #puts "seq; #{rdf_type} #{rdf_type - [RDF_NS.Seq, RDF_NS.Bag, RDF_NS.Alt]}"
+      if !(rdf_type - [RDF_NS.Seq, RDF_NS.Bag, RDF_NS.Alt]).empty?
         props.keys.select {|k| k.match(/#{RDF_NS.uri}_(\d)$/)}.
           sort_by {|i| i.sub(RDF_NS._.to_s, "").to_i}.
           map {|key| props[key]}.
           flatten
-      elsif self.triples(Triple.new(subject, RDF_NS.first, nil))
+      elsif !self.triples(Triple.new(subject, RDF_NS.first, nil)).empty?
         # N3-style first/rest chain
         list = []
         while subject != RDF_NS.nil

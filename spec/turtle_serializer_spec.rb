@@ -55,7 +55,7 @@ describe "Turtle Serializer" do
     it "should generate bare anon" do
       input = %(@prefix : <http://a/> . [:a :b] .)
       serialize(input, nil,
-        %r(^\s*\[ :a :b\] \.$),
+        %r(^\s*\[ :a :b\] \.$)
       )
     end
     
@@ -63,14 +63,14 @@ describe "Turtle Serializer" do
       input = %(@prefix : <http://a/> . [:a :b] :c :d .)
       serialize(input, nil,
         %r(^\s*\[ :a :b;$),
-        %r(^\s+:c :d\] \.$),
+        %r(^\s+:c :d\] \.$)
       )
     end
     
     it "should generate anon as object" do
       input = %(@prefix : <http://a/> . :a :b [:c :d] .)
       serialize(input, nil,
-        %r(^\s*\:a :b \[ :c :d\] \.$),
+        %r(^\s*\:a :b \[ :c :d\] \.$)
       )
     end
   end
@@ -79,56 +79,56 @@ describe "Turtle Serializer" do
     it "should generate bare list" do
       input = %(@prefix : <http://a/> . (:a :b) .)
       serialize(input, nil,
-        %r(^\(:a :b\) \.$),
+        %r(^\(:a :b\) \.$)
       )
     end
 
     it "should generate literal list" do
       input = %(@prefix : <http://a/> . :a :b ( "apple" "banana" ) .)
       serialize(input, nil,
-        %r(^:a :b \("apple" "banana"\) \.$),
+        %r(^:a :b \("apple" "banana"\) \.$)
       )
     end
     
     it "should generate empty list" do
       input = %(@prefix : <http://a/> . :a :b () .)
       serialize(input, nil,
-        %r(^:a :b \(\) \.$),
+        %r(^:a :b \(\) \.$)
       )
     end
     
     it "should generate empty list(2)" do
       input = %(@prefix : <http://a/> . :emptyList = () .)
       serialize(input, nil,
-        %r(^:emptyList <.*sameAs> \(\) \.$),
+        %r(^:emptyList <.*sameAs> \(\) \.$)
       )
     end
     
     it "should generate empty list as subject" do
       input = %(@prefix : <http://a/> . () :a :b .)
       serialize(input, nil,
-        %r(^\(\) :a :b \.$),
+        %r(^\(\) :a :b \.$)
       )
     end
     
     it "should generate list as subject" do
       input = %(@prefix : <http://a/> . (:a) :b :c .)
       serialize(input, nil,
-        %r(^\(:a\) :b :c \.$),
+        %r(^\(:a\) :b :c \.$)
       )
     end
 
     it "should generate list of empties" do
       input = %(@prefix : <http://a/> . :listOf2Empties = (() ()) .)
       serialize(input, nil,
-        %r(^:listOf2Empties <.*sameAs> \(\(\) \(\)\) \.$),
+        %r(^:listOf2Empties <.*sameAs> \(\(\) \(\)\) \.$)
       )
     end
     
     it "should generate list anon" do
       input = %(@prefix : <http://a/> . :twoAnons = ([a :mother] [a :father]) .)
       serialize(input, nil,
-        %r(^:twoAnons <.*sameAs> \(\[\s*a :mother\] \[\s*a :father\]\) \.$),
+        %r(^:twoAnons <.*sameAs> \(\[\s*a :mother\] \[\s*a :father\]\) \.$)
       )
     end
   end

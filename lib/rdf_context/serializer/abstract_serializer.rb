@@ -11,11 +11,16 @@ module RdfContext
     end
     
     # Serialize the graph
-    def serialize(stream, base = nil)
+    #
+    # @param [IO, StreamIO] stream:: Stream in which to place serialized graph
+    # @param [Hash] options:: Options for parser
+    # <em>options[:base]</em>:: Base URI of graph, used to shorting URI references
+    def serialize(stream, options = {})
     end
     
-    def relativaize(uri)
-      self.base ? URIRef.new(uri.to_s.sub(/^#{self.base}/, "")) : (uri.is_a?(URIRef) ? uri : URIRef.new(uri.to_s))
+    def relativize(uri)
+      uri = uri.to_s
+      self.base ? uri.sub(/^#{self.base}/, "") : uri
     end
   end
 end

@@ -102,7 +102,7 @@ class String
       (?:\\[\\bfnrt"/])   # Escaped control characters, " and /
       |(?:\\U00\h{6})     # 6 byte escaped Unicode
       |(?:\\u\h{4})       # 4 byte escaped Unicode
-    )xn
+    )x
   else
     UNESCAPE_RE = %r((?:\\[\\bfnrt"/]|(?:\\u(?:[A-Fa-f\d]{4}))+|\\[\x20-\xff]))n
   end
