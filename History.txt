@@ -1,13 +1,17 @@
 === 0.5.1
 * Avoid stack-overflow when checking graph size (if $DEBUG == true)
 * Refactor serializers to be based on AbstractSerializer
-* Add Graph#serialize taking a serializer or symbol identifing a serialzer and a base URI
+* Graph
+  * Add Graph#serialize taking a serializer or symbol identifing a serialzer and a base URI
+  * Add Graph#add_seq to add the list of Resources as to an RDF Container (i.e., rdf:first/rdf:rest)
+  * Add Graph#sync_properties to write properties cached from Graph#properties back to the store.
 * Add TurtleSerializer, along with AbstractSerializer, RecusiveSerializer, NTSerializer and XMLSerializer
 * Update XmlSerializer, and Graph#to_xml to do more intelligent generation of RDF/XML
   * Control depth of recursive node generation with :max_depth
   * Serialize rdf:type and untyped literals as attributes with :attributes => :untyped
   * Serialize typed literals as attributes with :attributes => :typed
 * Added Literal#typed? and Literal#untyped? in addition to Literal#xmlliteral?
+* BNode.new("") is not a named identifier, it's equivalent to an anonymous BNode
 
 === 0.5.0
 * Support for Ruby 1.9, 1.8.7 and 1.8.6.

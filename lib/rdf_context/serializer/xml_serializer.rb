@@ -102,7 +102,7 @@ module RdfContext
         rdf_type, *rest = properties.fetch(RDF_TYPE.to_s, [])
         properties[RDF_TYPE.to_s] = rest
         if rdf_type.is_a?(URIRef)
-          element = rdf_type.to_qname(uri_binding)
+          element = get_qname(rdf_type)
           if rdf_type.namespace && @default_ns && rdf_type.namespace.uri == @default_ns.uri
             element = rdf_type.short_name
           end
@@ -159,14 +159,16 @@ module RdfContext
       as_attr = false unless is_unique
       
       # Can't do as an attr if the qname has no prefix and there is no prefixed version
-      if as_attr && prop.namespace.prefix.to_s.empty?
-        if @prefixed_default_ns
-          qname = "#{@prefixed_default_ns.prefix}:#{prop.short_name}"
+      if @default_ns && prop.namespace.uri == @default_ns.uri
+        if as_attr
+          if @prefixed_default_ns
+            qname = "#{@prefixed_default_ns.prefix}:#{prop.short_name}"
+          else
+            as_attr = false
+          end
         else
-          as_attr = false
+          qname = prop.short_name
         end
-      elsif qname.match(/^:(.*)$/)
-        qname = $1
       end
 
       puts "predicate: #{qname}, as_attr: #{as_attr}, object: #{object.inspect}, done: #{is_done?(object)}, sub: #{@subjects.include?(object)}" if $DEBUG

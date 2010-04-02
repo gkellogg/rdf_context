@@ -60,7 +60,7 @@ module RdfContext
   RDF_TYPE    = URIRef.new("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
   XML_LITERAL = Literal::Encoding.xmlliteral
 
-  DC_NS    = Namespace.new("http://purl.org/dc/elements/1.1/", "dc")
+  DC_NS       = Namespace.new("http://purl.org/dc/elements/1.1/", "dc")
   OWL_NS      = Namespace.new("http://www.w3.org/2002/07/owl#", "owl")
   LOG_NS      = Namespace.new("http://www.w3.org/2000/10/swap/log#", "log")
   RDF_NS      = Namespace.new("http://www.w3.org/1999/02/22-rdf-syntax-ns#", "rdf")

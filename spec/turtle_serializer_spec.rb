@@ -32,6 +32,25 @@ describe "Turtle Serializer" do
       )
     end
     
+    it "should order properties" do
+      input = %(
+        @prefix : <http://a/> .
+        @prefix dc: <http://purl.org/dc/elements/1.1/> .
+        @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+        :b :c :d .
+        :b dc:title "title" .
+        :b a :class .
+        :b rdfs:label "label" .
+      )
+      serialize(input, nil,
+        %r(^:b a :class;$),
+        %r(^\s+rdfs:label "label";$),
+        %r(^\s+dc:title \"title\";$),
+        %r(^\s+:c :d \.$),
+        %r(a :class.*label.*title.*:c :d)m
+      )
+    end
+    
     it "should generate object list" do
       input = %(@prefix : <http://a/> . :b :c :d, :e .)
       serialize(input, nil,
@@ -129,6 +148,30 @@ describe "Turtle Serializer" do
       input = %(@prefix : <http://a/> . :twoAnons = ([a :mother] [a :father]) .)
       serialize(input, nil,
         %r(^:twoAnons <.*sameAs> \(\[\s*a :mother\] \[\s*a :father\]\) \.$)
+      )
+    end
+    
+    it "should generate owl:unionOf list" do
+      input = %(
+        @prefix : <http://a/> .
+        @prefix owl: <http://www.w3.org/2002/07/owl#> .
+        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+        @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+        :a rdfs:domain [
+          a owl:Class;
+          owl:unionOf [
+            a owl:Class;
+            rdf:first :b;
+            rdf:rest [
+              a owl:Class;
+              rdf:first :c;
+              rdf:rest rdf:nil
+            ]
+          ]
+        ] .
+      )
+      serialize(input, nil,
+        %r(:a rdfs:domain \[\s*a owl:Class;\s+owl:unionOf\s+\(:b\s+:c\)\]\s*\.$)m
       )
     end
   end

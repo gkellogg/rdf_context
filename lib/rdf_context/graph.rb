@@ -13,7 +13,6 @@ module RdfContext
   # Graphs store triples, and the namespaces associated with those triples, where defined
   class Graph
     attr_reader :triples
-    attr_reader :nsbinding
     attr_reader :identifier
     attr_reader :store
     attr_accessor :allow_n3
@@ -37,8 +36,6 @@ module RdfContext
     # <em>options[:identifier]</em>:: Identifier for this graph, BNode or URIRef
     # <em>options[:allow_n3]</em>:: Allow N3-specific triples: Literals as subject, BNodes as predicate
     def initialize(options = {})
-      @nsbinding = {}
-
       # Instantiate triple store
       @store = case options[:store]
       when AbstractStore  then options[:store]
@@ -63,9 +60,6 @@ module RdfContext
     
     def context_aware?; @store.context_aware?; end
     
-    # Data Store interface
-    def nsbinding; @store.nsbinding; end
-
     # Destroy the store identified by _configuration_ if supported
     # If configuration is nil, remove the graph context
     def destroy(configuration = nil)
@@ -97,7 +91,7 @@ module RdfContext
     # Might be necessary for stores that require closing a connection to a
     # database or releasing some resource.
     def close(commit_pending_transaction=false)
-      @store.open(commit_pending_transaction)
+      @store.close(commit_pending_transaction)
     end
 
     # Serialize graph using specified serializer class.
@@ -111,10 +105,10 @@ module RdfContext
     #
     # @returns [IO, String]:: Passed IO/StringIO object or a string
     def serialize(options)
-      serializer = case options[:format]
+      serializer = case options[:format].to_sym
       when AbstractSerializer   then options[:serializer]
       when :nt, :ntriples       then NTSerializer.new(self)
-      when :ttl, :turtle        then TurtleSerializer.new(self)
+      when :ttl, :turtle, :n3   then TurtleSerializer.new(self)
       when :rdf, :xml, :rdfxml  then XmlSerializer.new(self)
       else                           NTSerializer.new(self)
       end
@@ -242,9 +236,43 @@ module RdfContext
       ctx = options[:context] || @default_context || self
       triples.each do |t|
         t.validate_rdf unless @allow_n3 # Only add triples if n3-mode is set
+        #puts "Add #{t.inspect}, ctx: #{ctx.identifier}" if $verbose
         @store.add(t, ctx)
       end
       self
+    end
+    
+    ##
+    # Adds a list of resources as an RDF list by creating bnodes and first/rest triples
+    # @param [URIRef, BNode] subject:: the subject of the triple
+    # @param [URIRef] predicate:: the predicate of the triple
+    # @param [Array] objects:: List of objects to serialize
+    # @return [Graph]:: Returns the graph
+    # @raise [Error]:: Checks parameter types and raises if they are incorrect.
+    def add_seq(subject, predicate, objects)
+      if objects.empty?
+        add_triple(subject, predicate, RDF_NS.nil)
+        return self
+      end
+      
+      if RDF_NS.first != predicate
+        bn = BNode.new
+        add_triple(subject, predicate, bn)
+        subject = bn
+      end
+
+      last = objects.pop
+      
+      objects.each do |o|
+        add_triple(subject, RDF_NS.first, o)
+        bn = BNode.new
+        add_triple(subject, RDF_NS.rest, bn)
+        subject = bn
+      end
+
+      # Last item in list
+      add_triple(subject, RDF_NS.first, last)
+      add_triple(subject, RDF_NS.rest, RDF_NS.nil)
     end
     
     # Remove a triple from the graph. Delegates to store.
@@ -277,8 +305,13 @@ module RdfContext
         list = []
         while subject != RDF_NS.nil
           props = properties(subject)
-          list += props[RDF_NS.first.to_s]
-          subject = props[RDF_NS.rest.to_s].first
+          f = props[RDF_NS.first.to_s]
+          if f.to_s.empty? || f.first == RDF_NS.nil
+            subject = RDF_NS.nil
+          else
+            list += f
+            subject = props[RDF_NS.rest.to_s].first
+          end
         end
         list
       else
@@ -297,8 +330,9 @@ module RdfContext
     #     "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" => [<http://example.com/#bar>],
     #     "http://example.com/#label"                       => ["An example"]
     #   }
-    def properties(subject)
+    def properties(subject, recalc = false)
       @properties ||= {}
+      @properties.delete(subject.to_s) if recalc
       @properties[subject.to_s] ||= begin
         hash = Hash.new
         self.triples(Triple.new(subject, nil, nil)).map do |t, ctx|
@@ -309,6 +343,24 @@ module RdfContext
         end
         hash
       end
+    end
+    
+    
+    # Synchronize properties to graph
+    def sync_properties(subject)
+      props = properties(subject)
+      
+      # First remove all properties for subject
+      remove(Triple.new(subject, nil, nil))
+      
+      # Iterate through and add properties to graph
+      props.each_pair do |pred, list|
+        predicate = URIRef.new(pred)
+        [list].flatten.compact.each do |object|
+          add(Triple.new(subject, predicate, object))
+        end
+      end
+      @properties.delete(subject.to_s) # Read back in from graph
     end
     
     # Return an n3 identifier for the Graph

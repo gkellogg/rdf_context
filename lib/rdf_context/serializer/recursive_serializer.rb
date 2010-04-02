@@ -15,7 +15,7 @@ module RdfContext
     end
 
     def top_classes; [RDFS_NS.Class]; end
-    def predicate_order; [RDF_TYPE, RDFS_NS.label]; end
+    def predicate_order; [RDF_TYPE, RDFS_NS.label, DC_NS.title]; end
     
     def is_done?(subject)
       @serialized.include?(subject)
@@ -103,8 +103,8 @@ module RdfContext
     def sort_properties(properties)
       properties.keys.each do |k|
         properties[k] = properties[k].sort do |a, b|
-          a_li = a.is_a?(URIRef) && a.short_name =~ /^_\d+$/ ? a.to_i : a
-          b_li = b.is_a?(URIRef) && b.short_name =~ /^_\d+$/ ? b.to_i : b
+          a_li = a.is_a?(URIRef) && a.short_name =~ /^_\d+$/ ? a.to_i : a.to_s
+          b_li = b.is_a?(URIRef) && b.short_name =~ /^_\d+$/ ? b.to_i : b.to_s
           
           a_li <=> b_li
         end
@@ -112,19 +112,19 @@ module RdfContext
       
       # Make sorted list of properties
       prop_list = []
-      seen = {}
       
       predicate_order.each do |prop|
-        next if seen.has_key?(prop) || !properties.has_key?(prop)
-        prop_list << prop
-        seen[prop] = true
+        next unless properties[prop]
+        prop_list << prop.to_s
       end
       
       properties.keys.sort.each do |prop|
-        next if seen.has_key?(prop)
-        prop_list << prop
-        seen[prop] = true
+        next if prop_list.include?(prop.to_s)
+        prop_list << prop.to_s
       end
+      
+      puts "sort_properties: #{prop_list.to_sentence}" if $DEBUG
+      prop_list
     end
 
     # Returns indent string multiplied by the depth

@@ -299,6 +299,62 @@ HERE
       subject.size.should == 0
     end
 
+    describe "properties" do
+      subject { Graph.new }
+      
+      it "should get asserted properties" do
+        subject.add_triple(@ex.a, @ex.b, @ex.c)
+        subject.properties(@ex.a).should be_a(Hash)
+        subject.properties(@ex.a).size.should == 1
+        subject.properties(@ex.a).has_key?(@ex.b.to_s).should be_true
+        subject.properties(@ex.a)[@ex.b.to_s].should == [@ex.c]
+      end
+      
+      it "should get asserted properties with 2 properties" do
+        subject.add_triple(@ex.a, @ex.b, @ex.c)
+        subject.add_triple(@ex.a, @ex.b, @ex.d)
+        subject.properties(@ex.a).should be_a(Hash)
+        subject.properties(@ex.a).size.should == 1
+        subject.properties(@ex.a).has_key?(@ex.b.to_s).should be_true
+        subject.properties(@ex.a)[@ex.b.to_s].should include(@ex.c, @ex.d)
+      end
+
+      it "should get asserted properties with 3 properties" do
+        subject.add_triple(@ex.a, @ex.b, @ex.c)
+        subject.add_triple(@ex.a, @ex.b, @ex.d)
+        subject.add_triple(@ex.a, @ex.b, @ex.e)
+        subject.properties(@ex.a).should be_a(Hash)
+        subject.properties(@ex.a).size.should == 1
+        subject.properties(@ex.a).has_key?(@ex.b.to_s).should be_true
+        subject.properties(@ex.a)[@ex.b.to_s].should include(@ex.c, @ex.d, @ex.e)
+      end
+
+      it "should get asserted type with single type" do
+        subject.add_triple(@ex.a, RDF_TYPE, @ex.Audio)
+        subject.properties(@ex.a)[RDF_TYPE.to_s].should == [@ex.Audio]
+        subject.type_of(@ex.a).should == [@ex.Audio]
+      end
+    
+      it "should get nil with no type" do
+        subject.add_triple(@ex.a, @ex.b, @ex.c)
+        subject.properties(@ex.a)[RDF_TYPE.to_s].should == nil
+        subject.type_of(@ex.a).should == []
+      end
+      
+      it "should sync properties to graph" do
+        props = subject.properties(@ex.a)
+        props.should be_a(Hash)
+        props[RDF_TYPE.to_s] = @ex.Audio
+        props[DC_NS.title.to_s] = "title"
+        props[@ex.b.to_s] = [@ex.c, @ex.d]
+        subject.sync_properties(@ex.a)
+        subject.contains?(Triple.new(@ex.a, RDF_TYPE, @ex.Audio)).should be_true
+        subject.contains?(Triple.new(@ex.a, DC_NS.title, "title")).should be_true
+        subject.contains?(Triple.new(@ex.a, @ex.b, @ex.c)).should be_true
+        subject.contains?(Triple.new(@ex.a, @ex.b, @ex.d)).should be_true
+      end
+    end
+    
     describe "find triples" do
       it "should find subjects" do
         subject.triples(Triple.new(@ex.john, nil, nil)).size.should == 2
@@ -363,7 +419,7 @@ HERE
     end
     
     describe "rdf:first/rdf:rest sequences" do
-      subject {
+      it "should return object list" do
         a, b = BNode.new("a"), BNode.new("b"), BNode.new("c")
         g = Graph.new(:store => ListStore.new)
         g.add_triple(@ex.List, RDF_NS.first, @ex.john)
@@ -373,12 +429,21 @@ HERE
         g.add_triple(b, RDF_NS.first,  @ex.rick)
         g.add_triple(b, RDF_NS.rest, RDF_NS.nil)
         g.bind(@ex)
-        g
-      }
+
+        #puts g.seq(@ex.List).inspect
+        g.seq(@ex.List).should == [@ex.john, @ex.jane, @ex.rick]
+      end
       
-      it "should return object list" do
-        puts subject.seq(@ex.List).inspect
-        subject.seq(@ex.List).should == [@ex.john, @ex.jane, @ex.rick]
+      it "should generate a list of resources" do
+        g = Graph.new(:store => ListStore.new)
+        g.add_seq(@ex.List, RDF_NS.first, [@ex.john, @ex.jane, @ex.rick])
+        g.seq(@ex.List).should == [@ex.john, @ex.jane, @ex.rick]
+      end
+      
+      it "should generate an empty list" do
+        g = Graph.new(:store => ListStore.new)
+        g.add_seq(@ex.List, RDF_NS.first, [])
+        g.seq(@ex.List).should == []
       end
     end
   end

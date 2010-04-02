@@ -29,6 +29,7 @@ module RdfContext
     
     def destroy(configuration = {}); end
     def open(configuration = {}); end
+    def close(commit_pending_transactions = false); end
     def commit; end
     def rollback; end
 

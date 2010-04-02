@@ -47,7 +47,7 @@ describe "Blank nodes" do
   describe "which has a blank identifier" do
     subject { BNode.new("", @context) }
     it "should not be the same as an anonymous identifier" do should_not == BNode.new end
-    it "should be the same as another blank identifier" do should == BNode.new("", @context) end
+    it "should not be the same as another blank identifier" do should_not == BNode.new("", @context) end
   end
 
   describe "which are anonymous" do
