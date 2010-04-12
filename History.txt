@@ -1,3 +1,6 @@
+=== 0.5.2
+* Remove old binding for a namespace URI creating a new binding
+
 === 0.5.1
 * Avoid stack-overflow when checking graph size (if $DEBUG == true)
 * Refactor serializers to be based on AbstractSerializer
