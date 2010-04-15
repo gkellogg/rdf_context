@@ -1,3 +1,8 @@
+=== 0.5.3
+* Fix bug in XML serializer when type is a BNode.
+* Undo change in 0.5.2 to remove old binding based on equivalent URI to equivalent prefix.
+* Undo change form 0.5.1 to make BNode.new("") a named identifier. Required for RDFa test 0088.
+
 === 0.5.2
 * Remove old binding for a namespace URI creating a new binding
 

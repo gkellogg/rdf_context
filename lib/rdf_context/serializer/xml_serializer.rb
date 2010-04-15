@@ -35,7 +35,7 @@ module RdfContext
       preprocess
 
       predicates = @graph.predicates.uniq
-      possible = predicates | @graph.objects.uniq
+      possible = predicates + @graph.objects.uniq
       namespaces = {}
       required_namespaces = {}
       possible.each do |res|
@@ -100,9 +100,9 @@ module RdfContext
         puts "subject: #{subject.to_n3}, props: #{properties.inspect}" if $DEBUG
 
         rdf_type, *rest = properties.fetch(RDF_TYPE.to_s, [])
-        properties[RDF_TYPE.to_s] = rest
         if rdf_type.is_a?(URIRef)
           element = get_qname(rdf_type)
+          properties[RDF_TYPE.to_s] = rest
           if rdf_type.namespace && @default_ns && rdf_type.namespace.uri == @default_ns.uri
             element = rdf_type.short_name
           end

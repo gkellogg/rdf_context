@@ -16,7 +16,7 @@ module RdfContext
     # @param [String] identifier:: Legal NCName or nil for a named BNode
     # @param [Hash] context:: Context used to store named BNodes
     def initialize(identifier = nil, context = {})
-      if identifier.to_s.empty?
+      if identifier.nil?
         @identifier = generate_bn_identifier
       elsif identifier.match(/n?bn\d+[a-z]+(N\w+)?$/)
         @identifier = context[identifier] || identifier
