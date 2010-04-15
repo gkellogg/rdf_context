@@ -104,6 +104,7 @@ module RdfContext
           element = get_qname(rdf_type)
           properties[RDF_TYPE.to_s] = rest
           if rdf_type.namespace && @default_ns && rdf_type.namespace.uri == @default_ns.uri
+            properties[RDF_TYPE.to_s] = rest
             element = rdf_type.short_name
           end
         end
