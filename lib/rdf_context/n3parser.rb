@@ -50,6 +50,7 @@ module RdfContext
       add_debug("namesspace", "'#{prefix}' <#{uri}>")
       uri = @default_ns.uri if uri == '#'
       @graph.bind(Namespace.new(uri, prefix))
+      add_debug("namesspace", "ns = #{@graph.nsbinding.inspect}")
     end
 
     def process_statements(document)
@@ -177,20 +178,26 @@ module RdfContext
     end
 
     def process_expression(expression)
-      add_debug(*expression.info("process_expression"))
       if expression.respond_to?(:pathitem) && expression.respond_to?(:expression)
+        add_debug(*expression.info("process_expression(pathitem && expression)"))
         process_path(expression)  # Returns last object in chain
       elsif expression.respond_to?(:uri)
+        add_debug(*expression.info("process_expression(uri)"))
         process_uri(expression.uri)
       elsif expression.respond_to?(:localname)
+        add_debug(*expression.info("process_expression(localname)"))
         build_uri(expression)
       elsif expression.respond_to?(:anonnode)
+        add_debug(*expression.info("process_expression(anonnode)"))
         process_anonnode(expression)
       elsif expression.respond_to?(:literal)
+        add_debug(*expression.info("process_expression(literal)"))
         process_literal(expression)
       elsif expression.respond_to?(:numericliteral)
+        add_debug(*expression.info("process_expression(numericliteral)"))
         process_numeric_literal(expression)
       elsif expression.respond_to?(:boolean)
+        add_debug(*expression.info("process_expression(boolean)"))
         barename = expression.text_value.to_s
         if @keywords && !@keywords.include?(barename)
           build_uri(barename)
@@ -198,6 +205,7 @@ module RdfContext
           Literal.typed(barename.delete("@"), XSD_NS.boolean)
         end
       elsif expression.respond_to?(:barename)
+        add_debug(*expression.info("process_expression(barename)"))
         barename = expression.text_value.to_s
         
         # Should only happen if @keywords is defined, and text_value is not a defined keyword
@@ -210,6 +218,7 @@ module RdfContext
           build_uri(barename)
         end
       else
+        add_debug(*expression.info("process_expression(else)"))
         build_uri(expression)
       end
     end
@@ -325,8 +334,13 @@ module RdfContext
       prefix = expression.respond_to?(:nprefix) ? expression.nprefix.text_value.to_s : ""
       localname = expression.localname.text_value if expression.respond_to?(:localname)
       localname ||= (expression.respond_to?(:text_value) ? expression.text_value : expression).to_s.sub(/^:/, "")
+      localname = nil if localname.empty? # In N3/Turtle "_:" is not named
 
-#      add_debug(*expression.info("build_uri(#{prefix.inspect}, #{localname.inspect})"))
+      if expression.respond_to?(:info)
+        add_debug(*expression.info("build_uri(#{prefix.inspect}, #{localname.inspect})"))
+      else
+        add_debug("", "build_uri(#{prefix.inspect}, #{localname.inspect})")
+      end
 
       uri = if @graph.nsbinding[prefix]
         @graph.nsbinding[prefix] + localname.to_s.rdf_escape

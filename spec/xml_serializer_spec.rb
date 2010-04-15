@@ -332,12 +332,20 @@ describe "XML Serializer" do
       bn = BNode.new("a")
       @graph.add_triple(bn, DC_NS.title, "foo")
       @graph.add_triple(bn, OWL_NS.equals, bn)
-        check_xpaths(
-          serialize(:attributes => :untyped, :base => "http://release/"),
-          "/rdf:RDF/rdf:Description/@dc:title" => "foo",
-          "/rdf:RDF/rdf:Description/@rdf:nodeID" => /Na$/,
-          "/rdf:RDF/rdf:Description/owl:equals/@rdf:nodeID" => /Na$/
-        )
+      check_xpaths(
+        serialize(:attributes => :untyped, :base => "http://release/"),
+        "/rdf:RDF/rdf:Description/@dc:title" => "foo",
+        "/rdf:RDF/rdf:Description/@rdf:nodeID" => /Na$/,
+        "/rdf:RDF/rdf:Description/owl:equals/@rdf:nodeID" => /Na$/
+      )
+    end
+    
+    it "should replicate rdfcore/rdfms-seq-representation" do
+      @graph.parse(%(
+        <http://example.org/eg#eric> a [ <http://example.org/eg#intersectionOf> (<http://example.org/eg#Person> <http://example.org/eg#Male>)] .
+      ))
+      graph2 = Graph.new
+      graph2.parse(serialize(:format => :xml)).should be_equivalent_graph(@graph)
     end
   end
   

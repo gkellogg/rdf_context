@@ -13,7 +13,7 @@ class Parse
     output = parser.graph.serialize(:format => $format.to_sym, :base => base_uri)
     puts output unless $quiet
 
-    puts parser.debug.join("\n\t") if $verbose
+    puts parser.debug.to_a.join("\n\t") if $verbose
   rescue RdfException => e
     puts "Parse failure: #{e.message}"
     puts parser.debug if $verbose && parser

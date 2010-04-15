@@ -35,10 +35,11 @@ module RdfContext
 
     # Bind namespace to store, returns bound namespace
     def bind(namespace)
+      puts "bind #{namespace.inspect}"
       # Over-write an empty prefix
       uri = namespace.uri.to_s
       @uri_binding.delete(uri)
-      @nsbinding.delete_if {|prefix, ns| ns.uri.to_s == uri}
+      @nsbinding.delete_if {|prefix, ns| namespace.prefix == prefix}
 
       @uri_binding[uri] = namespace
       @nsbinding[namespace.prefix.to_s] = namespace
