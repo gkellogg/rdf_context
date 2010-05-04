@@ -46,6 +46,17 @@ describe "URI References" do
     uri2.to_s.should == "http://example.org/foo#bar"
   end
 
+  describe "short_name" do
+    specify { URIRef.new("http://foo/bar").short_name.should == "bar"}
+    specify { URIRef.new("http://foo").short_name.should == false}
+  end
+  
+  describe "base" do
+    specify { URIRef.new("http://foo/bar").base.should == "http://foo/"}
+    specify { URIRef.new("http://foo/").base.should == "http://foo/"}
+    specify { URIRef.new("http://foo").base.should == "http://foo/"}
+  end
+  
   describe "QName" do
       it "should find with trailing /" do
         ex = Namespace.new("http://example.org/foo/", "ex")
@@ -130,31 +141,4 @@ describe "URI References" do
   it "should be equivalent to string" do
     URIRef.new("http://example.org/foo#bar").should == "http://example.org/foo#bar"
   end
-  
-#   TEST turned off until parser is working.  
-#   it "should allow the programmer to Follow His Nose" do
-#     a = URIRef.new("http://127.0.0.1:3001/test")
-#     
-#     # server
-#     test_proc = lambda { |req, resp|
-#       resp['Content-Type'] = "application/rdf+xml"
-#       resp.body = <<-EOF;
-# <?xml version="1.0" ?>
-# <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:foaf="http://xmlns.com/foaf/0.1/">
-#   <rdf:Description rdf:about="http://localhost:3001/test">
-#     <foaf:name>Testy McTest</foaf:name>
-#   </rdf:Description>
-# </rdf:RDF>
-#       EOF
-#     }
-#     test = HTTPServlet::ProcHandler.new(test_proc)
-#     s = HTTPServer.new(:Port => 3001)
-#     s.mount("/test", test)
-#     trap("INT"){ s.shutdown }
-#     thread = Thread.new { s.start }
-#     graph = a.load_graph
-#     s.shutdown
-#     graph.class.should == RdfContext::Graph
-#     graph.size.should == 1
-#   end
 end

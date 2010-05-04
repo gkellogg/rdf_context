@@ -7,7 +7,7 @@ module RdfContext
     attr_accessor :doc, :graph
 
     ## 
-    # Creates a new parser for N3 (or Turtle).
+    # Creates a new parser
     #
     # @param [Hash] options:: Options from
     # <em>options[:graph]</em>:: Graph to parse into, otherwise a new RdfContext::Graph instance is created

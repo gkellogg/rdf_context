@@ -9,8 +9,8 @@ describe "Namespace" do
     end
     
     it "should create URIRef for frag" do
-      foaf_frag = Namespace.new("http://xmlns.com/foaf/0.1/", "foaf", true)
-      foaf_frag.knows.to_s.should == "http://xmlns.com/foaf/0.1/#knows"
+      foaf_frag = Namespace.new("http://xmlns.com/foaf/0.1/", "foaf")
+      foaf_frag.knows.to_s.should == "http://xmlns.com/foaf/0.1/knows"
     end
   end
   
@@ -50,6 +50,20 @@ describe "Namespace" do
     subject.foo.should == "http://xmlns.com/foaf/0.1/foo"
   end
   
+  describe "no URI normalization" do
+    specify {Namespace.new("http://foo", "foo").uri.should == "http://foo"}
+    specify {Namespace.new("http://foo#", "foo").uri.should == "http://foo#"}
+    specify {Namespace.new("http://foo/", "foo").uri.should == "http://foo/"}
+    specify {Namespace.new("xyz:foo", "foo").uri.should == "xyz:foo"}
+  end
+  
+  it "should not normalize URI" do
+  end
+  
+  describe "serialization" do
+    specify {subject.to_s.should == "foaf: http://xmlns.com/foaf/0.1/"}
+  end
+
   describe '#+' do
     it "should construct URI with +" do
       (subject + "foo").class.should == URIRef

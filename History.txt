@@ -1,3 +1,10 @@
+=== 0.5.4
+* RDFa 1.1 parsing supported (based on RDFa Core 1.1 W3C Working Draft 22 April 2010)
+* Fix URIRef#short_name (and consequently #base and #namespace) to not extract a non-hierarchical path as a short_name
+* Namespace no longer uses URIRef, but just acts on strings.
+* Namespace#new does not take an optional _fragment_ argument any longer.
+* Added Namespace#to_s to output "prefix: uri" format
+
 === 0.5.3
 * Fix bug in XML serializer when type is a BNode.
 * Undo change in 0.5.2 to remove old binding based on equivalent URI to equivalent prefix.

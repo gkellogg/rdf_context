@@ -12,21 +12,14 @@ module RdfContext
     #
     # @param [String] uri:: the URI of the namespace
     # @param [String] prefix:: the prefix of the namespace
-    # @param [Boolean] fragment:: are the identifiers on this resource fragment identifiers? (e.g. '#')  Defaults to false.
     # @return [Namespace]:: The newly created namespace.
     # @raise [Error]:: Checks validity of the desired prefix and raises if it is incorrect.
     #
     # @author Tom Morris, Pius Uzamere
-    def initialize(uri, prefix, fragment = nil)
+    def initialize(uri, prefix)
       prefix = prefix.to_s
 
-      @fragment = fragment
-      if uri.to_s.match(/^(.*)\#$/)
-        # Remove frag hash from URI so URIRef doesn't screw it up
-        uri = $1
-        @fragment ||= true
-      end
-      @uri = uri.is_a?(URIRef) ? uri : URIRef.new(uri, :normalize => false, :namespace => self)
+      @uri = uri.to_s
 
       raise ParserException, "Invalid prefix '#{prefix}'" unless prefix_valid?(prefix)
       @prefix = prefix
@@ -41,7 +34,7 @@ module RdfContext
     #
     # To avoid naming problems, a suffix may have an appended '_', which will be removed when the URI is generated.
     #
-    # @return [URIRef]:: The newly created URIRegerence.
+    # @return [String]:: The newly created URI.
     # @raise [Error]:: Checks validity of the desired prefix and raises if it is incorrect.
     # @author Tom Morris, Pius Uzamere
     def method_missing(methodname, *args)
@@ -52,11 +45,10 @@ module RdfContext
     # Rules are somewhat different than for normal URI unions, as the raw URI is used as the source,
     # not a normalized URI, and the result is not normalized
     def +(suffix)
-      prefix = @uri.to_s
-      prefix += '#' if @fragment && !prefix.index("#")
+      prefix = @uri
       suffix = suffix.to_s.sub(/^\#/, "") if prefix.index("#")
       suffix = suffix.to_s.sub(/_$/, '')
-      URIRef.new(prefix + suffix, :normalize => false, :namespace => self)
+      URIRef.new(prefix + suffix.to_s, :normalize => false, :namespace => self)
     end
 
     # Make sure to attach fragment
@@ -71,7 +63,7 @@ module RdfContext
 
     # Compare namespaces
     def eql?(other)
-      @prefix == other.prefix && self.uri == other.uri && @fragment == other.fragment
+      self.uri == other.uri
     end
     alias_method :==, :eql?
 
@@ -85,6 +77,10 @@ module RdfContext
       {xmlns_attr => @uri.to_s}
     end
     
+    def to_s
+      "#{prefix}: #{@uri}"
+    end
+    
     def inspect
       "Namespace[abbr='#{prefix}',uri='#{@uri}']"
     end
@@ -92,7 +88,7 @@ module RdfContext
     private
     # The Namespace prefix must be an NCName
     def prefix_valid?(prefix)
-      NC_REGEXP.match(prefix) || prefix.to_s.empty?
+      NC_REGEXP.match(prefix.to_s) || prefix.to_s.empty?
     end
   end
 end

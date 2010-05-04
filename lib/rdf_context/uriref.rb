@@ -47,14 +47,17 @@ module RdfContext
     # short_name of URI for creating QNames.
     #   "#{base]{#short_name}}" == uri
     def short_name
-      @short_name ||= if @namespace
-        self.to_s.sub(@namespace.uri.to_s, "")
-      elsif @uri.fragment()
-        @uri.fragment()
-      elsif @uri.path.split("/").last.class == String and @uri.path.split("/").last.length > 0
-        @uri.path.split("/").last
-      else
-        false
+      @short_name ||= begin
+        path = @uri.path.split("/")
+        if @namespace
+          self.to_s.sub(@namespace.uri.to_s, "")
+        elsif @uri.fragment
+          @uri.fragment
+        elsif path && path.length > 1 && path.last.class == String && path.last.length > 0 && path.last.index("/") != 0
+          path.last
+        else
+          false
+        end
       end
     end
     
@@ -63,7 +66,7 @@ module RdfContext
     def base
       @base ||= begin
         uri_base = self.to_s
-        sn = short_name.to_s
+        sn = short_name ? short_name.to_s : ""
         uri_base[0, uri_base.length - sn.length]
       end
     end

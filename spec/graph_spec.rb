@@ -328,6 +328,15 @@ HERE
         subject.properties(@ex.a).has_key?(@ex.b.to_s).should be_true
         subject.properties(@ex.a)[@ex.b.to_s].should include(@ex.c, @ex.d, @ex.e)
       end
+      
+      it "should get asserted properties for a BNode" do
+        bn = BNode.new
+        subject.add_triple(bn, @ex.b, @ex.c)
+        subject.properties(bn).should be_a(Hash)
+        subject.properties(bn).size.should == 1
+        subject.properties(bn).has_key?(@ex.b.to_s).should be_true
+        subject.properties(bn)[@ex.b.to_s].should == [@ex.c]
+      end
 
       it "should get asserted type with single type" do
         subject.add_triple(@ex.a, RDF_TYPE, @ex.Audio)

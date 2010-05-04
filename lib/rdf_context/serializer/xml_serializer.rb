@@ -32,6 +32,8 @@ module RdfContext
       
       doc = Nokogiri::XML::Document.new
 
+      puts "\nserialize: graph namespaces: #{@graph.nsbinding.inspect}" if $DEBUG
+
       preprocess
 
       predicates = @graph.predicates.uniq
@@ -43,8 +45,12 @@ module RdfContext
         if !get_qname(res)  # Creates Namespace mappings
           [RDF_NS, DC_NS, OWL_NS, LOG_NS, RDF_NS, RDFS_NS, XHV_NS, XML_NS, XSD_NS, XSI_NS].each do |ns|
             # Bind a standard namespace to the graph and try the lookup again
-            @graph.bind(ns) if ns.uri == res.base
-            required_namespaces[res.base] = true if !get_qname(res) && predicates.include?(res)
+            if ns.uri == res.base
+              @graph.bind(ns) 
+            end
+          end
+          if !get_qname(res) && predicates.include?(res)
+            required_namespaces[res.base] = true
           end
         end
       end
@@ -64,7 +70,7 @@ module RdfContext
       # Add bindings for predicates not already having bindings
       tmp_ns = "ns0"
       required_namespaces.keys.each do |uri|
-        puts "serialize: create temporary namespace for <#{uri}>" if $DEBUG
+        #puts "create namespace definition for #{uri}"
         add_namespace(Namespace.new(uri, tmp_ns))
         tmp_ns = tmp_ns.succ
       end
@@ -103,7 +109,8 @@ module RdfContext
         if rdf_type.is_a?(URIRef)
           element = get_qname(rdf_type)
           properties[RDF_TYPE.to_s] = rest
-          if rdf_type.namespace && @default_ns && rdf_type.namespace.uri == @default_ns.uri
+          type_ns = rdf_type.namespace rescue nil
+          if type_ns && @default_ns && type_ns.uri == @default_ns.uri
             properties[RDF_TYPE.to_s] = rest
             element = rdf_type.short_name
           end

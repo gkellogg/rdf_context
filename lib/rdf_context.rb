@@ -9,6 +9,7 @@ rescue LoadError
   require 'rubygems' unless ENV['NO_RUBYGEMS']
   gem 'nokogiri'
   gem 'addressable'
+  gem 'treetop'
   require 'nokogiri'
   require 'addressable/uri'
   require 'builder'
@@ -64,6 +65,7 @@ module RdfContext
   OWL_NS      = Namespace.new("http://www.w3.org/2002/07/owl#", "owl")
   LOG_NS      = Namespace.new("http://www.w3.org/2000/10/swap/log#", "log")
   RDF_NS      = Namespace.new("http://www.w3.org/1999/02/22-rdf-syntax-ns#", "rdf")
+  RDFA_NS     = Namespace.new("http://www.w3.org/ns/rdfa#", "rdfa")
   RDFS_NS     = Namespace.new("http://www.w3.org/2000/01/rdf-schema#", "rdfs")
   XHV_NS      = Namespace.new("http://www.w3.org/1999/xhtml/vocab#", "xhv")
   XML_NS      = Namespace.new("http://www.w3.org/XML/1998/namespace", "xml")

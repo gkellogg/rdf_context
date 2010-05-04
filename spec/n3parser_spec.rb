@@ -261,7 +261,7 @@ describe "N3 parser" do
       it "should map <> to document uri" do
         n3doc = "@prefix : <> ."
         @parser.parse(n3doc, "http://the.document.itself")
-        @parser.graph.nsbinding.should == {"" => Namespace.new("http://the.document.itself", "", true)}
+        @parser.graph.nsbinding.should == {"" => Namespace.new("http://the.document.itself#", "")}
       end
 
       it "should use <> as a prefix and as a triple node" do

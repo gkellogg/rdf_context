@@ -3,11 +3,6 @@ module RdfaHelper
   class TestCase
     include Matchers
     
-    TEST_DIR = File.join(File.dirname(__FILE__), 'rdfa-test-suite')
-    NT_DIR = File.join(File.dirname(__FILE__), 'rdfa-triples')
-    BASE_MANIFEST_URL = "http://rdfa.digitalbazaar.com/test-suite/"
-    BASE_TEST_CASE_URL = "#{BASE_MANIFEST_URL}test-cases/"
-    
     HTMLRE = Regexp.new('([0-9]{4,4})\.xhtml')
     TCPATHRE = Regexp.compile('\$TCPATH')
     
@@ -34,7 +29,7 @@ module RdfaHelper
         #next unless statement.subject.uri.to_s.match(/0001/)
         unless self.about
           self.about = Addressable::URI.parse(statement.subject.uri.to_s)
-          self.name = statement.subject.short_name
+          self.name = statement.subject.short_name || self.about
         end
         
         if statement.predicate.short_name == "expectedResults"
@@ -74,7 +69,7 @@ module RdfaHelper
     end
     
     def tcpath
-      BASE_TEST_CASE_URL + (suite == "xhtml" ? "xhtml1" : suite)
+      RDFA_TEST_CASE_URL + (suite == "xhtml" ? "xhtml1" : suite)
     end
     
     # Read in file, and apply modifications to create a properly formatted HTML
@@ -82,7 +77,7 @@ module RdfaHelper
       f = self.inputDocument
       found_head = false
       namespaces = ""
-      body = File.readlines(File.join(TEST_DIR, "tests", f)).map do |line|
+      body = File.readlines(File.join(RDFA_DIR, "tests", f)).map do |line|
         found_head ||= line.match(/<head/)
         if found_head
           line.chop
@@ -118,14 +113,14 @@ module RdfaHelper
     # Read in file, and apply modifications reference either .html or .xhtml
     def results
       f = self.name + ".sparql"
-      body = File.read(File.join(TEST_DIR, "tests", f)).gsub(TCPATHRE, tcpath)
+      body = File.read(File.join(RDFA_DIR, "tests", f)).gsub(TCPATHRE, tcpath)
       
       suite == "xhtml" ? body : body.gsub(HTMLRE, '\1.html')
     end
     
     def triples
       f = self.name + ".nt"
-      body = File.read(File.join(NT_DIR, f)).gsub(TCPATHRE, tcpath)
+      body = File.read(File.join(RDFA_NT_DIR, f)).gsub(TCPATHRE, tcpath)
       suite == "xhtml" ? body : body.gsub(HTMLRE, '\1.html')
     end
     
@@ -166,9 +161,9 @@ module RdfaHelper
       return @test_cases unless @test_cases.empty?
       
       @suite = suite # Process the given test suite
-      @manifest_url = "#{BASE_MANIFEST_URL}#{suite}-manifest.rdf"
+      @manifest_url = "#{RDFA_MANIFEST_URL}#{suite}-manifest.rdf"
       
-      manifest_str = File.read(File.join(TEST_DIR, "#{suite}-manifest.rdf"))
+      manifest_str = File.read(File.join(RDFA_DIR, "#{suite}-manifest.rdf"))
       parser = RdfXmlParser.new
       
       begin
