@@ -33,8 +33,8 @@ describe "RDFa parser" do
      sess = mock("session")
      sess.stub(:base_url=)
      sess.stub(:timeout=)
-     sess.stub(:get).with("http://www.w3.org/2007/08/pyRdfa/profiles/foaf").and_return(basic_resp)
-     sess.stub(:get).with("http://www.w3.org/2007/08/pyRdfa/profiles/basic").and_return(foaf_resp)
+     sess.stub(:get).with("http://www.w3.org/2007/08/pyRdfa/profiles/foaf").and_return(foaf_resp)
+     sess.stub(:get).with("http://www.w3.org/2007/08/pyRdfa/profiles/basic").and_return(basic_resp)
      sess.stub(:get).with("http://www.w3.org/1999/xhtml/vocab").and_return(xhv_resp)
      sess.stub(:get).with("http://microformats.org/profiles/hcard").and_return(hcard_resp)
      sess.stub(:get).with("http://www.w3.org/2005/10/profile").and_return(profile_resp)
@@ -153,8 +153,12 @@ describe "RDFa parser" do
           specify "test #{t.name}: #{t.title}#{",  (negative test)" unless t.expectedResults}" do
             #puts t.input
             #puts t.results
-            t.run_test do |rdfa_string, rdfa_parser|
-              rdfa_parser.parse(rdfa_string, t.informationResourceInput, :debug => [])
+            begin
+              t.run_test do |rdfa_string, rdfa_parser|
+                rdfa_parser.parse(rdfa_string, t.informationResourceInput, :debug => [])
+              end
+            rescue SparqlException => e
+              pending(e.message) { raise }
             end
           end
         end
@@ -169,8 +173,14 @@ describe "RDFa parser" do
               t.run_test do |rdfa_string, rdfa_parser|
                 rdfa_parser.parse(rdfa_string, t.informationResourceInput, :debug => [])
               end
+            rescue SparqlException => e
+              pending(e.message) { raise }
             rescue Spec::Expectations::ExpectationNotMetError => e
-              pending() {  raise }
+              if t.name =~ /01[789]\d/
+                raise
+              else
+                pending() {  raise }
+              end
             end
           end
         end

@@ -163,8 +163,13 @@ module RdfContext
     def uri_binding; @store.uri_binding; end
     
     # QName for a URI
+    # Try bound namespaces, and if not found, try well-known namespaces
     def qname(uri)
-      uri.to_qname(self.uri_binding)
+      uri.to_qname(self.uri_binding) || begin
+        qn = uri.to_qname(WELL_KNOWN_NS)
+        self.bind(uri.namespace) if qn
+        qn
+      end
     end
     
     # Namespace for prefix

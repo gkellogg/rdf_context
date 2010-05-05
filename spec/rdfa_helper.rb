@@ -146,7 +146,7 @@ module RdfaHelper
         # Run SPARQL query
         @parser.graph.should pass_query(query_string, self)
       else
-        #pending("Query skipped, Redland not installed")
+        raise SparqlException, "Query skipped, Redland not installed"
       end
 
       @parser.graph.to_rdfxml.should be_valid_xml

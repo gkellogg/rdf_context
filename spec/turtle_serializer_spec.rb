@@ -119,7 +119,7 @@ describe "Turtle Serializer" do
     it "should generate empty list(2)" do
       input = %(@prefix : <http://a/> . :emptyList = () .)
       serialize(input, nil,
-        %r(^:emptyList <.*sameAs> \(\) \.$)
+        %r(^:emptyList (<.*sameAs>|owl:sameAs) \(\) \.$)
       )
     end
     
@@ -140,14 +140,14 @@ describe "Turtle Serializer" do
     it "should generate list of empties" do
       input = %(@prefix : <http://a/> . :listOf2Empties = (() ()) .)
       serialize(input, nil,
-        %r(^:listOf2Empties <.*sameAs> \(\(\) \(\)\) \.$)
+        %r(^:listOf2Empties (<.*sameAs>|owl:sameAs) \(\(\) \(\)\) \.$)
       )
     end
     
     it "should generate list anon" do
       input = %(@prefix : <http://a/> . :twoAnons = ([a :mother] [a :father]) .)
       serialize(input, nil,
-        %r(^:twoAnons <.*sameAs> \(\[\s*a :mother\] \[\s*a :father\]\) \.$)
+        %r(^:twoAnons (<.*sameAs>|owl:sameAs) \(\[\s*a :mother\] \[\s*a :father\]\) \.$)
       )
     end
     

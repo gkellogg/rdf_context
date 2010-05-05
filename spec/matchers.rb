@@ -110,6 +110,7 @@ module Matchers
         ntriples_parser.parse_string_into_model(model, actual.to_ntriples, "http://www.w3.org/2006/07/SWD/RDFa/testsuite/xhtml1-testcases/")
 
         @results = @query.execute(model)
+        #puts "Redland query results: #{@results.inspect}"
         if @expected_results
           @results.is_boolean? && @results.get_boolean?
         else

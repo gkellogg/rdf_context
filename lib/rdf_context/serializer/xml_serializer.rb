@@ -42,17 +42,12 @@ module RdfContext
       required_namespaces = {}
       possible.each do |res|
         next unless res.is_a?(URIRef)
-        if !get_qname(res)  # Creates Namespace mappings
-          [RDF_NS, DC_NS, OWL_NS, LOG_NS, RDF_NS, RDFS_NS, XHV_NS, XML_NS, XSD_NS, XSI_NS].each do |ns|
-            # Bind a standard namespace to the graph and try the lookup again
-            if ns.uri == res.base
-              @graph.bind(ns) 
-            end
-          end
-          if !get_qname(res) && predicates.include?(res)
-            required_namespaces[res.base] = true
-          end
+        if res.namespace
+          add_namespace(res.namespace)
+        else
+          required_namespaces[res.base] = true
         end
+        #puts "possible namespace for #{res}: #{res.namespace || %(<#{res.base}>)}"
       end
       add_namespace(RDF_NS)
       add_namespace(XML_NS) if @base || @lang
@@ -70,7 +65,7 @@ module RdfContext
       # Add bindings for predicates not already having bindings
       tmp_ns = "ns0"
       required_namespaces.keys.each do |uri|
-        #puts "create namespace definition for #{uri}"
+        puts "create namespace definition for #{uri}" if $DEBUG
         add_namespace(Namespace.new(uri, tmp_ns))
         tmp_ns = tmp_ns.succ
       end
@@ -150,6 +145,7 @@ module RdfContext
     # If _is_unique_ is true, this predicate may be able to be serialized as an attribute
     def predicate(prop, object, node, is_unique)
       qname = prop.to_qname(uri_binding)
+      raise RdfException, "No qname generated for <#{prop}>" unless qname
 
       # See if we can serialize as attribute.
       # * untyped attributes that aren't duplicated where xml:lang == @lang
@@ -239,6 +235,16 @@ module RdfContext
         end
       end
       node.add_child(pred_node) if pred_node
+    end
+
+    def preprocess_triple(triple)
+      super
+      
+      # Pre-fetch qnames, to fill namespaces
+      get_qname(triple.predicate)
+      get_qname(triple.object) if triple.predicate == RDF_TYPE
+
+      @references[triple.predicate] = ref_count(triple.predicate) + 1
     end
   end
 end

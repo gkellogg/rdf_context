@@ -207,7 +207,7 @@ module RdfContext
             old_debug, old_verbose, = $DEBUG, $verbose
             $DEBUG, $verbose = false, false
             p_graph = Parser.parse(resp.body, profile)
-            ttl = p_graph.serialize(:format => :ttl) if old_debug
+            ttl = p_graph.serialize(:format => :ttl) if @debug || $DEBUG
             $DEBUG, $verbose = old_debug, old_verbose
             add_debug(element, ttl) if ttl
             p_graph.subjects.each do |subject|
@@ -220,7 +220,7 @@ module RdfContext
               term = props[RDFA_NS.term_.to_s]
               prefix = props[RDFA_NS.prefix_.to_s]
               add_debug(element, "extract_mappings: uri=#{uri.inspect}, term=#{term.inspect}, prefix=#{prefix.inspect}")
-          
+
               next if !uri || (!term && !prefix)
               raise ParserException, "multi-valued rdf:uri" if uri.length != 1
               raise ParserException, "multi-valued rdf:term." if term && term.length != 1
@@ -267,7 +267,7 @@ module RdfContext
       element.namespaces.each do |attr_name, attr_value|
         begin
           abbr, prefix = attr_name.split(":")
-          uri_mappings[prefix.to_s.downcase] = @graph.bind(Namespace.new(attr_value, prefix.to_s.downcase)) if abbr.downcase == "xmlns"
+          uri_mappings[prefix.to_s.downcase] = @graph.bind(Namespace.new(attr_value, prefix.to_s.downcase)) if abbr.downcase == "xmlns" && prefix
         rescue RdfException => e
           add_debug(element, "extract_mappings raised #{e.class}: #{e.message}")
           raise if @strict
@@ -278,10 +278,12 @@ module RdfContext
       # prefix is a whitespace separated list of prefix-name URI pairs of the form
       #   NCName ':' ' '+ xs:anyURI
       # SPEC Confusion: prefix is forced to lower-case in @profile, but not specified here.
-      element.attributes["prefix"].to_s.split(/[^:]\s+/).each do |pair|
-        #puts "uri_mappings prefix #{pair}, #{element.attributes["prefix"]}"
-        prefix, uri = pair.split(': ')
-        prefix = prefix.downcase
+      mappings = element.attributes["prefix"].to_s.split(/\s+/)
+      while mappings.length > 0 do
+        prefix, uri = mappings.shift.downcase, mappings.shift
+        #puts "uri_mappings prefix #{prefix} <#{uri}>"
+        next unless prefix.match(/:$/)
+        prefix.chop!
         
         uri_mappings[prefix] = @graph.bind(Namespace.new(uri, prefix))
       end
@@ -341,7 +343,7 @@ module RdfContext
         else
           vocab.to_s
         end
-        add_debug(element, "traverse, default_vocaulary: #{default_vocabulary.inspect}")
+        add_debug(element, "[Step 2] traverse, default_vocaulary: #{default_vocabulary.inspect}")
       end
       
       # Local term mappings [7.5 Steps 3 & 4]
@@ -363,7 +365,7 @@ module RdfContext
       else
         language
       end
-      add_debug(element, "traverse, lang: #{language}") if attrs['lang']
+      add_debug(element, "HTML5 [3.2.3.3] traverse, lang: #{language}") if attrs['lang']
     
       # rels and revs
       rels = process_uris(element, rel, evaluation_context, :uri_mappings => uri_mappings, :term_mappings => term_mappings, :vocab => default_vocabulary)
@@ -373,17 +375,17 @@ module RdfContext
       add_debug(element, "traverse, property: #{property.nil? ? 'nil' : property}, typeof: #{typeof.nil? ? 'nil' : typeof}, datatype: #{datatype.nil? ? 'nil' : datatype}, content: #{content.nil? ? 'nil' : content}")
       add_debug(element, "traverse, rels: #{rels.join(" ")}, revs: #{revs.join(" ")}")
 
-      if not rel || rev
+      if !(rel || rev)
         # Establishing a new subject if no rel/rev [7.5 Step 6]
         # May not be valid, but can exist
         if about
           new_subject = process_uri(element, about, evaluation_context, :uri_mappings => uri_mappings)
         elsif src
-          new_subject = process_uri(element, about, evaluation_context)
+          new_subject = process_uri(element, src, evaluation_context)
         elsif resource
           new_subject =  process_uri(element, resource, evaluation_context, :uri_mappings => uri_mappings)
         elsif href
-          new_subject = process_uri(element, about, evaluation_context)
+          new_subject = process_uri(element, href, evaluation_context)
         end
 
         # If no URI is provided by a resource attribute, then the first match from the following rules
@@ -406,7 +408,7 @@ module RdfContext
             skip = true unless property
           end
         end
-        add_debug(element, "new_subject: #{new_subject}, skip = #{skip}")
+        add_debug(element, "[Step 6] new_subject: #{new_subject}, skip = #{skip}")
       else
         # [7.5 Step 7]
         # If the current element does contain a @rel or @rev attribute, then the next step is to
@@ -440,7 +442,7 @@ module RdfContext
           current_object_resource = process_uri(element, href, evaluation_context)
         end
 
-        add_debug(element, "new_subject: #{new_subject}, current_object_resource = #{current_object_resource.nil? ? 'nil' : current_object_resource}")
+        add_debug(element, "[Step 7] new_subject: #{new_subject}, current_object_resource = #{current_object_resource.nil? ? 'nil' : current_object_resource}")
       end
     
       # Process @typeof if there is a subject [Step 8]
@@ -464,7 +466,7 @@ module RdfContext
         end
       elsif rel || rev
         # Incomplete triples and bnode creation [Step 10]
-        add_debug(element, "incompletes: rels: #{rels}, revs: #{revs}")
+        add_debug(element, "[Step 10] incompletes: rels: #{rels}, revs: #{revs}")
         current_object_resource = BNode.new
       
         rels.each do |r|
@@ -488,15 +490,15 @@ module RdfContext
         type_resource = process_uri(element, type, evaluation_context, :uri_mappings => uri_mappings, :term_mappings => term_mappings, :vocab => default_vocabulary) if type
         if type and !type.empty? and (type_resource.to_s != XML_LITERAL.to_s)
           # typed literal
-          add_debug(element, "typed literal")
+          add_debug(element, "[Step 11] typed literal")
           current_object_literal = Literal.typed(content || element.inner_text, type_resource, :language => language)
         elsif content or (children_node_types == [Nokogiri::XML::Text]) or (element.children.length == 0) or (type == '')
           # plain literal
-          add_debug(element, "plain literal")
+          add_debug(element, "[Step 11] plain literal")
           current_object_literal = Literal.untyped(content || element.inner_text, language)
         elsif children_node_types != [Nokogiri::XML::Text] and (type == nil or type_resource.to_s == XML_LITERAL.to_s)
           # XML Literal
-          add_debug(element, "XML Literal: #{element.inner_html}")
+          add_debug(element, "[Step 11] XML Literal: #{element.inner_html}")
           current_object_literal = Literal.typed(element.children, XML_LITERAL, :language => language, :namespaces => uri_mappings)
           recurse = false
         end
@@ -511,7 +513,7 @@ module RdfContext
     
       if not skip and new_subject && !evaluation_context.incomplete_triples.empty?
         # Complete the incomplete triples from the evaluation context [Step 12]
-        add_debug(element, "complete incomplete triples: new_subject=#{new_subject}, completes=#{evaluation_context.incomplete_triples.inspect}")
+        add_debug(element, "[Step 12] complete incomplete triples: new_subject=#{new_subject}, completes=#{evaluation_context.incomplete_triples.inspect}")
         evaluation_context.incomplete_triples.each do |trip|
           if trip[:direction] == :forward
             add_triple(element, evaluation_context.parent_subject, trip[:predicate], new_subject)
@@ -529,14 +531,14 @@ module RdfContext
               term_mappings == evaluation_context.term_mappings &&
               default_vocabulary == evaluation_context.default_vocabulary &&
             new_ec = evaluation_context
-            add_debug(element, "skip: reused ec")
+            add_debug(element, "[Step 13] skip: reused ec")
           else
             new_ec = evaluation_context.clone
             new_ec.language = language
             new_ec.uri_mappings = uri_mappings
             new_ec.term_mappings = term_mappings
             new_ec.default_vocabulary = default_vocabulary
-            add_debug(element, "skip: cloned ec")
+            add_debug(element, "[Step 13] skip: cloned ec")
           end
         else
           # create a new evaluation context
@@ -548,7 +550,7 @@ module RdfContext
           new_ec.language = language
           new_ec.term_mappings = term_mappings
           new_ec.default_vocabulary = default_vocabulary
-          add_debug(element, "new ec")
+          add_debug(element, "[Step 13] new ec")
         end
       
         element.children.each do |child|
@@ -566,7 +568,7 @@ module RdfContext
     end
 
     def process_uri(element, value, evaluation_context, options = {})
-      return if value.to_s.empty?
+      #return if value.to_s.empty?
       #add_debug(element, "process_uri: #{value}")
       options = {:uri_mappings => {}}.merge(options)
       if !options[:term_mappings] && options[:uri_mappings] && value.to_s.match(/^\[(.*)\]$/)
@@ -574,7 +576,7 @@ module RdfContext
         # When the value is surrounded by square brackets, then the content within the brackets is
         # evaluated as a CURIE according to the CURIE Syntax definition. If it is not a valid CURIE, the
         # value must be ignored.
-        uri = curie_to_resource_or_bnode($1, options[:uri_mappings], evaluation_context.parent_subject)
+        uri = curie_to_resource_or_bnode(element, $1, options[:uri_mappings], evaluation_context.parent_subject)
         add_debug(element, "process_uri: #{value} => safeCURIE => <#{uri}>")
         uri
       elsif options[:term_mappings] && NC_REGEXP.match(value.to_s)
@@ -588,7 +590,7 @@ module RdfContext
         # SafeCURIEorCURIEorURI or TERMorCURIEorURI
         # Otherwise, the value is evaluated as a CURIE.
         # If it is a valid CURIE, the resulting URI is used; otherwise, the value will be processed as a URI.
-        uri = curie_to_resource_or_bnode(value, options[:uri_mappings], evaluation_context.parent_subject)
+        uri = curie_to_resource_or_bnode(element, value, options[:uri_mappings], evaluation_context.parent_subject)
         if uri
           add_debug(element, "process_uri: #{value} => CURIE => <#{uri}>")
         else
@@ -607,9 +609,10 @@ module RdfContext
     # <em>options[:vocab]</em>:: Default vocabulary
     def process_term(value, options)
       case
-      when options[:term_mappings].is_a?(Hash) && options[:term_mappings].has_key?(value)
+      when options[:term_mappings].is_a?(Hash) && options[:term_mappings].has_key?(value.to_s.downcase)
         # If the term is in the local term mappings, use the associated URI.
-        options[:term_mappings][value]
+        # XXX Spec Confusion: are terms always downcased? Or only for XHTML Vocab?
+        options[:term_mappings][value.to_s.downcase]
       when options[:vocab]
         # Otherwise, if there is a local default vocabulary the URI is obtained by concatenating that value and the term.
         options[:vocab] + value
@@ -620,38 +623,31 @@ module RdfContext
     end
 
     # From section 6. CURIE Syntax Definition
-    def curie_to_resource_or_bnode(curie, uri_mappings, subject)
+    def curie_to_resource_or_bnode(element, curie, uri_mappings, subject)
       # URI mappings for CURIEs default to XH_MAPPING, rather than the default doc namespace
       prefix, reference = curie.to_s.split(":")
 
       # consider the bnode situation
-      if curie.to_s.empty?
-        add_debug(nil, "curie_to_resource_or_bnode #{subject}, empty CURIE")
-        # Empty curie resolves to current subject (No, an empty curie should be ignored)
-        #URIRef.new(subject)
-        nil
-      elsif prefix == "_"
+      if prefix == "_"
         # we force a non-nil name, otherwise it generates a new name
         BNode.new(reference || "", @named_bnodes)
       elsif curie.to_s.match(/^:/)
         # Default prefix
-        case
-        when uri_mappings[""]
+        if uri_mappings[""]
           uri_mappings[""].send("#{reference}_")
-        when @host_defaults[:prefix]
+        elsif @host_defaults[:prefix]
           @host_defaults[:prefix].send("#{reference}_")
-        else
-          nil
         end
       elsif !curie.to_s.match(/:/)
         # No prefix, undefined (in this context, it is evaluated as a term elsewhere)
         nil
       else
-        ns = uri_mappings[prefix.to_s]
+        # XXX Spec Confusion, are prefixes always downcased?
+        ns = uri_mappings[prefix.to_s.downcase]
         if ns
           ns + reference
         else
-          add_debug(nil, "curie_to_resource_or_bnode No namespace mapping for #{prefix}")
+          add_debug(element, "curie_to_resource_or_bnode No namespace mapping for #{prefix.downcase}")
           nil
         end
       end

@@ -66,16 +66,12 @@ module RdfContext
     # Return a QName for the URI, or nil. Adds namespace of QName to defined namespaces
     def get_qname(uri)
       if uri.is_a?(URIRef)
-        begin
-          qn = @graph.qname(uri)
-        rescue RdfException
-          return false  # no namespace
-        end
+        qn = @graph.qname(uri)
         # Local parts with . will mess up serialization
-        return false if qn.index('.')
+        return false if qn.nil? || qn.index('.')
         
         add_namespace(uri.namespace)
-        return qn
+        qn
       end
     end
     

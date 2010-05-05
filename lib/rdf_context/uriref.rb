@@ -93,17 +93,20 @@ module RdfContext
     alias_method :to_ntriples, :to_n3
   
     # Output URI as QName using URI binding
-    def to_qname(uri_binding = {})
-      ns = namespace(uri_binding)
-      "#{ns.prefix}:#{short_name}"
+    def to_qname(uri_binding = [])
+      namespaces = case uri_binding
+      when Hash then uri_binding.values
+      when Array then uri_binding
+      else []
+      end
+      ns = namespace(namespaces)
+      "#{ns.prefix}:#{short_name}" if ns
     end
     
-    def namespace(uri_binding = {})
-      @namespace ||= begin
-        uri = uri_binding.keys.detect {|u| self.to_s.index(u) == 0 }
-        raise RdfException, "Couldn't find namespace for #{@uri}" unless uri
-        uri_binding[uri]
-      end
+    # Look at namespaces and find first that matches this URI, ordering by longest URI first
+    def namespace(namespaces = [])
+      @namespace ||=
+        namespaces.sort_by {|ns| -ns.uri.to_s.length}.detect {|ns| self.to_s.index(ns.uri.to_s) == 0}
     end
     
     def inspect

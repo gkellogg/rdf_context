@@ -2,6 +2,7 @@ module RdfContext
   class RdfException    < RuntimeError; end
 
   class ParserException < RdfException; end
+  class SparqlException < RdfException; end
   class GraphException  < RdfException; end
   class StoreException  < RdfException; end
   class BNodeException  < RdfException; end
