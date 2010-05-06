@@ -44,10 +44,9 @@ describe "Turtle Serializer" do
       )
       serialize(input, nil,
         %r(^:b a :class;$),
-        %r(^\s+rdfs:label "label";$),
-        %r(^\s+dc:title \"title\";$),
-        %r(^\s+:c :d \.$),
-        %r(a :class.*label.*title.*:c :d)m
+        %r(^\s+rdfs:label "label"),
+        %r(^\s+dc:title \"title\"),
+        %r(^\s+:c :d)
       )
     end
     

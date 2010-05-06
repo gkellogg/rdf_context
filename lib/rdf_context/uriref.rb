@@ -110,7 +110,7 @@ module RdfContext
     end
     
     def inspect
-      "#{self.class}[#{self.to_n3}]"
+      "#{self.class}[#{self.to_n3}, ns=#{namespace.inspect}]"
     end
     
     # Output URI as resource reference for RDF/XML

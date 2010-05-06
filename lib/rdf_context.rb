@@ -61,7 +61,7 @@ module RdfContext
   RDF_TYPE    = URIRef.new("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
   XML_LITERAL = Literal::Encoding.xmlliteral
 
-  DC_NS       = Namespace.new("http://purl.org/dc/elements/1.1/", "dc")
+  DC_NS       = Namespace.new("http://purl.org/dc/terms/", "dc")
   OWL_NS      = Namespace.new("http://www.w3.org/2002/07/owl#", "owl")
   LOG_NS      = Namespace.new("http://www.w3.org/2000/10/swap/log#", "log")
   RDF_NS      = Namespace.new("http://www.w3.org/1999/02/22-rdf-syntax-ns#", "rdf")
@@ -71,7 +71,7 @@ module RdfContext
   XML_NS      = Namespace.new("http://www.w3.org/XML/1998/namespace", "xml")
   XSD_NS      = Namespace.new("http://www.w3.org/2001/XMLSchema#", "xsd")
   XSI_NS      = Namespace.new("http://www.w3.org/2001/XMLSchema-instance", "xsi")
-  WELL_KNOWN_NS = [DC_NS, OWL_NS, LOG_NS, RDF_NS, RDFA_NS, RDFS_NS, XHV_NS, XML_NS, XSD_NS, XSI_NS]
+  WELLKNOWN_NAMESPACES = [DC_NS, OWL_NS, LOG_NS, RDF_NS, RDFA_NS, RDFS_NS, XHV_NS, XML_NS, XSD_NS, XSI_NS]
 
   XH_MAPPING  = {"" => Namespace.new("http://www.w3.org/1999/xhtml/vocab\#", nil)}
 end

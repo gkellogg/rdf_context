@@ -166,7 +166,7 @@ module RdfContext
     # Try bound namespaces, and if not found, try well-known namespaces
     def qname(uri)
       uri.to_qname(self.uri_binding) || begin
-        qn = uri.to_qname(WELL_KNOWN_NS)
+        qn = uri.to_qname(WELLKNOWN_NAMESPACES)
         self.bind(uri.namespace) if qn
         qn
       end

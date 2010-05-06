@@ -8,7 +8,7 @@
 * URIRef#to_qname and #to_namespace No longer generates an exception. Each take either a Hash or an Array of namespaces and tries them from longest to shortest.
 * Improved Turtle and XML serializers in use of namespaces.
 * Generate pending messages if RDFa tests skipped due to lack of Redland installation.
-
+* Change dcterms: prefix to dc: (fully compatible with previous /elements/ definitions)
 
 === 0.5.3
 * Fix bug in XML serializer when type is a BNode.

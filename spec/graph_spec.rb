@@ -120,13 +120,13 @@ describe "Graphs" do
   
   describe "with XML Literal objects" do
     subject {
-      dc = Namespace.new("http://purl.org/dc/elements/1.1/", "dc")
+      dc = Namespace.new("http://purl.org/dc/terms/", "dc")
       xhtml = Namespace.new("http://www.w3.org/1999/xhtml", "")
       g = Graph.new(:store => ListStore.new)
       g << Triple.new(
         URIRef.new("http://www.w3.org/2006/07/SWD/RDFa/testsuite/xhtml1-testcases/0011.xhtml"),
-        URIRef.new("http://purl.org/dc/elements/1.1/title"),
-        Literal.typed("E = mc<sup xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\">2</sup>: The Most Urgent Problem of Our Time",
+        URIRef.new("http://purl.org/dc/terms/title"),
+        Literal.typed("E = mc<sup xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:dc=\"http://purl.org/dc/terms/\">2</sup>: The Most Urgent Problem of Our Time",
                       "http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral",
                       g.nsbinding)
       )
@@ -136,20 +136,20 @@ describe "Graphs" do
     }
     
     it "should output NTriple" do
-      nt = '<http://www.w3.org/2006/07/SWD/RDFa/testsuite/xhtml1-testcases/0011.xhtml> <http://purl.org/dc/elements/1.1/title> "E = mc<sup xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\">2</sup>: The Most Urgent Problem of Our Time"^^<http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral> .' + "\n"
+      nt = '<http://www.w3.org/2006/07/SWD/RDFa/testsuite/xhtml1-testcases/0011.xhtml> <http://purl.org/dc/terms/title> "E = mc<sup xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:dc=\"http://purl.org/dc/terms/\">2</sup>: The Most Urgent Problem of Our Time"^^<http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral> .' + "\n"
       subject.to_ntriples.should == nt
     end
 
     it "should output RDF/XML" do
       rdfxml = <<-HERE
 <?xml version="1.0" encoding="UTF-8"?>
-<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:xhv=\"http://www.w3.org/1999/xhtml/vocab#\">
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\" xmlns:dc=\"http://purl.org/dc/terms/\" xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:xhv=\"http://www.w3.org/1999/xhtml/vocab#\">
   <rdf:Description rdf:about="http://www.w3.org/2006/07/SWD/RDFa/testsuite/xhtml1-testcases/0011.xhtml">
-    <dc:title rdf:parseType="Literal">E = mc<sup xmlns="http://www.w3.org/1999/xhtml" xmlns:dc="http://purl.org/dc/elements/1.1/">2>/sup>: The Most Urgent Problem of Our Time</dc:title>
+    <dc:title rdf:parseType="Literal">E = mc<sup xmlns="http://www.w3.org/1999/xhtml" xmlns:dc="http://purl.org/dc/terms/">2>/sup>: The Most Urgent Problem of Our Time</dc:title>
   </rdf:Description>
 </rdf:RDF>
 HERE
-      subject.to_rdfxml.should include("E = mc<sup xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\">2</sup>: The Most Urgent Problem of Our Time")
+      subject.to_rdfxml.should include("E = mc<sup xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:dc=\"http://purl.org/dc/terms/\">2</sup>: The Most Urgent Problem of Our Time")
     end
   end
   
