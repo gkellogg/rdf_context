@@ -46,7 +46,13 @@ module RdfContext
     def to_s; self.to_ntriples; end
     
     def inspect
-      "#{self.class}[#{self.to_n3}]"
+      contents = [self.subject, self.predicate, self.object].map do |r|
+        case r
+        when URIRef, BNode, Literal then r.to_n3
+        else r.inspect
+        end
+      end.join(" ")
+      "#{self.class}[#{contents}]"
     end
 
     # Is the predicate of this statment rdf:type?
