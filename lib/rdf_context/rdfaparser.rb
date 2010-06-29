@@ -125,7 +125,7 @@ module RdfContext
 
       # Determine host language
       # XXX - right now only XHTML defined
-      @host_language = case @doc.root.attributes["version"].to_s
+      @host_language = case @doc.root && @doc.root.attributes["version"].to_s
       when /XHTML+RDFa/ then :xhtml
       end
       
