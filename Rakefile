@@ -25,6 +25,7 @@ begin
     gemspec.add_dependency('whatlanguage', '>= 1.0.0')
     gemspec.add_dependency('nokogiri', '>= 1.3.3')
     gemspec.add_dependency('builder', '>= 2.1.2')
+    gemspec.add_dependency('patron', '>= 0.4.6')
     gemspec.add_development_dependency('rspec')
     gemspec.add_development_dependency('activesupport', '>= 2.3.0')
     gemspec.extra_rdoc_files     = %w(README.rdoc History.txt)
