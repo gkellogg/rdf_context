@@ -54,7 +54,7 @@ describe "URI References" do
   describe "base" do
     specify { URIRef.new("http://foo/bar").base.should == "http://foo/"}
     specify { URIRef.new("http://foo/").base.should == "http://foo/"}
-    specify { URIRef.new("http://foo").base.should == "http://foo/"}
+    specify { URIRef.new("http://foo").base.should == "http://foo"}
   end
   
   describe "QName" do

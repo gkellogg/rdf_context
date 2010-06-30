@@ -53,7 +53,7 @@ module RdfContext
       def extract_from_element(el)
         b = el.attribute_with_ns("base", XML_NS.uri.to_s)
         lang = el.attribute_with_ns("lang", XML_NS.uri.to_s)
-        self.base = URIRef.new(b, self.base) if b
+        self.base = URIRef.new(b.to_s.rdf_unescape, self.base, :normalize => false) if b
         self.language = lang if lang
         self.uri_mappings.merge!(extract_mappings(el))
       end
@@ -66,7 +66,7 @@ module RdfContext
         element.namespaces.each do |attr_name,attr_value|
           abbr, suffix = attr_name.to_s.split(":")
           if abbr == "xmlns"
-            attr_value = URIRef.new(attr_value, self.base) if attr_value.match(/^\#/)
+            attr_value = URIRef.new(attr_value.rdf_unescape, self.base, :normalize => false) if attr_value.match(/^\#/)
             mappings[suffix] = Namespace.new(attr_value, suffix)
             @graph.bind(mappings[suffix])
           end
@@ -79,7 +79,7 @@ module RdfContext
         @li_counter += 1
         predicate = Addressable::URI.parse(predicate.to_s)
         predicate.fragment = "_#{@li_counter}"
-        predicate = URIRef.new(predicate)
+        predicate = URIRef.new(predicate, :normalize => false)
       end
 
       # Set XML base. Ignore any fragment
@@ -178,7 +178,7 @@ module RdfContext
           # If there is an attribute a in propertyAttr with a.URI == rdf:type
           # then u:=uri(identifier:=resolve(a.string-value))
           # and the following triple is added to the graph:
-          u = URIRef.new(attr.value, ec.base)
+          u = URIRef.new(attr.value.rdf_unescape, ec.base, :normalize => false)
           add_triple(attr, subject, RDF_TYPE, u)
         elsif is_propertyAttr?(attr)
           # Attributes not RDF_TYPE
@@ -367,7 +367,7 @@ module RdfContext
             reify(id, child, subject, predicate, literal, child_ec) if id
           else
             if resourceAttr
-              resource = URIRef.new(resourceAttr, ec.base)
+              resource = URIRef.new(resourceAttr.rdf_unescape, ec.base, :normalize => false)
             elsif nodeID
               resource = BNode.new(nodeID, @named_bnodes)
             else
@@ -405,7 +405,7 @@ module RdfContext
     # Reify subject, predicate, and object given the EvaluationContext (ec) and current XMl element (el)
     def reify(id, el, subject, predicate, object, ec)
       add_debug(el, "reify, id: #{id}")
-      rsubject = URIRef.new("#" + id, ec.base)
+      rsubject = URIRef.new("#" + id, ec.base, :normalize => false)
       add_triple(el, rsubject, RDF_NS.subject, subject)
       add_triple(el, rsubject, RDF_NS.predicate, predicate)
       add_triple(el, rsubject, RDF_NS.object, object)
@@ -439,9 +439,9 @@ module RdfContext
         add_debug(el, "parse_subject, nodeID: '#{nodeID}")
         BNode.new(nodeID, @named_bnodes)
       when about
-        about = about.value.rdf_escape
+        about = about.value.rdf_unescape
         add_debug(el, "parse_subject, about: '#{about}'")
-        URIRef.new(about, ec.base)
+        URIRef.new(about, ec.base, :normalize => false)
       else
         add_debug(el, "parse_subject, BNode")
         BNode.new
@@ -453,7 +453,7 @@ module RdfContext
       if NC_REGEXP.match(id)
         # ID may only be specified once for the same URI
         if base
-          uri = URIRef.new("##{id}", base)
+          uri = URIRef.new("##{id}", base, :normalize => false)
           if @id_mapping[id] && @id_mapping[id] == uri
             warn = "ID addtribute '#{id}' may only be defined once for the same URI"
             add_debug(el, warn)

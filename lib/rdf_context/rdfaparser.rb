@@ -164,7 +164,7 @@ module RdfContext
         base = base_el.attributes['href']
         # Strip any fragment from base
         base = base.to_s.split("#").first
-        @uri = URIRef.new(base)
+        @uri = URIRef.new(base, :normalize => false, :normalize => false)
         add_debug(base_el, "parse_whole_doc: base='#{base}'")
       end
 
@@ -243,7 +243,7 @@ module RdfContext
               # triple that is the common subject of an rdfa:term and an rdfa:uri predicate, create a
               # mapping from the object literal of the rdfa:term predicate to the object literal of the
               # rdfa:uri predicate. Add or update this mapping in the local term mappings.
-              tm[term.to_s] = URIRef.new(uri.to_s) if term
+              tm[term.to_s] = URIRef.new(uri.to_s, :normalize => false) if term
             end
           rescue ParserException
             add_debug(element, "extract_mappings: profile subject #{subject.to_s}: #{e.message}")
@@ -399,7 +399,7 @@ module RdfContext
             # From XHTML+RDFa 1.1:
             # if no URI is provided, then first check to see if the element is the head or body element.
             # If it is, then act as if there is an empty @about present, and process it according to the rule for @about.
-            new_subject = URIRef.new(evaluation_context.base)
+            new_subject = URIRef.new(evaluation_context.base, :normalize => false)
           elsif element.attributes['typeof']
             new_subject = BNode.new
           else
@@ -425,7 +425,7 @@ module RdfContext
             # From XHTML+RDFa 1.1:
             # if no URI is provided, then first check to see if the element is the head or body element.
             # If it is, then act as if there is an empty @about present, and process it according to the rule for @about.
-            new_subject = URIRef.new(evaluation_context.base)
+            new_subject = URIRef.new(evaluation_context.base, :normalize => false)
           elsif element.attributes['typeof']
             new_subject = BNode.new
           else
@@ -594,7 +594,7 @@ module RdfContext
         if uri
           add_debug(element, "process_uri: #{value} => CURIE => <#{uri}>")
         else
-          uri = URIRef.new(value, evaluation_context.base)
+          uri = URIRef.new(value, evaluation_context.base, :normalize => false)
           add_debug(element, "process_uri: #{value} => URI => <#{uri}>")
         end
         uri

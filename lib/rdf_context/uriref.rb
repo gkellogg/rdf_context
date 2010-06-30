@@ -15,7 +15,7 @@ module RdfContext
     # @options[:normalize]:: Normalize URI when transforming to string, defaults to true
     # @options[:namespace]:: Namespace used to create this URI, useful for to_qname
     def initialize (*args)
-      options = args.last.is_a?(Hash) ? args.pop : { :normalize => true }
+      options = args.last.is_a?(Hash) ? args.pop : { :normalize => false }
       @normalize = options[:normalize]
       @namespace = options[:namespace]
 
