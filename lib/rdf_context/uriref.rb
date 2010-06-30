@@ -21,9 +21,9 @@ module RdfContext
 
       args.each {|s| test_string(s)}
       if args.size == 1
-        uri = Addressable::URI.parse(args[0].to_s)
+        uri = Addressable::URI.parse(args[0].to_s.rdf_unescape.rdf_escape)
       else
-        uri = Addressable::URI.join(*args.map{|s| s.to_s}.reverse)
+        uri = Addressable::URI.join(*args.map{|s| s.to_s.rdf_unescape.rdf_escape}.reverse)
       end
 
       raise ParserException, "<" + uri.to_s + "> is a relative URI" if uri.relative?
