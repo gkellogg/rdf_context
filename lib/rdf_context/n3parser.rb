@@ -274,7 +274,7 @@ module RdfContext
         @default_ns + uri.rdf_escape
       else
         base_uri = @default_ns ? @default_ns.uri : @uri
-        URIRef.new(uri, base_uri, :normalize => normalize)
+        URIRef.new(uri.rdf_unescape, base_uri, :normalize => normalize)
       end
     end
     
