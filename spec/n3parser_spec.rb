@@ -260,14 +260,14 @@ describe "N3 parser" do
 
       it "should map <> to document uri" do
         n3doc = "@prefix : <> ."
-        @parser.parse(n3doc, "http://the.document.itself")
-        @parser.graph.nsbinding.should == {"" => Namespace.new("http://the.document.itself#", "")}
+        @parser.parse(n3doc, "http://a/b")
+        @parser.graph.nsbinding.should == {"" => Namespace.new("http://a/b", "")}
       end
 
       it "should use <> as a prefix and as a triple node" do
         n3 = %(@prefix : <> . <> a :a.)
         nt = %(
-        <http://a/b> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://a/b#a> .
+        <http://a/b> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://a/ba> .
         )
         @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug, :compare => :array)
       end
@@ -398,7 +398,7 @@ describe "N3 parser" do
       it "should set absolute base (trailing #)" do
         n3 = %(@base <http://foo/bar#> . <> :a <b> . <#c> :d </e>.)
         nt = %(
-        <http://foo/bar> <http://foo/bar#a> <http://foo/b> .
+        <http://foo/bar#> <http://foo/bar#a> <http://foo/b> .
         <http://foo/bar#c> <http://foo/bar#d> <http://foo/e> .
         )
         @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug, :compare => :array)
@@ -430,10 +430,10 @@ describe "N3 parser" do
         @parser.graph.nsbinding.should == {"ns" => Namespace.new("http://the/namespace#", "ns")}
       end
       
-      it "should bind empty prefix to <%> by default" do
+      it "should bind empty prefix to <#> by default" do
         n3doc = "@prefix : <#> ."
-        @parser.parse(n3doc, "http://the.document.itself")
-        @parser.graph.nsbinding.should == {"" => Namespace.new("http://the.document.itself#", "")}
+        @parser.parse(n3doc, "http://a/b")
+        @parser.graph.nsbinding.should == {"" => Namespace.new("http://a/b#", "")}
       end
 
       it "should be able to bind _ as namespace" do
