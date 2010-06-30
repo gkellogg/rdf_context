@@ -81,3 +81,41 @@ Rake::RDocTask.new("doc:rdoc") do |rdoc|
   rdoc.rdoc_files.include('README*', "History.txt")
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
+
+desc "Generate RDF Core Manifest.yml"
+namespace :spec do
+  task :prepare do
+    $:.unshift(File.join(File.dirname(__FILE__), 'lib'))
+    require 'rdf_context'
+    require 'spec/rdfa_helper'
+    require 'spec/rdf_helper'
+    require 'fileutils'
+
+    %w(xhtml html4 html5).each do |suite|
+      yaml = manifest_file = File.join(File.dirname(__FILE__), "spec", "#{suite}-manifest.yml")
+      FileUtils.rm_f(yaml)
+      RdfaHelper::TestCase.to_yaml(suite, yaml)
+    end
+
+    yaml = File.join(RDFCORE_DIR, "Manifest.yml")
+    FileUtils.rm_f(yaml)
+    RdfHelper::TestCase.to_yaml(RDFCORE_TEST, RDFCORE_DIR, yaml)
+
+    yaml = File.join(SWAP_DIR, "n3parser.yml")
+    FileUtils.rm_f(yaml)
+    RdfHelper::TestCase.to_yaml(SWAP_TEST, SWAP_DIR, yaml)
+    
+    yaml = File.join(SWAP_DIR, "regression.yml")
+    FileUtils.rm_f(yaml)
+    RdfHelper::TestCase.to_yaml(CWM_TEST, SWAP_DIR, yaml)
+    
+    yaml = File.join(TURTLE_DIR, "manifest.yml")
+    FileUtils.rm_f(yaml)
+    RdfHelper::TestCase.to_yaml(TURTLE_TEST, TURTLE_DIR, yaml)
+    
+    yaml = File.join(TURTLE_DIR, "manifest-bad.yml")
+    FileUtils.rm_f(yaml)
+    RdfHelper::TestCase.to_yaml(TURTLE_TEST, TURTLE_DIR, yaml)
+  end
+end
+

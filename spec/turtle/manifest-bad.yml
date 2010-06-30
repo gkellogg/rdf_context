@@ -1,0 +1,962 @@
+--- 
+- !ruby/object:RdfHelper::TestCase 
+  about: !ruby/object:RdfContext::URIRef 
+    namespace: 
+    normalize: true
+    to_s: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-00.ttl
+    uri: !ruby/object:Addressable::URI 
+      authority: www.w3.org
+      fragment: 
+      hash: 1592065674
+      host: www.w3.org
+      inferred_port: 
+      normalized_host: 
+      normalized_password: 
+      normalized_path: 
+      normalized_port: 
+      normalized_scheme: 
+      normalized_user: 
+      normalized_userinfo: 
+      password: 
+      path: /2001/sw/DataAccess/df1/tests/test-00.ttl
+      port: 
+      query: 
+      scheme: http
+      uri_string: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-00.ttl
+      user: 
+      userinfo: 
+      validation_deferred: false
+  description: Blank subject
+  inputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-00.ttl
+  name: test-00
+  outputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-00.out
+- !ruby/object:RdfHelper::TestCase 
+  about: !ruby/object:RdfContext::URIRef 
+    namespace: 
+    normalize: true
+    to_s: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-01.ttl
+    uri: !ruby/object:Addressable::URI 
+      authority: www.w3.org
+      fragment: 
+      hash: 1916611982
+      host: www.w3.org
+      inferred_port: 
+      normalized_host: 
+      normalized_password: 
+      normalized_path: 
+      normalized_port: 
+      normalized_scheme: 
+      normalized_user: 
+      normalized_userinfo: 
+      password: 
+      path: /2001/sw/DataAccess/df1/tests/test-01.ttl
+      port: 
+      query: 
+      scheme: http
+      uri_string: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-01.ttl
+      user: 
+      userinfo: 
+      validation_deferred: false
+  description: "@prefix and qnames"
+  inputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-01.ttl
+  name: test-01
+  outputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-01.out
+- !ruby/object:RdfHelper::TestCase 
+  about: !ruby/object:RdfContext::URIRef 
+    namespace: 
+    normalize: true
+    to_s: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-02.ttl
+    uri: !ruby/object:Addressable::URI 
+      authority: www.w3.org
+      fragment: 
+      hash: -929428781
+      host: www.w3.org
+      inferred_port: 
+      normalized_host: 
+      normalized_password: 
+      normalized_path: 
+      normalized_port: 
+      normalized_scheme: 
+      normalized_user: 
+      normalized_userinfo: 
+      password: 
+      path: /2001/sw/DataAccess/df1/tests/test-02.ttl
+      port: 
+      query: 
+      scheme: http
+      uri_string: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-02.ttl
+      user: 
+      userinfo: 
+      validation_deferred: false
+  description: ", operator"
+  inputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-02.ttl
+  name: test-02
+  outputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-02.out
+- !ruby/object:RdfHelper::TestCase 
+  about: !ruby/object:RdfContext::URIRef 
+    namespace: 
+    normalize: true
+    to_s: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-03.ttl
+    uri: !ruby/object:Addressable::URI 
+      authority: www.w3.org
+      fragment: 
+      hash: 1029042333
+      host: www.w3.org
+      inferred_port: 
+      normalized_host: 
+      normalized_password: 
+      normalized_path: 
+      normalized_port: 
+      normalized_scheme: 
+      normalized_user: 
+      normalized_userinfo: 
+      password: 
+      path: /2001/sw/DataAccess/df1/tests/test-03.ttl
+      port: 
+      query: 
+      scheme: http
+      uri_string: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-03.ttl
+      user: 
+      userinfo: 
+      validation_deferred: false
+  description: ; operator
+  inputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-03.ttl
+  name: test-03
+  outputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-03.out
+- !ruby/object:RdfHelper::TestCase 
+  about: !ruby/object:RdfContext::URIRef 
+    namespace: 
+    normalize: true
+    to_s: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-04.ttl
+    uri: !ruby/object:Addressable::URI 
+      authority: www.w3.org
+      fragment: 
+      hash: 2002137971
+      host: www.w3.org
+      inferred_port: 
+      normalized_host: 
+      normalized_password: 
+      normalized_path: 
+      normalized_port: 
+      normalized_scheme: 
+      normalized_user: 
+      normalized_userinfo: 
+      password: 
+      path: /2001/sw/DataAccess/df1/tests/test-04.ttl
+      port: 
+      query: 
+      scheme: http
+      uri_string: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-04.ttl
+      user: 
+      userinfo: 
+      validation_deferred: false
+  description: empty [] as subject and object
+  inputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-04.ttl
+  name: test-04
+  outputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-04.out
+- !ruby/object:RdfHelper::TestCase 
+  about: !ruby/object:RdfContext::URIRef 
+    namespace: 
+    normalize: true
+    to_s: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-05.ttl
+    uri: !ruby/object:Addressable::URI 
+      authority: www.w3.org
+      fragment: 
+      hash: -396781847
+      host: www.w3.org
+      inferred_port: 
+      normalized_host: 
+      normalized_password: 
+      normalized_path: 
+      normalized_port: 
+      normalized_scheme: 
+      normalized_user: 
+      normalized_userinfo: 
+      password: 
+      path: /2001/sw/DataAccess/df1/tests/test-05.ttl
+      port: 
+      query: 
+      scheme: http
+      uri_string: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-05.ttl
+      user: 
+      userinfo: 
+      validation_deferred: false
+  description: non-empty [] as subject and object
+  inputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-05.ttl
+  name: test-05
+  outputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-05.out
+- !ruby/object:RdfHelper::TestCase 
+  about: !ruby/object:RdfContext::URIRef 
+    namespace: 
+    normalize: true
+    to_s: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-06.ttl
+    uri: !ruby/object:Addressable::URI 
+      authority: www.w3.org
+      fragment: 
+      hash: 93530367
+      host: www.w3.org
+      inferred_port: 
+      normalized_host: 
+      normalized_password: 
+      normalized_path: 
+      normalized_port: 
+      normalized_scheme: 
+      normalized_user: 
+      normalized_userinfo: 
+      password: 
+      path: /2001/sw/DataAccess/df1/tests/test-06.ttl
+      port: 
+      query: 
+      scheme: http
+      uri_string: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-06.ttl
+      user: 
+      userinfo: 
+      validation_deferred: false
+  description: "'a' as predicate"
+  inputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-06.ttl
+  name: test-06
+  outputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-06.out
+- !ruby/object:RdfHelper::TestCase 
+  about: !ruby/object:RdfContext::URIRef 
+    namespace: 
+    normalize: true
+    to_s: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-07.ttl
+    uri: !ruby/object:Addressable::URI 
+      authority: www.w3.org
+      fragment: 
+      hash: 498915276
+      host: www.w3.org
+      inferred_port: 
+      normalized_host: 
+      normalized_password: 
+      normalized_path: 
+      normalized_port: 
+      normalized_scheme: 
+      normalized_user: 
+      normalized_userinfo: 
+      password: 
+      path: /2001/sw/DataAccess/df1/tests/test-07.ttl
+      port: 
+      query: 
+      scheme: http
+      uri_string: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-07.ttl
+      user: 
+      userinfo: 
+      validation_deferred: false
+  description: simple collection
+  inputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-07.ttl
+  name: test-07
+  outputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-07.out
+- !ruby/object:RdfHelper::TestCase 
+  about: !ruby/object:RdfContext::URIRef 
+    namespace: 
+    normalize: true
+    to_s: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-08.ttl
+    uri: !ruby/object:Addressable::URI 
+      authority: www.w3.org
+      fragment: 
+      hash: -1115355680
+      host: www.w3.org
+      inferred_port: 
+      normalized_host: 
+      normalized_password: 
+      normalized_path: 
+      normalized_port: 
+      normalized_scheme: 
+      normalized_user: 
+      normalized_userinfo: 
+      password: 
+      path: /2001/sw/DataAccess/df1/tests/test-08.ttl
+      port: 
+      query: 
+      scheme: http
+      uri_string: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-08.ttl
+      user: 
+      userinfo: 
+      validation_deferred: false
+  description: empty collection
+  inputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-08.ttl
+  name: test-08
+  outputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-08.out
+- !ruby/object:RdfHelper::TestCase 
+  about: !ruby/object:RdfContext::URIRef 
+    namespace: 
+    normalize: true
+    to_s: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-09.ttl
+    uri: !ruby/object:Addressable::URI 
+      authority: www.w3.org
+      fragment: 
+      hash: -1485931269
+      host: www.w3.org
+      inferred_port: 
+      normalized_host: 
+      normalized_password: 
+      normalized_path: 
+      normalized_port: 
+      normalized_scheme: 
+      normalized_user: 
+      normalized_userinfo: 
+      password: 
+      path: /2001/sw/DataAccess/df1/tests/test-09.ttl
+      port: 
+      query: 
+      scheme: http
+      uri_string: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-09.ttl
+      user: 
+      userinfo: 
+      validation_deferred: false
+  description: integer datatyped literal
+  inputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-09.ttl
+  name: test-09
+  outputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-09.out
+- !ruby/object:RdfHelper::TestCase 
+  about: !ruby/object:RdfContext::URIRef 
+    namespace: 
+    normalize: true
+    to_s: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-10.ttl
+    uri: !ruby/object:Addressable::URI 
+      authority: www.w3.org
+      fragment: 
+      hash: 165702611
+      host: www.w3.org
+      inferred_port: 
+      normalized_host: 
+      normalized_password: 
+      normalized_path: 
+      normalized_port: 
+      normalized_scheme: 
+      normalized_user: 
+      normalized_userinfo: 
+      password: 
+      path: /2001/sw/DataAccess/df1/tests/test-10.ttl
+      port: 
+      query: 
+      scheme: http
+      uri_string: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-10.ttl
+      user: 
+      userinfo: 
+      validation_deferred: false
+  description: decimal integer canonicalization
+  inputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-10.ttl
+  name: test-10
+  outputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-10.out
+- !ruby/object:RdfHelper::TestCase 
+  about: !ruby/object:RdfContext::URIRef 
+    namespace: 
+    normalize: true
+    to_s: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-11.ttl
+    uri: !ruby/object:Addressable::URI 
+      authority: www.w3.org
+      fragment: 
+      hash: -2040244669
+      host: www.w3.org
+      inferred_port: 
+      normalized_host: 
+      normalized_password: 
+      normalized_path: 
+      normalized_port: 
+      normalized_scheme: 
+      normalized_user: 
+      normalized_userinfo: 
+      password: 
+      path: /2001/sw/DataAccess/df1/tests/test-11.ttl
+      port: 
+      query: 
+      scheme: http
+      uri_string: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-11.ttl
+      user: 
+      userinfo: 
+      validation_deferred: false
+  description: "- and _ in names and qnames"
+  inputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-11.ttl
+  name: test-11
+  outputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-11.out
+- !ruby/object:RdfHelper::TestCase 
+  about: !ruby/object:RdfContext::URIRef 
+    namespace: 
+    normalize: true
+    to_s: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-12.ttl
+    uri: !ruby/object:Addressable::URI 
+      authority: www.w3.org
+      fragment: 
+      hash: -1897785824
+      host: www.w3.org
+      inferred_port: 
+      normalized_host: 
+      normalized_password: 
+      normalized_path: 
+      normalized_port: 
+      normalized_scheme: 
+      normalized_user: 
+      normalized_userinfo: 
+      password: 
+      path: /2001/sw/DataAccess/df1/tests/test-12.ttl
+      port: 
+      query: 
+      scheme: http
+      uri_string: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-12.ttl
+      user: 
+      userinfo: 
+      validation_deferred: false
+  description: tests for rdf:_<numbers> and other qnames starting with _
+  inputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-12.ttl
+  name: test-12
+  outputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-12.out
+- !ruby/object:RdfHelper::TestCase 
+  about: !ruby/object:RdfContext::URIRef 
+    namespace: 
+    normalize: true
+    to_s: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-13.ttl
+    uri: !ruby/object:Addressable::URI 
+      authority: www.w3.org
+      fragment: 
+      hash: -2004756989
+      host: www.w3.org
+      inferred_port: 
+      normalized_host: 
+      normalized_password: 
+      normalized_path: 
+      normalized_port: 
+      normalized_scheme: 
+      normalized_user: 
+      normalized_userinfo: 
+      password: 
+      path: /2001/sw/DataAccess/df1/tests/test-13.ttl
+      port: 
+      query: 
+      scheme: http
+      uri_string: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-13.ttl
+      user: 
+      userinfo: 
+      validation_deferred: false
+  description: "bare : allowed"
+  inputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-13.ttl
+  name: test-13
+  outputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-13.out
+- !ruby/object:RdfHelper::TestCase 
+  about: !ruby/object:RdfContext::URIRef 
+    namespace: 
+    normalize: true
+    to_s: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-17.ttl
+    uri: !ruby/object:Addressable::URI 
+      authority: www.w3.org
+      fragment: 
+      hash: 922299031
+      host: www.w3.org
+      inferred_port: 
+      normalized_host: 
+      normalized_password: 
+      normalized_path: 
+      normalized_port: 
+      normalized_scheme: 
+      normalized_user: 
+      normalized_userinfo: 
+      password: 
+      path: /2001/sw/DataAccess/df1/tests/test-17.ttl
+      port: 
+      query: 
+      scheme: http
+      uri_string: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-17.ttl
+      user: 
+      userinfo: 
+      validation_deferred: false
+  description: simple long literal
+  inputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-17.ttl
+  name: test-17
+  outputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-17.out
+- !ruby/object:RdfHelper::TestCase 
+  about: !ruby/object:RdfContext::URIRef 
+    namespace: 
+    normalize: true
+    to_s: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-18.ttl
+    uri: !ruby/object:Addressable::URI 
+      authority: www.w3.org
+      fragment: 
+      hash: -546940123
+      host: www.w3.org
+      inferred_port: 
+      normalized_host: 
+      normalized_password: 
+      normalized_path: 
+      normalized_port: 
+      normalized_scheme: 
+      normalized_user: 
+      normalized_userinfo: 
+      password: 
+      path: /2001/sw/DataAccess/df1/tests/test-18.ttl
+      port: 
+      query: 
+      scheme: http
+      uri_string: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-18.ttl
+      user: 
+      userinfo: 
+      validation_deferred: false
+  description: long literals with escapes
+  inputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-18.ttl
+  name: test-18
+  outputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-18.out
+- !ruby/object:RdfHelper::TestCase 
+  about: !ruby/object:RdfContext::URIRef 
+    namespace: 
+    normalize: true
+    to_s: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-19.ttl
+    uri: !ruby/object:Addressable::URI 
+      authority: www.w3.org
+      fragment: 
+      hash: 1766714122
+      host: www.w3.org
+      inferred_port: 
+      normalized_host: 
+      normalized_password: 
+      normalized_path: 
+      normalized_port: 
+      normalized_scheme: 
+      normalized_user: 
+      normalized_userinfo: 
+      password: 
+      path: /2001/sw/DataAccess/df1/tests/test-19.ttl
+      port: 
+      query: 
+      scheme: http
+      uri_string: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-19.ttl
+      user: 
+      userinfo: 
+      validation_deferred: false
+  description: floating point number
+  inputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-19.ttl
+  name: test-19
+  outputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-19.out
+- !ruby/object:RdfHelper::TestCase 
+  about: !ruby/object:RdfContext::URIRef 
+    namespace: 
+    normalize: true
+    to_s: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-20.ttl
+    uri: !ruby/object:Addressable::URI 
+      authority: www.w3.org
+      fragment: 
+      hash: -1419034149
+      host: www.w3.org
+      inferred_port: 
+      normalized_host: 
+      normalized_password: 
+      normalized_path: 
+      normalized_port: 
+      normalized_scheme: 
+      normalized_user: 
+      normalized_userinfo: 
+      password: 
+      path: /2001/sw/DataAccess/df1/tests/test-20.ttl
+      port: 
+      query: 
+      scheme: http
+      uri_string: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-20.ttl
+      user: 
+      userinfo: 
+      validation_deferred: false
+  description: empty literals, normal and long variant
+  inputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-20.ttl
+  name: test-20
+  outputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-20.out
+- !ruby/object:RdfHelper::TestCase 
+  about: !ruby/object:RdfContext::URIRef 
+    namespace: 
+    normalize: true
+    to_s: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-21.ttl
+    uri: !ruby/object:Addressable::URI 
+      authority: www.w3.org
+      fragment: 
+      hash: -342164609
+      host: www.w3.org
+      inferred_port: 
+      normalized_host: 
+      normalized_password: 
+      normalized_path: 
+      normalized_port: 
+      normalized_scheme: 
+      normalized_user: 
+      normalized_userinfo: 
+      password: 
+      path: /2001/sw/DataAccess/df1/tests/test-21.ttl
+      port: 
+      query: 
+      scheme: http
+      uri_string: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-21.ttl
+      user: 
+      userinfo: 
+      validation_deferred: false
+  description: positive integer, decimal and doubles
+  inputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-21.ttl
+  name: test-21
+  outputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-21.out
+- !ruby/object:RdfHelper::TestCase 
+  about: !ruby/object:RdfContext::URIRef 
+    namespace: 
+    normalize: true
+    to_s: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-22.ttl
+    uri: !ruby/object:Addressable::URI 
+      authority: www.w3.org
+      fragment: 
+      hash: 106306278
+      host: www.w3.org
+      inferred_port: 
+      normalized_host: 
+      normalized_password: 
+      normalized_path: 
+      normalized_port: 
+      normalized_scheme: 
+      normalized_user: 
+      normalized_userinfo: 
+      password: 
+      path: /2001/sw/DataAccess/df1/tests/test-22.ttl
+      port: 
+      query: 
+      scheme: http
+      uri_string: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-22.ttl
+      user: 
+      userinfo: 
+      validation_deferred: false
+  description: negative integer, decimal and doubles
+  inputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-22.ttl
+  name: test-22
+  outputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-22.out
+- !ruby/object:RdfHelper::TestCase 
+  about: !ruby/object:RdfContext::URIRef 
+    namespace: 
+    normalize: true
+    to_s: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-23.ttl
+    uri: !ruby/object:Addressable::URI 
+      authority: www.w3.org
+      fragment: 
+      hash: 2108585334
+      host: www.w3.org
+      inferred_port: 
+      normalized_host: 
+      normalized_password: 
+      normalized_path: 
+      normalized_port: 
+      normalized_scheme: 
+      normalized_user: 
+      normalized_userinfo: 
+      password: 
+      path: /2001/sw/DataAccess/df1/tests/test-23.ttl
+      port: 
+      query: 
+      scheme: http
+      uri_string: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-23.ttl
+      user: 
+      userinfo: 
+      validation_deferred: false
+  description: long literal ending in double quote
+  inputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-23.ttl
+  name: test-23
+  outputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-23.out
+- !ruby/object:RdfHelper::TestCase 
+  about: !ruby/object:RdfContext::URIRef 
+    namespace: 
+    normalize: true
+    to_s: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-24.ttl
+    uri: !ruby/object:Addressable::URI 
+      authority: www.w3.org
+      fragment: 
+      hash: 1796699874
+      host: www.w3.org
+      inferred_port: 
+      normalized_host: 
+      normalized_password: 
+      normalized_path: 
+      normalized_port: 
+      normalized_scheme: 
+      normalized_user: 
+      normalized_userinfo: 
+      password: 
+      path: /2001/sw/DataAccess/df1/tests/test-24.ttl
+      port: 
+      query: 
+      scheme: http
+      uri_string: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-24.ttl
+      user: 
+      userinfo: 
+      validation_deferred: false
+  description: boolean literals
+  inputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-24.ttl
+  name: test-24
+  outputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-24.out
+- !ruby/object:RdfHelper::TestCase 
+  about: !ruby/object:RdfContext::URIRef 
+    namespace: 
+    normalize: true
+    to_s: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-25.ttl
+    uri: !ruby/object:Addressable::URI 
+      authority: www.w3.org
+      fragment: 
+      hash: -678357987
+      host: www.w3.org
+      inferred_port: 
+      normalized_host: 
+      normalized_password: 
+      normalized_path: 
+      normalized_port: 
+      normalized_scheme: 
+      normalized_user: 
+      normalized_userinfo: 
+      password: 
+      path: /2001/sw/DataAccess/df1/tests/test-25.ttl
+      port: 
+      query: 
+      scheme: http
+      uri_string: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-25.ttl
+      user: 
+      userinfo: 
+      validation_deferred: false
+  description: comments
+  inputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-25.ttl
+  name: test-25
+  outputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-25.out
+- !ruby/object:RdfHelper::TestCase 
+  about: !ruby/object:RdfContext::URIRef 
+    namespace: 
+    normalize: true
+    to_s: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-26.ttl
+    uri: !ruby/object:Addressable::URI 
+      authority: www.w3.org
+      fragment: 
+      hash: -532845045
+      host: www.w3.org
+      inferred_port: 
+      normalized_host: 
+      normalized_password: 
+      normalized_path: 
+      normalized_port: 
+      normalized_scheme: 
+      normalized_user: 
+      normalized_userinfo: 
+      password: 
+      path: /2001/sw/DataAccess/df1/tests/test-26.ttl
+      port: 
+      query: 
+      scheme: http
+      uri_string: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-26.ttl
+      user: 
+      userinfo: 
+      validation_deferred: false
+  description: no final mewline
+  inputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-26.ttl
+  name: test-26
+  outputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-26.out
+- !ruby/object:RdfHelper::TestCase 
+  about: !ruby/object:RdfContext::URIRef 
+    namespace: 
+    normalize: true
+    to_s: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-27.ttl
+    uri: !ruby/object:Addressable::URI 
+      authority: www.w3.org
+      fragment: 
+      hash: 17113173
+      host: www.w3.org
+      inferred_port: 
+      normalized_host: 
+      normalized_password: 
+      normalized_path: 
+      normalized_port: 
+      normalized_scheme: 
+      normalized_user: 
+      normalized_userinfo: 
+      password: 
+      path: /2001/sw/DataAccess/df1/tests/test-27.ttl
+      port: 
+      query: 
+      scheme: http
+      uri_string: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-27.ttl
+      user: 
+      userinfo: 
+      validation_deferred: false
+  description: duplicate prefix
+  inputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-27.ttl
+  name: test-27
+  outputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-27.out
+- !ruby/object:RdfHelper::TestCase 
+  about: !ruby/object:RdfContext::URIRef 
+    namespace: 
+    normalize: true
+    to_s: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-28.ttl
+    uri: !ruby/object:Addressable::URI 
+      authority: www.w3.org
+      fragment: 
+      hash: 504919177
+      host: www.w3.org
+      inferred_port: 
+      normalized_host: 
+      normalized_password: 
+      normalized_path: 
+      normalized_port: 
+      normalized_scheme: 
+      normalized_user: 
+      normalized_userinfo: 
+      password: 
+      path: /2001/sw/DataAccess/df1/tests/test-28.ttl
+      port: 
+      query: 
+      scheme: http
+      uri_string: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-28.ttl
+      user: 
+      userinfo: 
+      validation_deferred: false
+  description: decimal data types (serializing test)
+  inputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-28.ttl
+  name: test-28
+  outputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-28.out
+- !ruby/object:RdfHelper::TestCase 
+  about: !ruby/object:RdfContext::URIRef 
+    namespace: 
+    normalize: true
+    to_s: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-29.ttl
+    uri: !ruby/object:Addressable::URI 
+      authority: www.w3.org
+      fragment: 
+      hash: 724043183
+      host: www.w3.org
+      inferred_port: 
+      normalized_host: 
+      normalized_password: 
+      normalized_path: 
+      normalized_port: 
+      normalized_scheme: 
+      normalized_user: 
+      normalized_userinfo: 
+      password: 
+      path: /2001/sw/DataAccess/df1/tests/test-29.ttl
+      port: 
+      query: 
+      scheme: http
+      uri_string: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-29.ttl
+      user: 
+      userinfo: 
+      validation_deferred: false
+  description: Escaping U+0001 to U+007F in a URI
+  inputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-29.ttl
+  name: test-29
+  outputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-29.out
+- !ruby/object:RdfHelper::TestCase 
+  about: !ruby/object:RdfContext::URIRef 
+    namespace: 
+    normalize: true
+    to_s: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-30.ttl
+    uri: !ruby/object:Addressable::URI 
+      authority: www.w3.org
+      fragment: 
+      hash: -600783871
+      host: www.w3.org
+      inferred_port: 
+      normalized_host: 
+      normalized_password: 
+      normalized_path: 
+      normalized_port: 
+      normalized_scheme: 
+      normalized_user: 
+      normalized_userinfo: 
+      password: 
+      path: /2001/sw/DataAccess/df1/tests/test-30.ttl
+      port: 
+      query: 
+      scheme: http
+      uri_string: http://www.w3.org/2001/sw/DataAccess/df1/tests/test-30.ttl
+      user: 
+      userinfo: 
+      validation_deferred: false
+  description: "@base"
+  inputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-30.ttl
+  name: test-30
+  outputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/test-30.out
+- !ruby/object:RdfHelper::TestCase 
+  about: !ruby/object:RdfContext::URIRef 
+    namespace: 
+    normalize: true
+    to_s: http://www.w3.org/2001/sw/DataAccess/df1/tests/rdf-schema.ttl
+    uri: !ruby/object:Addressable::URI 
+      authority: www.w3.org
+      fragment: 
+      hash: 1372235181
+      host: www.w3.org
+      inferred_port: 
+      normalized_host: 
+      normalized_password: 
+      normalized_path: 
+      normalized_port: 
+      normalized_scheme: 
+      normalized_user: 
+      normalized_userinfo: 
+      password: 
+      path: /2001/sw/DataAccess/df1/tests/rdf-schema.ttl
+      port: 
+      query: 
+      scheme: http
+      uri_string: http://www.w3.org/2001/sw/DataAccess/df1/tests/rdf-schema.ttl
+      user: 
+      userinfo: 
+      validation_deferred: false
+  description: RDF Namespace document converted into Turtle
+  inputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/rdf-schema.ttl
+  name: rdf-schema
+  outputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/rdf-schema.out
+- !ruby/object:RdfHelper::TestCase 
+  about: !ruby/object:RdfContext::URIRef 
+    namespace: 
+    normalize: true
+    to_s: http://www.w3.org/2001/sw/DataAccess/df1/tests/rdfs-namespace.ttl
+    uri: !ruby/object:Addressable::URI 
+      authority: www.w3.org
+      fragment: 
+      hash: 1351972057
+      host: www.w3.org
+      inferred_port: 
+      normalized_host: 
+      normalized_password: 
+      normalized_path: 
+      normalized_port: 
+      normalized_scheme: 
+      normalized_user: 
+      normalized_userinfo: 
+      password: 
+      path: /2001/sw/DataAccess/df1/tests/rdfs-namespace.ttl
+      port: 
+      query: 
+      scheme: http
+      uri_string: http://www.w3.org/2001/sw/DataAccess/df1/tests/rdfs-namespace.ttl
+      user: 
+      userinfo: 
+      validation_deferred: false
+  description: RDFS Namespace document converted into Turtle
+  inputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/rdfs-namespace.ttl
+  name: rdfs-namespace
+  outputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/rdfs-namespace.out
+- !ruby/object:RdfHelper::TestCase 
+  about: !ruby/object:RdfContext::URIRef 
+    namespace: 
+    normalize: true
+    to_s: http://www.w3.org/2001/sw/DataAccess/df1/tests/rdfq-results.ttl
+    uri: !ruby/object:Addressable::URI 
+      authority: www.w3.org
+      fragment: 
+      hash: -1445136833
+      host: www.w3.org
+      inferred_port: 
+      normalized_host: 
+      normalized_password: 
+      normalized_path: 
+      normalized_port: 
+      normalized_scheme: 
+      normalized_user: 
+      normalized_userinfo: 
+      password: 
+      path: /2001/sw/DataAccess/df1/tests/rdfq-results.ttl
+      port: 
+      query: 
+      scheme: http
+      uri_string: http://www.w3.org/2001/sw/DataAccess/df1/tests/rdfq-results.ttl
+      user: 
+      userinfo: 
+      validation_deferred: false
+  description: Example query result from http://www.w3.org/2003/03/rdfqr-tests/recording-query-results.html
+  inputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/rdfq-results.ttl
+  name: rdfq-results
+  outputDocument: /Users/gregg/Projects/rdf_context/spec/turtle/rdfq-results.out

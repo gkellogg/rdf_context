@@ -1,10 +1,18 @@
+autoload :YAML, "yaml"
+autoload :CGI, 'cgi'
+
+RDFA_DIR = File.join(File.dirname(__FILE__), 'rdfa-test-suite')
+RDFA_NT_DIR = File.join(File.dirname(__FILE__), 'rdfa-triples')
+RDFA_MANIFEST_URL = "http://rdfa.digitalbazaar.com/test-suite/"
+RDFA_TEST_CASE_URL = "#{RDFA_MANIFEST_URL}test-cases/"
+
 module RdfaHelper
   # Class representing test cases in format http://www.w3.org/2006/03/test-description#
   class TestCase
-    include Matchers
-    
     HTMLRE = Regexp.new('([0-9]{4,4})\.xhtml')
     TCPATHRE = Regexp.compile('\$TCPATH')
+    
+    include RdfContext
     
     attr_accessor :about
     attr_accessor :name
@@ -163,26 +171,51 @@ module RdfaHelper
       @suite = suite # Process the given test suite
       @manifest_url = "#{RDFA_MANIFEST_URL}#{suite}-manifest.rdf"
       
-      manifest_str = File.read(File.join(RDFA_DIR, "#{suite}-manifest.rdf"))
-      parser = RdfXmlParser.new
-      
-      begin
-        parser.parse(manifest_str, @manifest_url)
-      rescue
-        raise "Parse error: #{$!}\n\t#{parser.debug.to_a.join("\t\n")}\n\n"
+      manifest_file = File.join(RDFA_DIR, "#{suite}-manifest.rdf")
+      yaml_file = File.join(File.dirname(__FILE__), "#{suite}-manifest.yml")
+
+      @test_cases = unless File.file?(yaml_file)
+        puts "parse #{manifest_file} @#{Time.now}"
+        parser = RdfXmlParser.new
+
+        begin
+          parser.parse(File.open(manifest_file), @manifest_url)
+        rescue
+          raise "Parse error: #{$!}\n\t#{parser.debug.to_a.join("\t\n")}\n\n"
+        end
+        graph = parser.graph
+
+        # Group by subject
+        test_hash = graph.triples.inject({}) do |hash, st|
+          a = hash[st.subject] ||= []
+          a << st
+          hash
+        end
+        
+        test_hash.values.map {|statements| TestCase.new(statements, suite)}.
+          compact.
+          sort_by{|t| t.name }
+      else
+        # Read tests from Manifest.yml
+        self.from_yaml(yaml_file)
       end
-      graph = parser.graph
-      
-      # Group by subject
-      test_hash = graph.triples.inject({}) do |hash, st|
-        a = hash[st.subject] ||= []
-        a << st
-        hash
+    end
+    
+    def self.to_yaml(suite, file)
+      test_cases = self.test_cases(suite)
+      puts "write test cases to #{file}"
+      File.open(file, 'w') do |out|
+        YAML.dump(test_cases, out )
       end
-      
-      @test_cases = test_hash.values.map {|statements| TestCase.new(statements, suite)}.
-        compact.
-        sort_by{|t| t.name }
+    end
+    
+    def self.from_yaml(file)
+      YAML::add_private_type("RdfaHelper::TestCase") do |type, val|
+        TestCase.new( val )
+      end
+      File.open(file, 'r') do |input|
+        @test_cases = YAML.load(input)
+      end
     end
   end
 end
