@@ -262,7 +262,6 @@ module RdfContext
             # Gather namespaces from self and decendant nodes
             c.traverse do |n|
               ns = n.namespace
-              puts "ns: #{ns.inspect}"
               next unless ns
               prefix = ns.prefix ? "xmlns:#{ns.prefix}" : "xmlns"
               c[prefix] = ns.href unless c.namespaces[prefix]
