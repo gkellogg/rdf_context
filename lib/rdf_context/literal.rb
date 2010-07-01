@@ -242,6 +242,7 @@ module RdfContext
       # Map namespaces from context to each top-level element found within node-set
       def encode_contents(contents, options)
         #puts "encode_contents: '#{contents}'"
+        
         if contents.is_a?(String)
           ns_hash = options[:namespaces].values.inject({}) {|h, ns| h.merge(ns.xmlns_hash)}
           ns_strs = []
@@ -257,9 +258,11 @@ module RdfContext
             c = Nokogiri::XML.parse(c.copy(true).to_s) if c.is_a?(LibXML::XML::Node)
           end
           if c.is_a?(Nokogiri::XML::Element)
+            c = Nokogiri::XML.parse(c.dup.to_xml(:save_with => Nokogiri::XML::Node::SaveOptions::NO_EMPTY_TAGS)).root
             # Gather namespaces from self and decendant nodes
             c.traverse do |n|
               ns = n.namespace
+              puts "ns: #{ns.inspect}"
               next unless ns
               prefix = ns.prefix ? "xmlns:#{ns.prefix}" : "xmlns"
               c[prefix] = ns.href unless c.namespaces[prefix]
@@ -270,7 +273,7 @@ module RdfContext
               c["xml:lang"] = options[:language]
             end
           end
-          c.to_html
+          c.to_xml(:save_with => (Nokogiri::XML::Node::SaveOptions::NO_EMPTY_TAGS))
         end.join("")
       end
     end

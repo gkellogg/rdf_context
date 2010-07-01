@@ -309,7 +309,7 @@ describe "Literals: " do
         end
       end
       
-      describe "and namespaced element" do
+      describe "and node set" do
         subject {
           root = Nokogiri::XML.parse(%(
           <?xml version="1.0" encoding="UTF-8"?>
