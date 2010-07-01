@@ -507,8 +507,8 @@ module RdfContext
     # Bind namespace to store, returns bound namespace
     def bind(namespace)
       # Remove existing bindings for the same URI
-      executeSQL("DELETE FROM #{namespace_binds} WHERE prefix=?", namespace.prefix)
-      executeSQL("INSERT INTO #{namespace_binds} VALUES (?, ?)", namespace.prefix, namespace.uri)
+      executeSQL("DELETE FROM #{namespace_binds} WHERE prefix=?", namespace.prefix.to_s)
+      executeSQL("INSERT INTO #{namespace_binds} VALUES (?, ?)", namespace.prefix.to_s, namespace.uri.to_s)
       # May throw exception, should be handled in driver-specific class
 
       @namespaceCache ||= {}
