@@ -103,7 +103,7 @@ describe "URI References" do
         URIRef.new(uri).to_s.dump.should == dump
       end
     end
-  end
+  end if defined?(::Encoding) # Only works properly in Ruby 1.9
   
   describe "join" do
     {
