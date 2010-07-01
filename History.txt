@@ -1,4 +1,4 @@
-=== 0.5.5
+=== 0.5.6
 * Remove trailing ' in #encoding for treetop grammer, which caused problems installing rdoc in ruby 1.9.
 * Fixed corner case in RDFa parser where document doesn't exist, which was raising an error.
 * Add dependency on patron >= 0.4.6.
