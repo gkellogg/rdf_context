@@ -143,7 +143,7 @@ describe "RDFa parser" do
   end
 
   # W3C Test suite from http://www.w3.org/2006/07/SWD/RDFa/testsuite/
-  %w(xhtml html4 html5).each do |suite|
+  %w(xhtml xhtml11 html4 html5).each do |suite|
     describe "w3c #{suite} testcases" do
       describe "that are approved" do
         test_cases(suite).each do |t|
