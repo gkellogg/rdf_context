@@ -2,21 +2,16 @@
 - !ruby/object:RdfHelper::TestCase 
   about: !ruby/object:RdfContext::URIRef 
     namespace: 
-    normalize: true
+    normalize: false
     to_s: http://www.w3.org/2000/10/swap/test/syntax/no-last-nl.n3
     uri: !ruby/object:Addressable::URI 
       authority: www.w3.org
       fragment: 
-      hash: 1098672828
+      hash: 961633248
       host: www.w3.org
-      inferred_port: 
       normalized_host: 
-      normalized_password: 
       normalized_path: 
-      normalized_port: 
       normalized_scheme: 
-      normalized_user: 
-      normalized_userinfo: 
       password: 
       path: /2000/10/swap/test/syntax/no-last-nl.n3
       port: 
@@ -25,30 +20,25 @@
       uri_string: http://www.w3.org/2000/10/swap/test/syntax/no-last-nl.n3
       user: 
       userinfo: 
-      validation_deferred: false
+      validation_deferred: 
   description: An N3 file with no final newline character
-  inputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/syntax/no-last-nl.n3
+  inputDocument: ./spec/swap_test/syntax/no-last-nl.n3
   name: n3_10001
-  outputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/n3/n3parser.tests_n3_10001.nt
+  outputDocument: ./spec/swap_test/n3/n3parser.tests_n3_10001.nt
   rdf_type: PositiveParserTest
 - !ruby/object:RdfHelper::TestCase 
   about: !ruby/object:RdfContext::URIRef 
     namespace: 
-    normalize: true
+    normalize: false
     to_s: http://www.w3.org/2000/10/swap/test/syntax/dot-dash.n3
     uri: !ruby/object:Addressable::URI 
       authority: www.w3.org
       fragment: 
-      hash: -404499172
+      hash: -200024522
       host: www.w3.org
-      inferred_port: 
       normalized_host: 
-      normalized_password: 
       normalized_path: 
-      normalized_port: 
       normalized_scheme: 
-      normalized_user: 
-      normalized_userinfo: 
       password: 
       path: /2000/10/swap/test/syntax/dot-dash.n3
       port: 
@@ -57,30 +47,25 @@
       uri_string: http://www.w3.org/2000/10/swap/test/syntax/dot-dash.n3
       user: 
       userinfo: 
-      validation_deferred: false
+      validation_deferred: 
   description: combinations of - and _ in identifiers
-  inputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/syntax/dot-dash.n3
+  inputDocument: ./spec/swap_test/syntax/dot-dash.n3
   name: n3_10002
-  outputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/n3/n3parser.tests_n3_10002.nt
+  outputDocument: ./spec/swap_test/n3/n3parser.tests_n3_10002.nt
   rdf_type: PositiveParserTest
 - !ruby/object:RdfHelper::TestCase 
   about: !ruby/object:RdfContext::URIRef 
     namespace: 
-    normalize: true
+    normalize: false
     to_s: http://www.w3.org/2000/10/swap/test/syntax/keywords1.n3
     uri: !ruby/object:Addressable::URI 
       authority: www.w3.org
       fragment: 
-      hash: -302829692
+      hash: 1792820531
       host: www.w3.org
-      inferred_port: 
       normalized_host: 
-      normalized_password: 
       normalized_path: 
-      normalized_port: 
       normalized_scheme: 
-      normalized_user: 
-      normalized_userinfo: 
       password: 
       path: /2000/10/swap/test/syntax/keywords1.n3
       port: 
@@ -89,30 +74,25 @@
       uri_string: http://www.w3.org/2000/10/swap/test/syntax/keywords1.n3
       user: 
       userinfo: 
-      validation_deferred: false
+      validation_deferred: 
   description: "@keywords in n3"
-  inputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/syntax/keywords1.n3
+  inputDocument: ./spec/swap_test/syntax/keywords1.n3
   name: n3_10003
-  outputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/n3/n3parser.tests_n3_10003.nt
+  outputDocument: ./spec/swap_test/n3/n3parser.tests_n3_10003.nt
   rdf_type: PositiveParserTest
 - !ruby/object:RdfHelper::TestCase 
   about: !ruby/object:RdfContext::URIRef 
     namespace: 
-    normalize: true
+    normalize: false
     to_s: http://www.w3.org/2000/10/swap/test/syntax/keywords2.n3
     uri: !ruby/object:Addressable::URI 
       authority: www.w3.org
       fragment: 
-      hash: 1124884174
+      hash: 987839982
       host: www.w3.org
-      inferred_port: 
       normalized_host: 
-      normalized_password: 
       normalized_path: 
-      normalized_port: 
       normalized_scheme: 
-      normalized_user: 
-      normalized_userinfo: 
       password: 
       path: /2000/10/swap/test/syntax/keywords2.n3
       port: 
@@ -121,30 +101,25 @@
       uri_string: http://www.w3.org/2000/10/swap/test/syntax/keywords2.n3
       user: 
       userinfo: 
-      validation_deferred: false
+      validation_deferred: 
   description: using no keywords in n3
-  inputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/syntax/keywords2.n3
+  inputDocument: ./spec/swap_test/syntax/keywords2.n3
   name: n3_10004
-  outputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/n3/n3parser.tests_n3_10004.nt
+  outputDocument: ./spec/swap_test/n3/n3parser.tests_n3_10004.nt
   rdf_type: PositiveParserTest
 - !ruby/object:RdfHelper::TestCase 
   about: !ruby/object:RdfContext::URIRef 
     namespace: 
-    normalize: true
+    normalize: false
     to_s: http://www.w3.org/2000/10/swap/test/syntax/djb1a.n3
     uri: !ruby/object:Addressable::URI 
       authority: www.w3.org
       fragment: 
-      hash: 847252753
+      hash: -1245829990
       host: www.w3.org
-      inferred_port: 
       normalized_host: 
-      normalized_password: 
       normalized_path: 
-      normalized_port: 
       normalized_scheme: 
-      normalized_user: 
-      normalized_userinfo: 
       password: 
       path: /2000/10/swap/test/syntax/djb1a.n3
       port: 
@@ -153,30 +128,25 @@
       uri_string: http://www.w3.org/2000/10/swap/test/syntax/djb1a.n3
       user: 
       userinfo: 
-      validation_deferred: false
+      validation_deferred: 
   description: djb noticed a:b was parsed as rdf:type token
-  inputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/syntax/djb1a.n3
+  inputDocument: ./spec/swap_test/syntax/djb1a.n3
   name: n3_10005
-  outputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/n3/n3parser.tests_n3_10005.nt
+  outputDocument: ./spec/swap_test/n3/n3parser.tests_n3_10005.nt
   rdf_type: PositiveParserTest
 - !ruby/object:RdfHelper::TestCase 
   about: !ruby/object:RdfContext::URIRef 
     namespace: 
-    normalize: true
+    normalize: false
     to_s: http://www.w3.org/2000/10/swap/test/contexts.n3
     uri: !ruby/object:Addressable::URI 
       authority: www.w3.org
       fragment: 
-      hash: -451231723
+      hash: -1338678489
       host: www.w3.org
-      inferred_port: 
       normalized_host: 
-      normalized_password: 
       normalized_path: 
-      normalized_port: 
       normalized_scheme: 
-      normalized_user: 
-      normalized_userinfo: 
       password: 
       path: /2000/10/swap/test/contexts.n3
       port: 
@@ -185,30 +155,25 @@
       uri_string: http://www.w3.org/2000/10/swap/test/contexts.n3
       user: 
       userinfo: 
-      validation_deferred: false
+      validation_deferred: 
   description: Parse and generate simple contexts
-  inputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/contexts.n3
+  inputDocument: ./spec/swap_test/contexts.n3
   name: n3_10007
-  outputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/n3/n3parser.tests_n3_10007.nt
+  outputDocument: ./spec/swap_test/n3/n3parser.tests_n3_10007.nt
   rdf_type: PositiveParserTest
 - !ruby/object:RdfHelper::TestCase 
   about: !ruby/object:RdfContext::URIRef 
     namespace: 
-    normalize: true
+    normalize: false
     to_s: http://www.w3.org/2000/10/swap/test/anon-prop.n3
     uri: !ruby/object:Addressable::URI 
       authority: www.w3.org
       fragment: 
-      hash: 646131401
+      hash: -805068399
       host: www.w3.org
-      inferred_port: 
       normalized_host: 
-      normalized_password: 
       normalized_path: 
-      normalized_port: 
       normalized_scheme: 
-      normalized_user: 
-      normalized_userinfo: 
       password: 
       path: /2000/10/swap/test/anon-prop.n3
       port: 
@@ -217,30 +182,25 @@
       uri_string: http://www.w3.org/2000/10/swap/test/anon-prop.n3
       user: 
       userinfo: 
-      validation_deferred: false
+      validation_deferred: 
   description: Parse and regen anonymous property
-  inputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/anon-prop.n3
+  inputDocument: ./spec/swap_test/anon-prop.n3
   name: n3_10008
-  outputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/n3/n3parser.tests_n3_10008.nt
+  outputDocument: ./spec/swap_test/n3/n3parser.tests_n3_10008.nt
   rdf_type: PositiveParserTest
 - !ruby/object:RdfHelper::TestCase 
   about: !ruby/object:RdfContext::URIRef 
     namespace: 
-    normalize: true
+    normalize: false
     to_s: http://www.w3.org/2000/10/swap/test/strquot.n3
     uri: !ruby/object:Addressable::URI 
       authority: www.w3.org
       fragment: 
-      hash: -569592598
+      hash: -1711052224
       host: www.w3.org
-      inferred_port: 
       normalized_host: 
-      normalized_password: 
       normalized_path: 
-      normalized_port: 
       normalized_scheme: 
-      normalized_user: 
-      normalized_userinfo: 
       password: 
       path: /2000/10/swap/test/strquot.n3
       port: 
@@ -249,30 +209,25 @@
       uri_string: http://www.w3.org/2000/10/swap/test/strquot.n3
       user: 
       userinfo: 
-      validation_deferred: false
+      validation_deferred: 
   description: N3 string quoting with escaping
-  inputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/strquot.n3
+  inputDocument: ./spec/swap_test/strquot.n3
   name: n3_10009
-  outputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/n3/n3parser.tests_n3_10009.nt
+  outputDocument: ./spec/swap_test/n3/n3parser.tests_n3_10009.nt
   rdf_type: PositiveParserTest
 - !ruby/object:RdfHelper::TestCase 
   about: !ruby/object:RdfContext::URIRef 
     namespace: 
-    normalize: true
+    normalize: false
     to_s: http://www.w3.org/2000/10/swap/test/i18n/hiragana.n3
     uri: !ruby/object:Addressable::URI 
       authority: www.w3.org
       fragment: 
-      hash: -1159675347
+      hash: -1226340415
       host: www.w3.org
-      inferred_port: 
       normalized_host: 
-      normalized_password: 
       normalized_path: 
-      normalized_port: 
       normalized_scheme: 
-      normalized_user: 
-      normalized_userinfo: 
       password: 
       path: /2000/10/swap/test/i18n/hiragana.n3
       port: 
@@ -281,29 +236,24 @@
       uri_string: http://www.w3.org/2000/10/swap/test/i18n/hiragana.n3
       user: 
       userinfo: 
-      validation_deferred: false
+      validation_deferred: 
   description: N3 string, qname and IRI with utf-8 non-ascii characters
-  inputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/i18n/hiragana.n3
+  inputDocument: ./spec/swap_test/i18n/hiragana.n3
   name: n3_10010
   rdf_type: PositiveParserTest
 - !ruby/object:RdfHelper::TestCase 
   about: !ruby/object:RdfContext::URIRef 
     namespace: 
-    normalize: true
+    normalize: false
     to_s: http://www.w3.org/2000/10/swap/test/syntax/path1.n3
     uri: !ruby/object:Addressable::URI 
       authority: www.w3.org
       fragment: 
-      hash: -1846557590
+      hash: 779388392
       host: www.w3.org
-      inferred_port: 
       normalized_host: 
-      normalized_password: 
       normalized_path: 
-      normalized_port: 
       normalized_scheme: 
-      normalized_user: 
-      normalized_userinfo: 
       password: 
       path: /2000/10/swap/test/syntax/path1.n3
       port: 
@@ -312,30 +262,25 @@
       uri_string: http://www.w3.org/2000/10/swap/test/syntax/path1.n3
       user: 
       userinfo: 
-      validation_deferred: false
+      validation_deferred: 
   description: Path syntax, simple
-  inputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/syntax/path1.n3
+  inputDocument: ./spec/swap_test/syntax/path1.n3
   name: n3_10011
-  outputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/n3/n3parser.tests_n3_10011.nt
+  outputDocument: ./spec/swap_test/n3/n3parser.tests_n3_10011.nt
   rdf_type: PositiveParserTest
 - !ruby/object:RdfHelper::TestCase 
   about: !ruby/object:RdfContext::URIRef 
     namespace: 
-    normalize: true
+    normalize: false
     to_s: http://www.w3.org/2000/10/swap/test/syntax/path2.n3
     uri: !ruby/object:Addressable::URI 
       authority: www.w3.org
       fragment: 
-      hash: -1729023871
+      hash: -25592157
       host: www.w3.org
-      inferred_port: 
       normalized_host: 
-      normalized_password: 
       normalized_path: 
-      normalized_port: 
       normalized_scheme: 
-      normalized_user: 
-      normalized_userinfo: 
       password: 
       path: /2000/10/swap/test/syntax/path2.n3
       port: 
@@ -344,30 +289,25 @@
       uri_string: http://www.w3.org/2000/10/swap/test/syntax/path2.n3
       user: 
       userinfo: 
-      validation_deferred: false
+      validation_deferred: 
   description: Path syntax, more
-  inputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/syntax/path2.n3
+  inputDocument: ./spec/swap_test/syntax/path2.n3
   name: n3_10012
-  outputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/n3/n3parser.tests_n3_10012.nt
+  outputDocument: ./spec/swap_test/n3/n3parser.tests_n3_10012.nt
   rdf_type: PositiveParserTest
 - !ruby/object:RdfHelper::TestCase 
   about: !ruby/object:RdfContext::URIRef 
     namespace: 
-    normalize: true
+    normalize: false
     to_s: http://www.w3.org/2000/10/swap/test/syntax/numbers.n3
     uri: !ruby/object:Addressable::URI 
       authority: www.w3.org
       fragment: 
-      hash: 1079802367
+      hash: 1886207498
       host: www.w3.org
-      inferred_port: 
       normalized_host: 
-      normalized_password: 
       normalized_path: 
-      normalized_port: 
       normalized_scheme: 
-      normalized_user: 
-      normalized_userinfo: 
       password: 
       path: /2000/10/swap/test/syntax/numbers.n3
       port: 
@@ -376,30 +316,25 @@
       uri_string: http://www.w3.org/2000/10/swap/test/syntax/numbers.n3
       user: 
       userinfo: 
-      validation_deferred: false
+      validation_deferred: 
   description: Number syntax
-  inputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/syntax/numbers.n3
+  inputDocument: ./spec/swap_test/syntax/numbers.n3
   name: n3_10013
-  outputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/n3/n3parser.tests_n3_10013.nt
+  outputDocument: ./spec/swap_test/n3/n3parser.tests_n3_10013.nt
   rdf_type: PositiveParserTest
 - !ruby/object:RdfHelper::TestCase 
   about: !ruby/object:RdfContext::URIRef 
     namespace: 
-    normalize: true
+    normalize: false
     to_s: http://www.w3.org/2000/10/swap/test/syntax/qvars1.n3
     uri: !ruby/object:Addressable::URI 
       authority: www.w3.org
       fragment: 
-      hash: -1061410506
+      hash: 543409409
       host: www.w3.org
-      inferred_port: 
       normalized_host: 
-      normalized_password: 
       normalized_path: 
-      normalized_port: 
       normalized_scheme: 
-      normalized_user: 
-      normalized_userinfo: 
       password: 
       path: /2000/10/swap/test/syntax/qvars1.n3
       port: 
@@ -408,30 +343,25 @@
       uri_string: http://www.w3.org/2000/10/swap/test/syntax/qvars1.n3
       user: 
       userinfo: 
-      validation_deferred: false
+      validation_deferred: 
   description: Quick variable syntax, simple
-  inputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/syntax/qvars1.n3
+  inputDocument: ./spec/swap_test/syntax/qvars1.n3
   name: n3_10014
-  outputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/n3/n3parser.tests_n3_10014.nt
+  outputDocument: ./spec/swap_test/n3/n3parser.tests_n3_10014.nt
   rdf_type: PositiveParserTest
 - !ruby/object:RdfHelper::TestCase 
   about: !ruby/object:RdfContext::URIRef 
     namespace: 
-    normalize: true
+    normalize: false
     to_s: http://www.w3.org/2000/10/swap/test/syntax/qvars2.n3
     uri: !ruby/object:Addressable::URI 
       authority: www.w3.org
       fragment: 
-      hash: 1455131155
+      hash: -261571140
       host: www.w3.org
-      inferred_port: 
       normalized_host: 
-      normalized_password: 
       normalized_path: 
-      normalized_port: 
       normalized_scheme: 
-      normalized_user: 
-      normalized_userinfo: 
       password: 
       path: /2000/10/swap/test/syntax/qvars2.n3
       port: 
@@ -440,30 +370,25 @@
       uri_string: http://www.w3.org/2000/10/swap/test/syntax/qvars2.n3
       user: 
       userinfo: 
-      validation_deferred: false
+      validation_deferred: 
   description: Quick variable syntax, more
-  inputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/syntax/qvars2.n3
+  inputDocument: ./spec/swap_test/syntax/qvars2.n3
   name: n3_10015
-  outputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/n3/n3parser.tests_n3_10015.nt
+  outputDocument: ./spec/swap_test/n3/n3parser.tests_n3_10015.nt
   rdf_type: PositiveParserTest
 - !ruby/object:RdfHelper::TestCase 
   about: !ruby/object:RdfContext::URIRef 
     namespace: 
-    normalize: true
+    normalize: false
     to_s: http://www.w3.org/2000/10/swap/test/syntax/lstring.n3
     uri: !ruby/object:Addressable::URI 
       authority: www.w3.org
       fragment: 
-      hash: 1305658
+      hash: 2133162527
       host: www.w3.org
-      inferred_port: 
       normalized_host: 
-      normalized_password: 
       normalized_path: 
-      normalized_port: 
       normalized_scheme: 
-      normalized_user: 
-      normalized_userinfo: 
       password: 
       path: /2000/10/swap/test/syntax/lstring.n3
       port: 
@@ -472,30 +397,25 @@
       uri_string: http://www.w3.org/2000/10/swap/test/syntax/lstring.n3
       user: 
       userinfo: 
-      validation_deferred: false
+      validation_deferred: 
   description: N3 string nested triple quoting
-  inputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/syntax/lstring.n3
+  inputDocument: ./spec/swap_test/syntax/lstring.n3
   name: n3_10016
-  outputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/n3/n3parser.tests_n3_10016.nt
+  outputDocument: ./spec/swap_test/n3/n3parser.tests_n3_10016.nt
   rdf_type: PositiveParserTest
 - !ruby/object:RdfHelper::TestCase 
   about: !ruby/object:RdfContext::URIRef 
     namespace: 
-    normalize: true
+    normalize: false
     to_s: http://www.w3.org/2000/10/swap/test/lists.n3
     uri: !ruby/object:Addressable::URI 
       authority: www.w3.org
       fragment: 
-      hash: 1964583980
+      hash: 877091703
       host: www.w3.org
-      inferred_port: 
       normalized_host: 
-      normalized_password: 
       normalized_path: 
-      normalized_port: 
       normalized_scheme: 
-      normalized_user: 
-      normalized_userinfo: 
       password: 
       path: /2000/10/swap/test/lists.n3
       port: 
@@ -504,30 +424,25 @@
       uri_string: http://www.w3.org/2000/10/swap/test/lists.n3
       user: 
       userinfo: 
-      validation_deferred: false
+      validation_deferred: 
   description: parsing and generation of N3 list syntax
-  inputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/lists.n3
+  inputDocument: ./spec/swap_test/lists.n3
   name: n3_10017
-  outputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/n3/n3parser.tests_n3_10017.nt
+  outputDocument: ./spec/swap_test/n3/n3parser.tests_n3_10017.nt
   rdf_type: PositiveParserTest
 - !ruby/object:RdfHelper::TestCase 
   about: !ruby/object:RdfContext::URIRef 
     namespace: 
-    normalize: true
+    normalize: false
     to_s: http://www.w3.org/2000/10/swap/test/syntax/trailing-semicolon.n3
     uri: !ruby/object:Addressable::URI 
       authority: www.w3.org
       fragment: 
-      hash: 1042427669
+      hash: 50492811
       host: www.w3.org
-      inferred_port: 
       normalized_host: 
-      normalized_password: 
       normalized_path: 
-      normalized_port: 
       normalized_scheme: 
-      normalized_user: 
-      normalized_userinfo: 
       password: 
       path: /2000/10/swap/test/syntax/trailing-semicolon.n3
       port: 
@@ -536,30 +451,25 @@
       uri_string: http://www.w3.org/2000/10/swap/test/syntax/trailing-semicolon.n3
       user: 
       userinfo: 
-      validation_deferred: false
+      validation_deferred: 
   description: Propertylists can end in trailing semicolon.
-  inputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/syntax/trailing-semicolon.n3
+  inputDocument: ./spec/swap_test/syntax/trailing-semicolon.n3
   name: n3_10018
-  outputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/n3/n3parser.tests_n3_10018.nt
+  outputDocument: ./spec/swap_test/n3/n3parser.tests_n3_10018.nt
   rdf_type: PositiveParserTest
 - !ruby/object:RdfHelper::TestCase 
   about: !ruby/object:RdfContext::URIRef 
     namespace: 
-    normalize: true
+    normalize: false
     to_s: http://www.w3.org/2000/10/swap/test/syntax/this-quantifiers.n3
     uri: !ruby/object:Addressable::URI 
       authority: www.w3.org
       fragment: 
-      hash: -941221360
+      hash: 1721981270
       host: www.w3.org
-      inferred_port: 
       normalized_host: 
-      normalized_password: 
       normalized_path: 
-      normalized_port: 
       normalized_scheme: 
-      normalized_user: 
-      normalized_userinfo: 
       password: 
       path: /2000/10/swap/test/syntax/this-quantifiers.n3
       port: 
@@ -568,30 +478,25 @@
       uri_string: http://www.w3.org/2000/10/swap/test/syntax/this-quantifiers.n3
       user: 
       userinfo: 
-      validation_deferred: false
+      validation_deferred: 
   description: Can still read the old 'this log:forSome' syntax?
-  inputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/syntax/this-quantifiers.n3
+  inputDocument: ./spec/swap_test/syntax/this-quantifiers.n3
   name: n3_10019
-  outputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/n3/n3parser.tests_n3_10019.nt
+  outputDocument: ./spec/swap_test/n3/n3parser.tests_n3_10019.nt
   rdf_type: NegativeParserTest
 - !ruby/object:RdfHelper::TestCase 
   about: !ruby/object:RdfContext::URIRef 
     namespace: 
-    normalize: true
+    normalize: false
     to_s: http://www.w3.org/2000/10/swap/test/syntax/this-rules.n3
     uri: !ruby/object:Addressable::URI 
       authority: www.w3.org
       fragment: 
-      hash: 726672199
+      hash: 999879983
       host: www.w3.org
-      inferred_port: 
       normalized_host: 
-      normalized_password: 
       normalized_path: 
-      normalized_port: 
       normalized_scheme: 
-      normalized_user: 
-      normalized_userinfo: 
       password: 
       path: /2000/10/swap/test/syntax/this-rules.n3
       port: 
@@ -600,30 +505,25 @@
       uri_string: http://www.w3.org/2000/10/swap/test/syntax/this-rules.n3
       user: 
       userinfo: 
-      validation_deferred: false
+      validation_deferred: 
   description: Can still read the old 'this log:forAll' syntax
-  inputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/syntax/this-rules.n3
+  inputDocument: ./spec/swap_test/syntax/this-rules.n3
   name: n3_10020
-  outputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/n3/n3parser.tests_n3_10020.nt
+  outputDocument: ./spec/swap_test/n3/n3parser.tests_n3_10020.nt
   rdf_type: NegativeParserTest
 - !ruby/object:RdfHelper::TestCase 
   about: !ruby/object:RdfContext::URIRef 
     namespace: 
-    normalize: true
+    normalize: false
     to_s: http://www.w3.org/2000/10/swap/test/syntax/equals1.n3
     uri: !ruby/object:Addressable::URI 
       authority: www.w3.org
       fragment: 
-      hash: 599653594
+      hash: -783633403
       host: www.w3.org
-      inferred_port: 
       normalized_host: 
-      normalized_password: 
       normalized_path: 
-      normalized_port: 
       normalized_scheme: 
-      normalized_user: 
-      normalized_userinfo: 
       password: 
       path: /2000/10/swap/test/syntax/equals1.n3
       port: 
@@ -632,29 +532,24 @@
       uri_string: http://www.w3.org/2000/10/swap/test/syntax/equals1.n3
       user: 
       userinfo: 
-      validation_deferred: false
+      validation_deferred: 
   description: The = keyword
-  inputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/syntax/equals1.n3
+  inputDocument: ./spec/swap_test/syntax/equals1.n3
   name: n3_10025
   rdf_type: PositiveParserTest
 - !ruby/object:RdfHelper::TestCase 
   about: !ruby/object:RdfContext::URIRef 
     namespace: 
-    normalize: true
+    normalize: false
     to_s: http://www.w3.org/2000/10/swap/test/syntax/equals2.n3
     uri: !ruby/object:Addressable::URI 
       authority: www.w3.org
       fragment: 
-      hash: -1086335871
+      hash: -1588613952
       host: www.w3.org
-      inferred_port: 
       normalized_host: 
-      normalized_password: 
       normalized_path: 
-      normalized_port: 
       normalized_scheme: 
-      normalized_user: 
-      normalized_userinfo: 
       password: 
       path: /2000/10/swap/test/syntax/equals2.n3
       port: 
@@ -663,29 +558,24 @@
       uri_string: http://www.w3.org/2000/10/swap/test/syntax/equals2.n3
       user: 
       userinfo: 
-      validation_deferred: false
+      validation_deferred: 
   description: The = keyword
-  inputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/syntax/equals2.n3
+  inputDocument: ./spec/swap_test/syntax/equals2.n3
   name: n3_10026
   rdf_type: PositiveParserTest
 - !ruby/object:RdfHelper::TestCase 
   about: !ruby/object:RdfContext::URIRef 
     namespace: 
-    normalize: true
+    normalize: false
     to_s: http://www.w3.org/2000/10/swap/test/syntax/zero-predicates.n3
     uri: !ruby/object:Addressable::URI 
       authority: www.w3.org
       fragment: 
-      hash: 12026862
+      hash: -335847247
       host: www.w3.org
-      inferred_port: 
       normalized_host: 
-      normalized_password: 
       normalized_path: 
-      normalized_port: 
       normalized_scheme: 
-      normalized_user: 
-      normalized_userinfo: 
       password: 
       path: /2000/10/swap/test/syntax/zero-predicates.n3
       port: 
@@ -694,29 +584,24 @@
       uri_string: http://www.w3.org/2000/10/swap/test/syntax/zero-predicates.n3
       user: 
       userinfo: 
-      validation_deferred: false
+      validation_deferred: 
   description: A statement that says nothing at all
-  inputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/syntax/zero-predicates.n3
+  inputDocument: ./spec/swap_test/syntax/zero-predicates.n3
   name: n3_10027
   rdf_type: PositiveParserTest
 - !ruby/object:RdfHelper::TestCase 
   about: !ruby/object:RdfContext::URIRef 
     namespace: 
-    normalize: true
+    normalize: false
     to_s: http://www.w3.org/2000/10/swap/test/tests-work.txt
     uri: !ruby/object:Addressable::URI 
       authority: www.w3.org
       fragment: 
-      hash: 775255256
+      hash: -645452563
       host: www.w3.org
-      inferred_port: 
       normalized_host: 
-      normalized_password: 
       normalized_path: 
-      normalized_port: 
       normalized_scheme: 
-      normalized_user: 
-      normalized_userinfo: 
       password: 
       path: /2000/10/swap/test/tests-work.txt
       port: 
@@ -725,29 +610,24 @@
       uri_string: http://www.w3.org/2000/10/swap/test/tests-work.txt
       user: 
       userinfo: 
-      validation_deferred: false
+      validation_deferred: 
   description: something that isn't n3
-  inputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/tests-work.txt
+  inputDocument: ./spec/swap_test/tests-work.txt
   name: n3_20000
   rdf_type: NegativeParserTest
 - !ruby/object:RdfHelper::TestCase 
   about: !ruby/object:RdfContext::URIRef 
     namespace: 
-    normalize: true
+    normalize: false
     to_s: http://www.w3.org/2000/10/swap/test/syntax/neg-keywords3.n3
     uri: !ruby/object:Addressable::URI 
       authority: www.w3.org
       fragment: 
-      hash: -131122030
+      hash: 1476266585
       host: www.w3.org
-      inferred_port: 
       normalized_host: 
-      normalized_password: 
       normalized_path: 
-      normalized_port: 
       normalized_scheme: 
-      normalized_user: 
-      normalized_userinfo: 
       password: 
       path: /2000/10/swap/test/syntax/neg-keywords3.n3
       port: 
@@ -756,29 +636,24 @@
       uri_string: http://www.w3.org/2000/10/swap/test/syntax/neg-keywords3.n3
       user: 
       userinfo: 
-      validation_deferred: false
+      validation_deferred: 
   description: "@keywords is not a valid predicate"
-  inputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/syntax/neg-keywords3.n3
+  inputDocument: ./spec/swap_test/syntax/neg-keywords3.n3
   name: n3_20001
   rdf_type: NegativeParserTest
 - !ruby/object:RdfHelper::TestCase 
   about: !ruby/object:RdfContext::URIRef 
     namespace: 
-    normalize: true
+    normalize: false
     to_s: http://www.w3.org/2000/10/swap/test/syntax/neg-single-quote.n3
     uri: !ruby/object:Addressable::URI 
       authority: www.w3.org
       fragment: 
-      hash: -197488415
+      hash: 1920766115
       host: www.w3.org
-      inferred_port: 
       normalized_host: 
-      normalized_password: 
       normalized_path: 
-      normalized_port: 
       normalized_scheme: 
-      normalized_user: 
-      normalized_userinfo: 
       password: 
       path: /2000/10/swap/test/syntax/neg-single-quote.n3
       port: 
@@ -787,29 +662,24 @@
       uri_string: http://www.w3.org/2000/10/swap/test/syntax/neg-single-quote.n3
       user: 
       userinfo: 
-      validation_deferred: false
+      validation_deferred: 
   description: single quoted strings are illegal
-  inputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/syntax/neg-single-quote.n3
+  inputDocument: ./spec/swap_test/syntax/neg-single-quote.n3
   name: n3_20002
   rdf_type: NegativeParserTest
 - !ruby/object:RdfHelper::TestCase 
   about: !ruby/object:RdfContext::URIRef 
     namespace: 
-    normalize: true
+    normalize: false
     to_s: http://www.w3.org/2000/10/swap/test/syntax/neg-thisadoc.n3
     uri: !ruby/object:Addressable::URI 
       authority: www.w3.org
       fragment: 
-      hash: -1078914087
+      hash: -1933695432
       host: www.w3.org
-      inferred_port: 
       normalized_host: 
-      normalized_password: 
       normalized_path: 
-      normalized_port: 
       normalized_scheme: 
-      normalized_user: 
-      normalized_userinfo: 
       password: 
       path: /2000/10/swap/test/syntax/neg-thisadoc.n3
       port: 
@@ -818,29 +688,24 @@
       uri_string: http://www.w3.org/2000/10/swap/test/syntax/neg-thisadoc.n3
       user: 
       userinfo: 
-      validation_deferred: false
+      validation_deferred: 
   description: "The `this' keyword is no longer legal "
-  inputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/syntax/neg-thisadoc.n3
+  inputDocument: ./spec/swap_test/syntax/neg-thisadoc.n3
   name: n3_20003
   rdf_type: NegativeParserTest
 - !ruby/object:RdfHelper::TestCase 
   about: !ruby/object:RdfContext::URIRef 
     namespace: 
-    normalize: true
+    normalize: false
     to_s: http://www.w3.org/2000/10/swap/test/syntax/neg-literal-predicate.n3
     uri: !ruby/object:Addressable::URI 
       authority: www.w3.org
       fragment: 
-      hash: -519870981
+      hash: 410084121
       host: www.w3.org
-      inferred_port: 
       normalized_host: 
-      normalized_password: 
       normalized_path: 
-      normalized_port: 
       normalized_scheme: 
-      normalized_user: 
-      normalized_userinfo: 
       password: 
       path: /2000/10/swap/test/syntax/neg-literal-predicate.n3
       port: 
@@ -849,29 +714,24 @@
       uri_string: http://www.w3.org/2000/10/swap/test/syntax/neg-literal-predicate.n3
       user: 
       userinfo: 
-      validation_deferred: false
+      validation_deferred: 
   description: A predicate cannot be a literal, I hope
-  inputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/syntax/neg-literal-predicate.n3
+  inputDocument: ./spec/swap_test/syntax/neg-literal-predicate.n3
   name: n3_20004
   rdf_type: NegativeParserTest
 - !ruby/object:RdfHelper::TestCase 
   about: !ruby/object:RdfContext::URIRef 
     namespace: 
-    normalize: true
+    normalize: false
     to_s: http://www.w3.org/2000/10/swap/test/syntax/neg-formula-predicate.n3
     uri: !ruby/object:Addressable::URI 
       authority: www.w3.org
       fragment: 
-      hash: -1939990936
+      hash: -951218457
       host: www.w3.org
-      inferred_port: 
       normalized_host: 
-      normalized_password: 
       normalized_path: 
-      normalized_port: 
       normalized_scheme: 
-      normalized_user: 
-      normalized_userinfo: 
       password: 
       path: /2000/10/swap/test/syntax/neg-formula-predicate.n3
       port: 
@@ -880,29 +740,24 @@
       uri_string: http://www.w3.org/2000/10/swap/test/syntax/neg-formula-predicate.n3
       user: 
       userinfo: 
-      validation_deferred: false
+      validation_deferred: 
   description: A predicate cannot be a formula, I hope
-  inputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/syntax/neg-formula-predicate.n3
+  inputDocument: ./spec/swap_test/syntax/neg-formula-predicate.n3
   name: n3_20005
   rdf_type: NegativeParserTest
 - !ruby/object:RdfHelper::TestCase 
   about: !ruby/object:RdfContext::URIRef 
     namespace: 
-    normalize: true
+    normalize: false
     to_s: http://www.w3.org/2000/10/swap/test/syntax/zero-objects.n3
     uri: !ruby/object:Addressable::URI 
       authority: www.w3.org
       fragment: 
-      hash: 1129214327
+      hash: 998484651
       host: www.w3.org
-      inferred_port: 
       normalized_host: 
-      normalized_password: 
       normalized_path: 
-      normalized_port: 
       normalized_scheme: 
-      normalized_user: 
-      normalized_userinfo: 
       password: 
       path: /2000/10/swap/test/syntax/zero-objects.n3
       port: 
@@ -911,8 +766,8 @@
       uri_string: http://www.w3.org/2000/10/swap/test/syntax/zero-objects.n3
       user: 
       userinfo: 
-      validation_deferred: false
+      validation_deferred: 
   description: A statement that says nothing at all
-  inputDocument: /Users/gregg/Projects/rdf_context/spec/swap_test/syntax/zero-objects.n3
+  inputDocument: ./spec/swap_test/syntax/zero-objects.n3
   name: n3_20028
   rdf_type: NegativeParserTest
