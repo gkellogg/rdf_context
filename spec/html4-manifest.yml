@@ -3,7 +3,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 2001997353
+    hash: 454930089
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -31,7 +31,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 165928247
+    hash: 454930088
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -59,7 +59,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -633181789
+    hash: 454930087
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -87,7 +87,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 2103916625
+    hash: 454930086
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -115,7 +115,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 817454653
+    hash: 454930085
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -143,7 +143,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -114210554
+    hash: 454930084
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -171,7 +171,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -46967049
+    hash: 454930083
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -199,7 +199,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -2040719205
+    hash: 454930082
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -227,7 +227,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -2097998176
+    hash: 454930080
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -255,7 +255,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -2123903245
+    hash: 454862441
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -283,7 +283,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -618476444
+    hash: 454862440
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -311,7 +311,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1312385365
+    hash: 454862439
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -339,7 +339,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1957798585
+    hash: 454862438
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -367,7 +367,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1996296647
+    hash: 454862437
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -395,7 +395,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1932509937
+    hash: 454862436
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -423,7 +423,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 271814004
+    hash: 454862435
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -451,7 +451,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 660271192
+    hash: 454862434
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -479,7 +479,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1969865407
+    hash: 454862433
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -507,7 +507,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1796404812
+    hash: 454862432
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -535,7 +535,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1193069206
+    hash: 454794792
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -563,7 +563,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1735522758
+    hash: 454794791
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -591,7 +591,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1312893771
+    hash: 454794790
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -619,7 +619,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1948880389
+    hash: 454794789
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -647,7 +647,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -466944791
+    hash: 454794788
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -675,7 +675,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 171024674
+    hash: 454794787
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -703,7 +703,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -37867413
+    hash: 454794786
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -731,7 +731,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 591864095
+    hash: 454794785
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -759,7 +759,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1590873756
+    hash: 454794784
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -787,7 +787,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 120326026
+    hash: 454794783
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -815,7 +815,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1640971339
+    hash: 454727143
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -843,7 +843,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 211649710
+    hash: 454727142
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -871,7 +871,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1762466449
+    hash: 454727141
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -899,7 +899,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 755913105
+    hash: 454727140
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -927,7 +927,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 862523678
+    hash: 454727139
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -955,7 +955,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1659971986
+    hash: 454727138
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -983,7 +983,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -150726175
+    hash: 454727137
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1011,7 +1011,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -783560308
+    hash: 454727136
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1039,7 +1039,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1000529067
+    hash: 454727135
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1067,7 +1067,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -2091989690
+    hash: 454727134
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1095,7 +1095,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1917326746
+    hash: 454659494
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1123,7 +1123,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 2076161380
+    hash: 454659493
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1151,7 +1151,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -63722540
+    hash: 454659492
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1179,7 +1179,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 528846701
+    hash: 454659491
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1207,7 +1207,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -531080277
+    hash: 454659490
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1235,7 +1235,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1185783808
+    hash: 454659489
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1263,7 +1263,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -226276671
+    hash: 454659488
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1291,7 +1291,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 85293328
+    hash: 454659487
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1319,7 +1319,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1949407742
+    hash: 454659486
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1347,7 +1347,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1679028652
+    hash: 454659485
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1375,7 +1375,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1210267672
+    hash: 454591845
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1403,7 +1403,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -819481678
+    hash: 454591844
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1431,7 +1431,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1839450616
+    hash: 454591843
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1459,7 +1459,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -736252838
+    hash: 454591842
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1487,7 +1487,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -707075495
+    hash: 454591841
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1515,7 +1515,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -2115708579
+    hash: 454591840
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1543,7 +1543,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1230728331
+    hash: 454591839
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1571,7 +1571,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -553317526
+    hash: 454591838
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1599,7 +1599,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1336458921
+    hash: 454591837
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1627,7 +1627,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1721884177
+    hash: 454591836
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1655,7 +1655,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1824092704
+    hash: 454524196
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1683,7 +1683,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1045697130
+    hash: 454524195
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1711,7 +1711,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -454931010
+    hash: 454524194
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1739,7 +1739,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 468483365
+    hash: 454524193
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1767,7 +1767,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -135579709
+    hash: 454524192
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1795,7 +1795,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -258442630
+    hash: 454524191
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1823,7 +1823,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -358928160
+    hash: 454524190
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1851,7 +1851,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1305724252
+    hash: 454524189
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1879,7 +1879,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1455909508
+    hash: 454524188
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1907,7 +1907,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1277328690
+    hash: 454524187
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1935,7 +1935,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1024860658
+    hash: 454456547
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1963,7 +1963,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -782548286
+    hash: 454456546
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -1991,7 +1991,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 576673973
+    hash: 454456545
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2019,7 +2019,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1100182891
+    hash: 454456544
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2047,7 +2047,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1242832286
+    hash: 454456543
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2075,7 +2075,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 933692261
+    hash: 454456542
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2103,7 +2103,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1527413366
+    hash: 454456541
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2131,7 +2131,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 960195062
+    hash: 454456540
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2159,7 +2159,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1667191445
+    hash: 454456539
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2187,7 +2187,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1161481545
+    hash: 454456538
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2215,7 +2215,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -69667409
+    hash: 454388898
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2243,7 +2243,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -345929157
+    hash: 454388897
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2271,7 +2271,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 287547884
+    hash: 454388896
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2299,7 +2299,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -996278592
+    hash: 454388895
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2327,7 +2327,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1048581111
+    hash: 454388894
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2355,7 +2355,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1607206949
+    hash: 454388893
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2383,7 +2383,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 211612242
+    hash: 454388892
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2411,7 +2411,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 830907031
+    hash: 454388891
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2439,7 +2439,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -2046130150
+    hash: 454388890
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2467,7 +2467,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1395193361
+    hash: 454388889
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2495,7 +2495,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 108517975
+    hash: 454321249
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2523,7 +2523,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 2101391855
+    hash: 454321248
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2551,7 +2551,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -307185979
+    hash: 454321247
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2579,7 +2579,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -625883221
+    hash: 454321246
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2607,7 +2607,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 890281775
+    hash: 454321245
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2635,7 +2635,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -834060158
+    hash: 454321244
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2663,7 +2663,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1418398633
+    hash: 454321243
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2691,7 +2691,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -39869193
+    hash: 454321242
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2719,7 +2719,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 738047411
+    hash: 454321241
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2747,7 +2747,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -20577583
+    hash: 454321240
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2775,7 +2775,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1989821663
+    hash: 446410413
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2803,7 +2803,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1039578073
+    hash: 446410412
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2831,7 +2831,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1953235155
+    hash: 446410411
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2861,7 +2861,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 508619306
+    hash: 446410410
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2889,7 +2889,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -234396105
+    hash: 446410409
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2917,7 +2917,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1980993313
+    hash: 446410408
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2945,7 +2945,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -2022184103
+    hash: 446410407
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -2973,7 +2973,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1757585553
+    hash: 446410406
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3001,7 +3001,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -789778624
+    hash: 446410404
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3029,7 +3029,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 816212029
+    hash: 446410403
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3057,7 +3057,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1286285545
+    hash: 446342764
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3085,7 +3085,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1600198411
+    hash: 446342763
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3113,7 +3113,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -916664486
+    hash: 446342762
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3141,7 +3141,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1000570667
+    hash: 446342761
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3169,7 +3169,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -714447515
+    hash: 446342760
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3197,7 +3197,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 763589777
+    hash: 446342759
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3225,7 +3225,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 332708526
+    hash: 446342758
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3253,7 +3253,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -753771020
+    hash: 446342757
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3281,7 +3281,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1509114306
+    hash: 446342756
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3315,7 +3315,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1103612846
+    hash: 446342754
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3343,7 +3343,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1481121187
+    hash: 446275115
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3371,7 +3371,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 786003634
+    hash: 446275114
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3399,7 +3399,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 170233831
+    hash: 446275113
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3427,7 +3427,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1832845672
+    hash: 446275112
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3455,7 +3455,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 521056179
+    hash: 446275111
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3483,7 +3483,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 258498420
+    hash: 446275110
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3511,7 +3511,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 2123032096
+    hash: 446275109
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3539,7 +3539,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1333261528
+    hash: 446275108
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3567,7 +3567,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1650333798
+    hash: 446275107
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3595,7 +3595,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 639503792
+    hash: 446275106
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3623,7 +3623,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1413576831
+    hash: 446207466
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3651,7 +3651,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -2128289076
+    hash: 446207464
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3679,7 +3679,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -915853748
+    hash: 446207463
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3707,7 +3707,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -595844933
+    hash: 446207461
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3735,7 +3735,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1819468251
+    hash: 446207460
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3763,7 +3763,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1333984874
+    hash: 446207459
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3791,7 +3791,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 192216407
+    hash: 446207458
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3819,7 +3819,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 580808797
+    hash: 446207457
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3847,7 +3847,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1218246457
+    hash: 446139816
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3875,7 +3875,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -2116178687
+    hash: 446139814
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3903,7 +3903,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 92146399
+    hash: 446139813
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3931,7 +3931,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -373533959
+    hash: 446139812
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3959,7 +3959,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -2084666129
+    hash: 446139811
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -3987,7 +3987,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1186071872
+    hash: 446139809
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4015,7 +4015,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1500138521
+    hash: 446139808
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4043,7 +4043,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1492842094
+    hash: 446072168
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4071,7 +4071,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1948035496
+    hash: 446072167
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4099,7 +4099,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 178463257
+    hash: 446072166
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4127,7 +4127,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -457150867
+    hash: 446072165
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4155,7 +4155,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1636204832
+    hash: 446072163
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4183,7 +4183,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -850325833
+    hash: 446072162
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4211,7 +4211,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -761865753
+    hash: 446072161
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4239,7 +4239,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 2005364492
+    hash: 446072159
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4267,7 +4267,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1031583216
+    hash: 446004518
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4295,7 +4295,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1709336784
+    hash: 446004516
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4323,7 +4323,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1768525072
+    hash: 446004514
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4351,7 +4351,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 819854337
+    hash: 446004513
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4379,7 +4379,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 2072562284
+    hash: 446004512
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4407,7 +4407,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -999850872
+    hash: 446004511
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4435,7 +4435,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1337502035
+    hash: 446004510
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4463,7 +4463,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1183696463
+    hash: 445936870
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4491,7 +4491,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1928126468
+    hash: 445936869
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4519,7 +4519,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 741595363
+    hash: 445936868
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4547,7 +4547,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1166084707
+    hash: 445936866
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4575,7 +4575,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1065766343
+    hash: 445936865
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4603,7 +4603,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 322878817
+    hash: 445936864
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4631,7 +4631,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1688162664
+    hash: 445936863
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4659,7 +4659,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 698601509
+    hash: 445936862
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4687,7 +4687,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 193618755
+    hash: 445869221
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4715,7 +4715,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -272309375
+    hash: 445869219
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4743,7 +4743,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -660617186
+    hash: 445869217
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4771,7 +4771,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -2078017161
+    hash: 445869216
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4799,7 +4799,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -791089403
+    hash: 445869215
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4827,7 +4827,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1335751940
+    hash: 445869214
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4855,7 +4855,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1434662277
+    hash: 445869213
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4883,7 +4883,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: -1478854978
+    hash: 445801572
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
@@ -4911,7 +4911,7 @@
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com
     fragment: 
-    hash: 1244541299
+    hash: -350050460
     host: rdfa.digitalbazaar.com
     normalized_host: 
     normalized_path: 
