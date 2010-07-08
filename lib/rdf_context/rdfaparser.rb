@@ -394,18 +394,18 @@ module RdfContext
       if !(rel || rev)
         # Establishing a new subject if no rel/rev [7.5 Step 6]
         # May not be valid, but can exist
-        if about
-          new_subject = process_uri(element, about, evaluation_context,
-                                    :uri_mappings => uri_mappings,
-                                    :r_1_0_restrictions => [:uri, :safe_curie, :bnode])
+        new_subject = if about
+          process_uri(element, about, evaluation_context,
+                      :uri_mappings => uri_mappings,
+                      :r_1_0_restrictions => [:uri, :safe_curie, :bnode])
         elsif src
-          new_subject = process_uri(element, src, evaluation_context, :r_1_0_restrictions => [:uri])
+          process_uri(element, src, evaluation_context, :r_1_0_restrictions => [:uri])
         elsif resource
-          new_subject =  process_uri(element, resource, evaluation_context,
-                                    :uri_mappings => uri_mappings,
-                                    :r_1_0_restrictions => [:uri, :safe_curie, :bnode])
+          process_uri(element, resource, evaluation_context,
+                      :uri_mappings => uri_mappings,
+                      :r_1_0_restrictions => [:uri, :safe_curie, :bnode])
         elsif href
-          new_subject = process_uri(element, href, evaluation_context, :r_1_0_restrictions => [:uri])
+          process_uri(element, href, evaluation_context, :r_1_0_restrictions => [:uri])
         end
 
         # If no URI is provided by a resource attribute, then the first match from the following rules
@@ -414,59 +414,49 @@ module RdfContext
         # otherwise,
         #   if parent object is present, new subject is set to the value of parent object.
         # Additionally, if @property is not present then the skip element flag is set to 'true';
-        if new_subject.nil?
-          if @host_language == :xhtml && element.name =~ /^(head|body)$/ && evaluation_context.base
-            # From XHTML+RDFa 1.1:
-            # if no URI is provided, then first check to see if the element is the head or body element.
-            # If it is, then act as if there is an empty @about present, and process it according to the rule for @about.
-            new_subject = URIRef.new(evaluation_context.base, :normalize => false)
-          elsif element.attributes['typeof']
-            new_subject = BNode.new
-          else
-            # if it's null, it's null and nothing changes
-            new_subject = evaluation_context.parent_object
-            skip = true unless property
-          end
+        new_subject ||= if @host_language == :xhtml && element.name =~ /^(head|body)$/ && evaluation_context.base
+          # From XHTML+RDFa 1.1:
+          # if no URI is provided, then first check to see if the element is the head or body element.
+          # If it is, then act as if there is an empty @about present, and process it according to the rule for @about.
+          URIRef.new(evaluation_context.base, :normalize => false)
+        elsif element.attributes['typeof']
+          BNode.new
+        else
+          skip = true unless property
+          # if it's null, it's null and nothing changes
+          evaluation_context.parent_object
         end
         add_debug(element, "[Step 6] new_subject: #{new_subject}, skip = #{skip}")
       else
         # [7.5 Step 7]
         # If the current element does contain a @rel or @rev attribute, then the next step is to
         # establish both a value for new subject and a value for current object resource:
-        if about
-          new_subject =  process_uri(element, about, evaluation_context,
-                                    :uri_mappings => uri_mappings,
-                                    :r_1_0_restrictions => [:uri, :safe_curie, :bnode])
-        elsif src
-          new_subject =  process_uri(element, src, evaluation_context,
-                                    :uri_mappings => uri_mappings,
-                                    :r_1_0_restrictions => [:uri, :safe_curie, :bnode])
-        end
+        new_subject = process_uri(element, about || src, evaluation_context,
+                                  :uri_mappings => uri_mappings,
+                                  :r_1_0_restrictions => [:uri, :safe_curie, :bnode])
       
         # If no URI is provided then the first match from the following rules will apply
-        if new_subject.nil?
-          if @host_language == :xhtml && element.name =~ /^(head|body)$/
-            # From XHTML+RDFa 1.1:
-            # if no URI is provided, then first check to see if the element is the head or body element.
-            # If it is, then act as if there is an empty @about present, and process it according to the rule for @about.
-            new_subject = URIRef.new(evaluation_context.base, :normalize => false)
-          elsif element.attributes['typeof']
-            new_subject = BNode.new
-          else
-            # if it's null, it's null and nothing changes
-            new_subject = evaluation_context.parent_object
-            # no skip flag set this time
-          end
+        new_subject ||= if @host_language == :xhtml && element.name =~ /^(head|body)$/
+          # From XHTML+RDFa 1.1:
+          # if no URI is provided, then first check to see if the element is the head or body element.
+          # If it is, then act as if there is an empty @about present, and process it according to the rule for @about.
+          URIRef.new(evaluation_context.base, :normalize => false)
+        elsif element.attributes['typeof']
+          BNode.new
+        else
+          # if it's null, it's null and nothing changes
+          evaluation_context.parent_object
+          # no skip flag set this time
         end
       
         # Then the current object resource is set to the URI obtained from the first match from the following rules:
-        if resource
-          current_object_resource =  process_uri(element, resource, evaluation_context,
-                                                :uri_mappings => uri_mappings,
-                                                :r_1_0_restrictions => [:uri, :safe_curie, :bnode])
+        current_object_resource = if resource
+          process_uri(element, resource, evaluation_context,
+                      :uri_mappings => uri_mappings,
+                      :r_1_0_restrictions => [:uri, :safe_curie, :bnode])
         elsif href
-          current_object_resource = process_uri(element, href, evaluation_context,
-                                                :r_1_0_restrictions => [:uri])
+          process_uri(element, href, evaluation_context,
+                      :r_1_0_restrictions => [:uri])
         end
 
         add_debug(element, "[Step 7] new_subject: #{new_subject}, current_object_resource = #{current_object_resource.nil? ? 'nil' : current_object_resource}")
@@ -527,19 +517,19 @@ module RdfContext
                                     :term_mappings => term_mappings,
                                     :vocab => default_vocabulary,
                                     :r_1_0_restrictions => [:curie, :bnode]) if type
-        if type and !type.empty? and (type_resource.to_s != XML_LITERAL.to_s)
+        current_object_literal = if type and !type.empty? and (type_resource.to_s != XML_LITERAL.to_s)
           # typed literal
           add_debug(element, "[Step 11] typed literal")
-          current_object_literal = Literal.typed(content || element.inner_text, type_resource, :language => language)
+          Literal.typed(content || element.inner_text, type_resource, :language => language)
         elsif content or (children_node_types == [Nokogiri::XML::Text]) or (element.children.length == 0) or (type == '')
           # plain literal
           add_debug(element, "[Step 11] plain literal")
-          current_object_literal = Literal.untyped(content || element.inner_text, language)
+          Literal.untyped(content || element.inner_text, language)
         elsif children_node_types != [Nokogiri::XML::Text] and (type == nil or type_resource.to_s == XML_LITERAL.to_s)
           # XML Literal
           add_debug(element, "[Step 11] XML Literal: #{element.inner_html}")
-          current_object_literal = Literal.typed(element.children, XML_LITERAL, :language => language, :namespaces => uri_mappings)
           recurse = false
+          Literal.typed(element.children, XML_LITERAL, :language => language, :namespaces => uri_mappings)
         end
       
         # add each property
@@ -607,7 +597,7 @@ module RdfContext
     end
 
     def process_uri(element, value, evaluation_context, options = {})
-      #return if value.to_s.empty?
+      return if value.nil?
       restrictions = @version == :rdfa_1_0 ? options[:r_1_0_restrictions] : [:uri, :bnode, :curie, :safe_curie, :term]
       add_debug(element, "process_uri: restrictions = #{restrictions.inspect}")
       options = {:uri_mappings => {}}.merge(options)
