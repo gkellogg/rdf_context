@@ -5,7 +5,8 @@ module RdfContext
   # An RDFa parser in Ruby
   #
   # Based on processing rules described here:
-  #   file:///Users/gregg/Projects/rdf_context/RDFa%20Core%201.1.html#sequence
+  #   RDFa 1.0: http://www.w3.org/TR/rdfa-syntax/#s_model
+  #   RDFa 1.1: http://www.w3.org/2010/02/rdfa/drafts/2010/ED-rdfa-core-20100705/
   #
   # Ben Adida
   # 2008-05-07
@@ -125,7 +126,9 @@ module RdfContext
 
       # Determine host language
       # XXX - right now only XHTML defined
-      @host_language = case @doc.root && @doc.root.attributes["version"].to_s
+      version = @doc.root.attributes["version"].to_s if @doc.root
+      
+      @host_language = case version.to_s
       when /XHTML+RDFa/ then :xhtml
       end
       
@@ -138,6 +141,7 @@ module RdfContext
         {
           :vocabulary => XHV_NS.uri,
           :prefix     => XHV_NS,
+          :uri_mappings => {"xhv" => XHV_NS}, # RDF::XHTML is wrong
           :term_mappings => %w(
             alternate appendix bookmark cite chapter contents copyright first glossary help icon index
             last license meta next p3pv1 prev role section stylesheet subsection start top up
@@ -147,6 +151,9 @@ module RdfContext
         {}
       end
       
+      @version = version.to_s.match(/RDFa 1.0/) ? :rdfa_1_0 : :rdfa_1_1
+
+      add_debug(@doc, "version = #{@version},  host_language = #{@host_language}")
       # parse
       parse_whole_document(@doc, @uri)
 
@@ -257,7 +264,7 @@ module RdfContext
         # Merge mappings from this vocabulary
         uri_mappings.merge!(@@vocabulary_cache[profile][:uri_mappings])
         term_mappings.merge!(@@vocabulary_cache[profile][:term_mappings])
-      end
+      end unless @version == :rdfa_1_0
       
       # look for xmlns
       # (note, this may be dependent on @host_language)
@@ -267,7 +274,8 @@ module RdfContext
       element.namespaces.each do |attr_name, attr_value|
         begin
           abbr, prefix = attr_name.split(":")
-          uri_mappings[prefix.to_s.downcase] = @graph.bind(Namespace.new(attr_value, prefix.to_s.downcase)) if abbr.downcase == "xmlns" && prefix
+          pfx_lc = @version == :rdfa_1_0 || prefix.nil? ? prefix : prefix.to_s.downcase
+          uri_mappings[pfx_lc] = @graph.bind(Namespace.new(attr_value, prefix.to_s)) if abbr.downcase == "xmlns" && prefix
         rescue RdfException => e
           add_debug(element, "extract_mappings raised #{e.class}: #{e.message}")
           raise if @strict
@@ -286,7 +294,7 @@ module RdfContext
         prefix.chop!
         
         uri_mappings[prefix] = @graph.bind(Namespace.new(uri, prefix))
-      end
+      end unless @version == :rdfa_1_0
       
       add_debug(element, "uri_mappings: #{uri_mappings.values.map{|ns|ns.to_s}.join(", ")}")
       add_debug(element, "term_mappings: #{term_mappings.keys.join(", ")}")
@@ -368,8 +376,16 @@ module RdfContext
       add_debug(element, "HTML5 [3.2.3.3] traverse, lang: #{language}") if attrs['lang']
     
       # rels and revs
-      rels = process_uris(element, rel, evaluation_context, :uri_mappings => uri_mappings, :term_mappings => term_mappings, :vocab => default_vocabulary)
-      revs = process_uris(element, rev, evaluation_context, :uri_mappings => uri_mappings, :term_mappings => term_mappings, :vocab => default_vocabulary)
+      rels = process_uris(element, rel, evaluation_context,
+                          :uri_mappings => uri_mappings,
+                          :term_mappings => term_mappings,
+                          :vocab => default_vocabulary,
+                          :r_1_0_restrictions => [:uri, :bnode, :term])
+      revs = process_uris(element, rev, evaluation_context,
+                          :uri_mappings => uri_mappings,
+                          :term_mappings => term_mappings,
+                          :vocab => default_vocabulary,
+                          :r_1_0_restrictions => [:uri, :bnode, :term])
     
       add_debug(element, "traverse, about: #{about.nil? ? 'nil' : about}, src: #{src.nil? ? 'nil' : src}, resource: #{resource.nil? ? 'nil' : resource}, href: #{href.nil? ? 'nil' : href}")
       add_debug(element, "traverse, property: #{property.nil? ? 'nil' : property}, typeof: #{typeof.nil? ? 'nil' : typeof}, datatype: #{datatype.nil? ? 'nil' : datatype}, content: #{content.nil? ? 'nil' : content}")
@@ -379,13 +395,17 @@ module RdfContext
         # Establishing a new subject if no rel/rev [7.5 Step 6]
         # May not be valid, but can exist
         if about
-          new_subject = process_uri(element, about, evaluation_context, :uri_mappings => uri_mappings)
+          new_subject = process_uri(element, about, evaluation_context,
+                                    :uri_mappings => uri_mappings,
+                                    :r_1_0_restrictions => [:uri, :safe_curie, :bnode])
         elsif src
-          new_subject = process_uri(element, src, evaluation_context)
+          new_subject = process_uri(element, src, evaluation_context, :r_1_0_restrictions => [:uri])
         elsif resource
-          new_subject =  process_uri(element, resource, evaluation_context, :uri_mappings => uri_mappings)
+          new_subject =  process_uri(element, resource, evaluation_context,
+                                    :uri_mappings => uri_mappings,
+                                    :r_1_0_restrictions => [:uri, :safe_curie, :bnode])
         elsif href
-          new_subject = process_uri(element, href, evaluation_context)
+          new_subject = process_uri(element, href, evaluation_context, :r_1_0_restrictions => [:uri])
         end
 
         # If no URI is provided by a resource attribute, then the first match from the following rules
@@ -414,9 +434,13 @@ module RdfContext
         # If the current element does contain a @rel or @rev attribute, then the next step is to
         # establish both a value for new subject and a value for current object resource:
         if about
-          new_subject =  process_uri(element, about, evaluation_context, :uri_mappings => uri_mappings)
+          new_subject =  process_uri(element, about, evaluation_context,
+                                    :uri_mappings => uri_mappings,
+                                    :r_1_0_restrictions => [:uri, :safe_curie, :bnode])
         elsif src
-          new_subject =  process_uri(element, src, evaluation_context, :uri_mappings => uri_mappings)
+          new_subject =  process_uri(element, src, evaluation_context,
+                                    :uri_mappings => uri_mappings,
+                                    :r_1_0_restrictions => [:uri, :safe_curie, :bnode])
         end
       
         # If no URI is provided then the first match from the following rules will apply
@@ -437,9 +461,12 @@ module RdfContext
       
         # Then the current object resource is set to the URI obtained from the first match from the following rules:
         if resource
-          current_object_resource =  process_uri(element, resource, evaluation_context, :uri_mappings => uri_mappings)
+          current_object_resource =  process_uri(element, resource, evaluation_context,
+                                                :uri_mappings => uri_mappings,
+                                                :r_1_0_restrictions => [:uri, :safe_curie, :bnode])
         elsif href
-          current_object_resource = process_uri(element, href, evaluation_context)
+          current_object_resource = process_uri(element, href, evaluation_context,
+                                                :r_1_0_restrictions => [:uri])
         end
 
         add_debug(element, "[Step 7] new_subject: #{new_subject}, current_object_resource = #{current_object_resource.nil? ? 'nil' : current_object_resource}")
@@ -448,7 +475,11 @@ module RdfContext
       # Process @typeof if there is a subject [Step 8]
       if new_subject and typeof
         # Typeof is TERMorCURIEorURIs
-        types = process_uris(element, typeof, evaluation_context, :uri_mappings => uri_mappings, :term_mappings => term_mappings, :vocab => default_vocabulary)
+        types = process_uris(element, typeof, evaluation_context,
+                            :uri_mappings => uri_mappings,
+                            :term_mappings => term_mappings,
+                            :vocab => default_vocabulary,
+                            :r_1_0_restrictions => [:curie, :bnode])
         add_debug(element, "typeof: #{typeof}")
         types.each do |one_type|
           add_triple(element, new_subject, RDF_TYPE, one_type)
@@ -480,14 +511,22 @@ module RdfContext
     
       # Establish current object literal [Step 11]
       if property
-        properties = process_uris(element, property, evaluation_context, :uri_mappings => uri_mappings, :term_mappings => term_mappings, :vocab => default_vocabulary)
+        properties = process_uris(element, property, evaluation_context,
+                                  :uri_mappings => uri_mappings,
+                                  :term_mappings => term_mappings,
+                                  :vocab => default_vocabulary,
+                                  :r_1_0_restrictions => [:curie, :bnode])
 
         # get the literal datatype
         type = datatype
         children_node_types = element.children.collect{|c| c.class}.uniq
       
         # the following 3 IF clauses should be mutually exclusive. Written as is to prevent extensive indentation.
-        type_resource = process_uri(element, type, evaluation_context, :uri_mappings => uri_mappings, :term_mappings => term_mappings, :vocab => default_vocabulary) if type
+        type_resource = process_uri(element, type, evaluation_context,
+                                    :uri_mappings => uri_mappings,
+                                    :term_mappings => term_mappings,
+                                    :vocab => default_vocabulary,
+                                    :r_1_0_restrictions => [:curie, :bnode]) if type
         if type and !type.empty? and (type_resource.to_s != XML_LITERAL.to_s)
           # typed literal
           add_debug(element, "[Step 11] typed literal")
@@ -569,17 +608,18 @@ module RdfContext
 
     def process_uri(element, value, evaluation_context, options = {})
       #return if value.to_s.empty?
-      #add_debug(element, "process_uri: #{value}")
+      restrictions = @version == :rdfa_1_0 ? options[:r_1_0_restrictions] : [:uri, :bnode, :curie, :safe_curie, :term]
+      add_debug(element, "process_uri: restrictions = #{restrictions.inspect}")
       options = {:uri_mappings => {}}.merge(options)
-      if !options[:term_mappings] && options[:uri_mappings] && value.to_s.match(/^\[(.*)\]$/)
+      if !options[:term_mappings] && options[:uri_mappings] && value.to_s.match(/^\[(.*)\]$/) && restrictions.include?(:safe_curie)
         # SafeCURIEorCURIEorURI
         # When the value is surrounded by square brackets, then the content within the brackets is
         # evaluated as a CURIE according to the CURIE Syntax definition. If it is not a valid CURIE, the
         # value must be ignored.
-        uri = curie_to_resource_or_bnode(element, $1, options[:uri_mappings], evaluation_context.parent_subject)
+        uri = curie_to_resource_or_bnode(element, $1, options[:uri_mappings], evaluation_context.parent_subject, restrictions)
         add_debug(element, "process_uri: #{value} => safeCURIE => <#{uri}>")
         uri
-      elsif options[:term_mappings] && NC_REGEXP.match(value.to_s)
+      elsif options[:term_mappings] && NC_REGEXP.match(value.to_s) && restrictions.include?(:term)
         # TERMorCURIEorURI
         # If the value is an NCName, then it is evaluated as a term according to General Use of Terms in
         # Attributes. Note that this step may mean that the value is to be ignored.
@@ -590,9 +630,11 @@ module RdfContext
         # SafeCURIEorCURIEorURI or TERMorCURIEorURI
         # Otherwise, the value is evaluated as a CURIE.
         # If it is a valid CURIE, the resulting URI is used; otherwise, the value will be processed as a URI.
-        uri = curie_to_resource_or_bnode(element, value, options[:uri_mappings], evaluation_context.parent_subject)
+        uri = curie_to_resource_or_bnode(element, value, options[:uri_mappings], evaluation_context.parent_subject, restrictions)
         if uri
           add_debug(element, "process_uri: #{value} => CURIE => <#{uri}>")
+        elsif @version == :rdfa_1_0 && value.to_s.match(/^xml/)
+          # Special case to not allow anything starting with XML to be treated as a URI
         else
           uri = URIRef.new(value, evaluation_context.base, :normalize => false)
           add_debug(element, "process_uri: #{value} => URI => <#{uri}>")
@@ -623,15 +665,16 @@ module RdfContext
     end
 
     # From section 6. CURIE Syntax Definition
-    def curie_to_resource_or_bnode(element, curie, uri_mappings, subject)
+    def curie_to_resource_or_bnode(element, curie, uri_mappings, subject, restrictions)
       # URI mappings for CURIEs default to XH_MAPPING, rather than the default doc namespace
       prefix, reference = curie.to_s.split(":")
 
       # consider the bnode situation
-      if prefix == "_"
+      if prefix == "_" && restrictions.include?(:bnode)
         # we force a non-nil name, otherwise it generates a new name
         BNode.new(reference || "", @named_bnodes)
       elsif curie.to_s.match(/^:/)
+        add_debug(element, "curie_to_resource_or_bnode: default prefix: defined? #{!!uri_mappings[""]}, defaults: #{@host_defaults[:prefix]}")
         # Default prefix
         if uri_mappings[""]
           uri_mappings[""].send("#{reference}_")
@@ -643,11 +686,12 @@ module RdfContext
         nil
       else
         # XXX Spec Confusion, are prefixes always downcased?
-        ns = uri_mappings[prefix.to_s.downcase]
+        prefix = prefix.to_s.downcase unless @version == :rdfa_1_0
+        ns = uri_mappings[prefix.to_s]
         if ns
           ns + reference
         else
-          add_debug(element, "curie_to_resource_or_bnode No namespace mapping for #{prefix.downcase}")
+          add_debug(element, "curie_to_resource_or_bnode No namespace mapping for #{prefix}")
           nil
         end
       end
