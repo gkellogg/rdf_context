@@ -239,13 +239,13 @@ module RdfContext
               raise ParserException, "rdf:uri must be a Literal" unless uri.is_a?(Literal)
               raise ParserException, "rdf:term must be a Literal" unless term.nil? || term.is_a?(Literal)
               raise ParserException, "rdf:prefix must be a Literal" unless prefix.nil? || prefix.is_a?(Literal)
-            
+              
               # For every extracted triple that is the common subject of an rdfa:prefix and an rdfa:uri
               # predicate, create a mapping from the object literal of the rdfa:prefix predicate to the
               # object literal of the rdfa:uri predicate. Add or update this mapping in the local list of
               # URI mappings after transforming the 'prefix' component to lower-case.
               # For every extracted
-              um[prefix.to_s.downcase] = @graph.bind(Namespace.new(uri.to_s, prefix.to_s.downcase)) if prefix
+              um[prefix.to_s.downcase] = @graph.bind(Namespace.new(uri.to_s, prefix.to_s.downcase)) if prefix && prefix.to_s != "_"
             
               # triple that is the common subject of an rdfa:term and an rdfa:uri predicate, create a
               # mapping from the object literal of the rdfa:term predicate to the object literal of the
@@ -274,6 +274,9 @@ module RdfContext
       element.namespaces.each do |attr_name, attr_value|
         begin
           abbr, prefix = attr_name.split(":")
+          # A Conforming RDFa Processor must ignore any definition of a mapping for the '_' prefix.
+          next if prefix == "_"
+
           pfx_lc = @version == :rdfa_1_0 || prefix.nil? ? prefix : prefix.to_s.downcase
           uri_mappings[pfx_lc] = @graph.bind(Namespace.new(attr_value, prefix.to_s)) if abbr.downcase == "xmlns" && prefix
         rescue RdfException => e
@@ -293,6 +296,9 @@ module RdfContext
         next unless prefix.match(/:$/)
         prefix.chop!
         
+        # A Conforming RDFa Processor must ignore any definition of a mapping for the '_' prefix.
+        next if prefix == "_"
+
         uri_mappings[prefix] = @graph.bind(Namespace.new(uri, prefix))
       end unless @version == :rdfa_1_0
       
@@ -507,6 +513,16 @@ module RdfContext
                                   :vocab => default_vocabulary,
                                   :r_1_0_restrictions => [:curie, :bnode])
 
+        properties.reject! do |p|
+          if p.is_a?(URIRef)
+            false
+          else
+            add_debug(element, "Illegal predicate: #{p.inspect}")
+            raise ReaderError, "predicate #{p.inspect} must be a URI" if @strict
+            true
+          end
+        end
+
         # get the literal datatype
         type = datatype
         children_node_types = element.children.collect{|c| c.class}.uniq
@@ -675,7 +691,7 @@ module RdfContext
         # No prefix, undefined (in this context, it is evaluated as a term elsewhere)
         nil
       else
-        # XXX Spec Confusion, are prefixes always downcased?
+        # Prefixes always downcased
         prefix = prefix.to_s.downcase unless @version == :rdfa_1_0
         ns = uri_mappings[prefix.to_s]
         if ns
