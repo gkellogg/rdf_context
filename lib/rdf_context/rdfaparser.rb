@@ -168,6 +168,8 @@ module RdfContext
       # If none found, assume xhtml
       @host_language ||= :xhtml
       
+      @version = version.to_s.match(/RDFa 1.0/) ? :rdfa_1_0 : :rdfa_1_1
+
       @host_defaults = case @host_language
       when :xhtml
         @graph.bind(XHV_NS)
@@ -183,9 +185,9 @@ module RdfContext
       else
         {}
       end
-      
-      @version = version.to_s.match(/RDFa 1.0/) ? :rdfa_1_0 : :rdfa_1_1
 
+      @host_defaults.delete(:vocabulary) if @version == :rdfa_1_0
+      
       add_debug(@doc, "version = #{@version},  host_language = #{@host_language}")
       # parse
       parse_whole_document(@doc, @uri)
@@ -388,7 +390,7 @@ module RdfContext
           # Set default_vocabulary to host language default
           @host_defaults.fetch(:vocabulary, nil)
         else
-          vocab.to_s
+          URIRef.new(vocab)
         end
         add_debug(element, "[Step 2] traverse, default_vocaulary: #{default_vocabulary.inspect}")
       end
@@ -551,7 +553,7 @@ module RdfContext
             false
           else
             add_debug(element, "Illegal predicate: #{p.inspect}")
-            raise ReaderError, "predicate #{p.inspect} must be a URI" if @strict
+            raise InvalidPredicate, "predicate #{p.inspect} must be a URI" if @strict
             true
           end
         end
