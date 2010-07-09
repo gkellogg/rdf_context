@@ -15,13 +15,13 @@ module RdfContext
     #
     # @param [String] n3_str:: the Notation3/Turtle string
     # @param [String] uri:: the URI of the document
-    # @param [Hash] options:: Options include the following
-    # <em>options[:debug]</em>:: Array to place debug messages
-    # <em>options[:strict]</em>:: Abort or proceed on error
+    # @option options [Array] :debug (nil) Array to place debug messages
+    # @option options [Boolean] :strict (false) Raise Error if true, continue with lax parsing, otherwise
     # @return [Graph]
-    # @raise RdfContext::RdfException or subclass
+    # @raise RdfException or subclass
     #
     # @author Patrick Sinclair (metade)
+    # @author Gregg Kellogg
     def parse(stream, uri = nil, options = {}, &block) # :yields: triple
       super
 

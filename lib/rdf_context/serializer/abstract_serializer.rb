@@ -3,8 +3,15 @@ require File.join(File.dirname(__FILE__), '..', 'uriref')
 module RdfContext
   # Abstract serializer
   class AbstractSerializer
-    attr_accessor :graph, :base
+    # @return [Graph]
+    attr_accessor :graph
     
+    # @return [String]
+    attr_accessor :base
+    
+    # New AbstractSerializer
+    # @param [Graph] graph
+    # @return [AbstractSerializer]
     def initialize(graph)
       @graph = graph
       @base = nil
@@ -12,12 +19,15 @@ module RdfContext
     
     # Serialize the graph
     #
-    # @param [IO, StreamIO] stream:: Stream in which to place serialized graph
-    # @param [Hash] options:: Options for parser
-    # <em>options[:base]</em>:: Base URI of graph, used to shorting URI references
+    # @param [IO, StreamIO] stream Stream in which to place serialized graph
+    # @option options [URIRef, String] :base (nil) Base URI of graph, used to shorting URI references
+    # @return [nil]
     def serialize(stream, options = {})
     end
     
+    # Create a relative version of the _uri_ parameter if a _base_ URI is defined
+    # @param [#to_s] uri
+    # @return [String]
     def relativize(uri)
       uri = uri.to_s
       self.base ? uri.sub(/^#{self.base}/, "") : uri

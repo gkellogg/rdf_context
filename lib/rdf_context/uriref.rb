@@ -7,13 +7,14 @@ module RdfContext
     
     # Create a URIRef from a URI  or a fragment and a URI
     #
-    # ==== Example
+    # @example
     #   u = URIRef.new("http://example.com")
     #   u = URIRef.new("foo", u) => "http://example.com/foo"
     # 
     # Last argument may be an options hash to set:
-    # @options[:normalize]:: Normalize URI when transforming to string, defaults to true
-    # @options[:namespace]:: Namespace used to create this URI, useful for to_qname
+    # @param [Array<#to_s>] args One or two URIs to create. Last is joined with first
+    # @option options[Boolean] :normalize Normalize URI when transforming to string, defaults to true
+    # @option options[Namespace] :namespace Namespace used to create this URI, useful for to_qname
     def initialize (*args)
       options = args.last.is_a?(Hash) ? args.pop : { :normalize => false }
       @normalize = options[:normalize]
@@ -39,6 +40,8 @@ module RdfContext
     end
     
     # Create a URI, either by appending a fragment, or using the input URI
+    # @param [#to_s] input
+    # @return [URIRef]
     def + (input)
       input_uri = Addressable::URI.parse(input.to_s)
       return URIRef.new(input_uri, self.to_s)
@@ -46,6 +49,7 @@ module RdfContext
     
     # short_name of URI for creating QNames.
     #   "#{base]{#short_name}}" == uri
+    # @return [String, false]
     def short_name
       @short_name ||= begin
         path = @uri.path.split("/")
@@ -63,6 +67,7 @@ module RdfContext
     
     # base of URI for creating QNames.
     #   "#{base]{#short_name}}" == uri
+    # @return [String]
     def base
       @base ||= begin
         uri_base = self.to_s
@@ -71,28 +76,36 @@ module RdfContext
       end
     end
   
+    # @param [URIRef] other
+    # @return [Boolean]
     def eql?(other)
       self.to_s == other.to_s
     end
     alias_method :==, :eql?
     
+    # @param [#to_s] other
+    # @return [-1, 0 1]
     def <=>(other)
       self.to_s <=> other.to_s
     end
   
     # Needed for uniq
+    # @return [String]
     def hash; to_s.hash; end
   
+    # @return [String]
     def to_s
       @to_s ||= @uri.to_s
     end
   
+    # @return [String]
     def to_n3
       "<" + self.to_s + ">"
     end
     alias_method :to_ntriples, :to_n3
   
     # Output URI as QName using URI binding
+    # @return [String]
     def to_qname(uri_binding = [])
       namespaces = case uri_binding
       when Hash then uri_binding.values
@@ -104,6 +117,8 @@ module RdfContext
     end
     
     # Look at namespaces and find first that matches this URI, ordering by longest URI first
+    # @param [Array<Namespace>] namespaces ([])
+    # @return [Namespace]
     def namespace(namespaces = [])
       @namespace ||=
         namespaces.sort_by {|ns| -ns.uri.to_s.length}.detect {|ns| self.to_s.index(ns.uri.to_s) == 0}
@@ -114,6 +129,7 @@ module RdfContext
     end
     
     # Output URI as resource reference for RDF/XML
+    # @return [Array<Hash{String => String}>]
     def xml_args
       [{"rdf:resource" => self.to_s}]
     end

@@ -18,14 +18,22 @@ module RdfContext
   # 
   # Based on Python RdfLib IOMemory
   class MemoryStore < AbstractStore
+    # Default context for this store
+    # @return [Graph]
     attr_accessor :default_context
     
     # Supports contexts
+    # @return [true]
     def context_aware?; true; end
     
     # Supports formulae
+    # @return [true]
     def formula_aware?; true; end
     
+    # Create a new MemoryStore Store, should be subclassed
+    # @param [Resource] identifier
+    # @param[Hash] configuration ignored
+    # @return [MemoryStore]
     def initialize(identifier = nil, configuration = {})
       super
       # indexed by [context][subject][predicate][object] = 1
@@ -64,6 +72,11 @@ module RdfContext
   
     # Add a triple to the store
     # Add to default context, if context is nil
+    #
+    # @param [Triple] triple
+    # @param [Graph] context (nil)
+    # @param [Boolean] quoted (false) A quoted triple, for Formulae
+    # @return [Triple]
     def add(triple, context = nil, quoted = false)
       context ||= Graph.new(:store => self, :identifier => @identifier)
       return unless triples(triple, context).empty?
@@ -88,8 +101,11 @@ module RdfContext
     end
   
     # Remove a triple from the context and store
+    # If subject, predicate and object are nil and context is not nil, the context is removed
     #
-    # if subject, predicate and object are nil and context is not nil, the context is removed
+    # @param [Triple] triple
+    # @param [Graph] context (nil)
+    # @return [nil]
     def remove(triple, context = nil)
       context = nil if context == @identifier || (context.respond_to?(:identifier) && context.identifier == @identifier)
     
@@ -112,6 +128,13 @@ module RdfContext
     end
   
     # A generator over all matching triples
+    # @param [Triple] triple
+    # @param [Graph] context (nil)
+    # @return [Array<Triplle>]
+    # @raise [StoreException] Not Implemented
+    # @yield [triple, context]
+    # @yieldparam [Triple] triple
+    # @yieldparam [Graph] context
     def triples(triple, context = nil, &block) # :yields: triple, context
       context = nil if context == @identifier || (context.respond_to?(:identifier) && context.identifier == @identifier)
     
@@ -237,6 +260,10 @@ module RdfContext
     # Note, if triple contains a Literal object, need to wild-card
     # and check each result individually due to variation in literal
     # comparisons
+    #
+    # @param [Triple] triple
+    # @param [Graph] context (nil)
+    # @return [Boolean]
     def contains?(triple, context = nil)
       #puts "contains? #{triple}"
       object = triple.object
@@ -251,6 +278,9 @@ module RdfContext
       end
     end
 
+    # Number of Triples in the graph
+    # @param [Graph] context (nil)
+    # @return [Integer]
     def size(context = nil)
       context = nil if (context.respond_to?(:identifier) ? context.identifier : context) == @identifier
 
@@ -258,6 +288,8 @@ module RdfContext
     end
   
     # Contexts containing the triple (no matching), or total number of contexts in store
+    # @param [Triple] triple (nil) Containing the triple/pattern if not nil
+    # @return [Array<Graph>]
     def contexts(triple = nil)
       if triple
         si, pi, oi = triple_to_int(triple)

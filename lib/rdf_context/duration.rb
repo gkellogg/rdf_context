@@ -7,6 +7,8 @@ module RdfContext
     # * Given a time, extract second
     # * Given a Flaat, use value direcly
     # * Given a String, parse as xsd:duration
+    # @param [Integer, Time, Float, String] value (#to_i)
+    # @return [Duration]
     def initialize(value)
       case value
       when Hash
@@ -28,11 +30,15 @@ module RdfContext
       self.normalize
     end
   
+  
+    # Reverse convert from XSD version of duration
+    # XSD allows -P1111Y22M33DT44H55M66.666S with any combination in regular order
+    # We assume 1M == 30D, but are out of spec in this regard
+    # We only output up to hours
+    #
+    # @param [String] value XSD formatted duration
+    # @return [Duration]
     def self.parse(value)
-      # Reverse convert from XSD version of duration
-      # XSD allows -P1111Y22M33DT44H55M66.666S with any combination in regular order
-      # We assume 1M == 30D, but are out of spec in this regard
-      # We only output up to hours
       if value.to_s.match(/^(-?)P(\d+Y)?(\d+M)?(\d+D)?T?(\d+H)?(\d+M)?([\d\.]+S)?$/)
         hash = {}
         hash[:ne] = $1 == "-" ? -1 : 1
@@ -48,11 +54,16 @@ module RdfContext
       self.new(value)
     end
     
+    # @return [Float]
     def to_f
       (((((@yr.to_i * 12 + @mo.to_i) * 30 + @da.to_i) * 24 + @hr.to_i) * 60 + @mi.to_i) * 60 + @se.to_f) * (@ne || 1)
     end
     
+    # @return [Integer]
     def to_i; Integer(self.to_f); end
+    
+    # @param [Duration, String, Numeric] something (false)
+    # @return [Boolean]
     def eql?(something)
       case something
       when Duration
@@ -67,6 +78,8 @@ module RdfContext
     end
     alias_method :==, :eql?
    
+    # @param [Symbol] format Output format, :xml outputs in xmlschema mode, otherwise in Human form
+    # @return [String]
     def to_s(format = nil)
       usec = (@se * 1000).to_i % 1000
       sec_str = usec > 0 ? "%2.3f" % @se : @se.to_i.to_s

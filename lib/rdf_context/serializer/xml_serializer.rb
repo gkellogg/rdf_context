@@ -5,6 +5,9 @@ module RdfContext
   class XmlSerializer < RecursiveSerializer
     VALID_ATTRIBUTES = [:none, :untyped, :typed]
     
+    # New XmlSerializer
+    # @param [Graph] graph
+    # @return [XmlSerializer]
     def initialize(graph)
       super
       @force_RDF_about = {}
@@ -12,16 +15,15 @@ module RdfContext
     
     # Serialize the graph
     #
-    # @param [IO, StreamIO] stream:: Stream in which to place serialized graph
-    # @param [Hash] options:: Options for parser
-    # <em>options[:base]</em>:: Base URI of graph, used to shorting URI references
-    # <em>options[:max_depth]</em>:: Maximum depth for recursively defining resources, defaults to 3
-    # <em>options[:lang]</em>:: Output as root xml:lang attribute, and avoid generation xml:lang where possible
-    # <em>options[:attributes]</em>:: How to use XML attributes when serializing, one of :none, :untyped, :typed. The default is none.
+    # @param [IO, StreamIO] stream Stream in which to place serialized graph
+    # @option options [URIRef, String] :base (nil) Base URI of graph, used to shorting URI references
+    # @option options [Integer] :max_depth (3) Maximum depth for recursively defining resources
+    # @option options [String] :lang (nil) Output as root xml:lang attribute, and avoid generation xml:lang where possible
+    # @option options [:none, :untyped, :typed] :attributes (:none) How to use XML attributes when serializing, one of :none, :untyped, :typed. The default is none.
+    # @return [nil]
     #
-    # -- Serialization Examples
-    # attributes == :none
-    #
+    # @example
+    #   attributes == :none
     #   serialize(io, :attributes => none)
     def serialize(stream, options = {})
       @max_depth = options[:max_depth] || 3

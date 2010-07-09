@@ -31,8 +31,10 @@ module RdfContext
     
     STRONGLY_TYPED_TERMS = false
     
-    # @param[URIRef] identifier:: URIRef of the Store. Defaults to CWD
-    # @param[Hash] configuration:: Hash containing infomation open can use to connect to datastore.
+    # Create a new AbstractSQLStore Store, should be subclassed
+    # @param [URIRef] identifier
+    # @param[Hash] configuration Specific to type of storage
+    # @return [AbstractSQLStore]
     def initialize(identifier = nil, configuration = {})
       @literalCache = {}
       @otherCache = {}
@@ -50,14 +52,20 @@ module RdfContext
     end
 
     # Supports contexts
+    # @return [true]
     def context_aware?; true; end
     
     # Supports formulae
+    # @return [true]
     def formula_aware?; true; end
 
     # Supports transactions
+    # @return [true]
     def transaction_aware?; true; end
-    
+
+    # Close the store
+    # @param [Boolean] commit_pending_transactions (false)
+    # @return [nil]
     def close(commit_pending_transactions = false)
       @db.commit if commit_pending_transactions && @db.transaction_active?
       @db.close
@@ -65,6 +73,11 @@ module RdfContext
     
     # Add a triple to the store
     # Add to default context, if context is nil
+    #
+    # @param [Triple] triple
+    # @param [Graph] context (nil)
+    # @param [Boolean] quoted (false) A quoted triple, for Formulae
+    # @return [Triple]
     def add(triple, context = nil, quoted = false)
       context ||= @identifier
       executeSQL("SET AUTOCOMMIT=0") if @autocommit_default
@@ -87,6 +100,10 @@ module RdfContext
     # Remove a triple from the context and store
     #
     # if subject, predicate and object are nil and context is not nil, the context is removed
+    #
+    # @param [Triple] triple
+    # @param [Graph] context (nil)
+    # @return [nil]
     def remove(triple, context = nil)
       if context
         if triple.subject == nil && triple.predicate.nil? && triple.object.nil?
@@ -147,7 +164,15 @@ module RdfContext
     # triple columns: subject,predicate,object,context,termComb,objLanguage,objDatatype
     # class membership columns: member,klass,context termComb
     # 
-    # FIXME:  These union all selects *may* be further optimized by joins
+    # @todo  These union all selects *may* be further optimized by joins
+    #
+    # @param [Triple] triple
+    # @param [Graph] context (nil)
+    # @return [Array<Triplle>]
+    # @raise [StoreException] Not Implemented
+    # @yield [triple, context]
+    # @yieldparam [Triple] triple
+    # @yieldparam [Graph] context
     def triples(triple, context = nil)  # :yields: triple, context
       parameters = []
       
@@ -261,6 +286,11 @@ module RdfContext
       results.uniq
     end
     
+    # Check to see if this store contains the specified triple
+    #
+    # @param [Triple] triple
+    # @param [Graph] context (nil)
+    # @return [Boolean]
     def contains?(triple, context = nil)
       #puts "contains? #{triple}"
       object = triple.object
@@ -276,6 +306,8 @@ module RdfContext
     end
     
     # Number of statements in the store.
+    # @param [Graph] context (nil)
+    # @return [Integer]
     def size(context = nil)
       parameters = []
       quotedContext = assertedContext = typeContext = literalContext = nil
@@ -364,6 +396,8 @@ module RdfContext
     end
 
     # Contexts containing the triple (no matching), or total number of contexts in store
+    # @param [Triple] triple (nil) Containing the triple/pattern if not nil
+    # @return [Array<Graph>]
     def contexts(triple = nil)
       parameters = []
       
@@ -505,6 +539,9 @@ module RdfContext
     # Namespace persistence interface implementation
     #
     # Bind namespace to store, returns bound namespace
+    #
+    # @param [Nameespace] namespace the namespace to bind
+    # @return [Namespace] The newly bound or pre-existing namespace.
     def bind(namespace)
       # Remove existing bindings for the same URI
       executeSQL("DELETE FROM #{namespace_binds} WHERE prefix=?", namespace.prefix.to_s)
@@ -521,6 +558,8 @@ module RdfContext
     end
 
     # Namespace for prefix
+    # @param [String] prefix
+    # @return [Namespace]
     def namespace(prefix)
       @namespaceCache ||= {}
       @namespaceUriCache ||= {}
@@ -535,6 +574,8 @@ module RdfContext
     end
     
     # Prefix for namespace
+    # @param [Namespace] namespcae
+    # @return [String]
     def prefix(namespace)
       uri = namespace.is_a?(Namespace) ? namespace.uri.to_s : namespace
 
@@ -550,6 +591,7 @@ module RdfContext
     end
 
     # Hash of prefix => Namespace bindings
+    # @return [Hash{String => Namespace}]
     def nsbinding
       unless @nsbinding.is_a?(Hash)
         @nsbinding = {}
@@ -568,6 +610,7 @@ module RdfContext
     end
     
     # Hash of uri => Namespace bindings
+    # @return [Hash{URIRef => Namespace}]
     def uri_binding
       nsbinding
       @uri_binding

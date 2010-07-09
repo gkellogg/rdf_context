@@ -5,57 +5,88 @@ module RdfContext
   # An RDFa parser in Ruby
   #
   # Based on processing rules described here:
-  #   RDFa 1.0: http://www.w3.org/TR/rdfa-syntax/#s_model
-  #   RDFa 1.1: http://www.w3.org/2010/02/rdfa/drafts/2010/ED-rdfa-core-20100705/
+  # @see http://www.w3.org/TR/rdfa-syntax/#s_model RDFa 1.0
+  # @see http://www.w3.org/2010/02/rdfa/drafts/2010/ED-rdfa-core-20100705/ RDFa 1.1
   #
-  # Ben Adida
-  # 2008-05-07
-  # Gregg Kellogg
-  # 2009-08-04
+  # @author Ben Adida
+  # @author Gregg Kellogg
   class RdfaParser < Parser
-    # Host language, One of:
-    #   :xhtml_rdfa_1_0
-    #   :xhtml_rdfa_1_1
+    # Host language
+    # @return [:xhtml]
     attr_reader :host_language
+
+    # Version
+    # @return [:rdfa_1_0, :rdfa_1_1]
+    attr_reader :version
     
     # The Recursive Baggage
+    # @private
     class EvaluationContext # :nodoc:
-      # The base. This will usually be the URL of the document being processed,
+      # The base.
+      #
+      # This will usually be the URL of the document being processed,
       # but it could be some other URL, set by some other mechanism,
       # such as the (X)HTML base element. The important thing is that it establishes
       # a URL against which relative paths can be resolved.
+      #
+      # @return [URIRef]
       attr :base, true
       # The parent subject.
+      #
       # The initial value will be the same as the initial value of base,
       # but it will usually change during the course of processing.
+      #
+      # @return [URIRef]
       attr :parent_subject, true
       # The parent object.
+      #
       # In some situations the object of a statement becomes the subject of any nested statements,
       # and this property is used to convey this value.
       # Note that this value may be a bnode, since in some situations a number of nested statements
       # are grouped together on one bnode.
       # This means that the bnode must be set in the containing statement and passed down,
       # and this property is used to convey this value.
+      #
+      # @return URIRef
       attr :parent_object, true
       # A list of current, in-scope URI mappings.
+      #
+      # @return [Hash{String => Namespace}]
       attr :uri_mappings, true
-      # A list of incomplete triples. A triple can be incomplete when no object resource
+      # A list of incomplete triples.
+      #
+      # A triple can be incomplete when no object resource
       # is provided alongside a predicate that requires a resource (i.e., @rel or @rev).
       # The triples can be completed when a resource becomes available,
       # which will be when the next subject is specified (part of the process called chaining).
+      #
+      # @return [Array<Array<URIRef, Resource>>]
       attr :incomplete_triples, true
       # The language. Note that there is no default language.
+      #
+      # @return [String]
       attr :language, true
       # The term mappings, a list of terms and their associated URIs.
+      #
       # This specification does not define an initial list.
       # Host Languages may define an initial list.
       # If a Host Language provides an initial list, it should do so via an RDFa Profile document.
+      #
+      # @return [Hash{String => URIRef}]
       attr :term_mappings, true
-      # The default vocabulary, a value to use as the prefix URI when a term is used.
+      # The default vocabulary
+      #
+      # A value to use as the prefix URI when a term is used.
       # This specification does not define an initial setting for the default vocabulary.
       # Host Languages may define an initial setting.
+      #
+      # @return [URIRef]
       attr :default_vocabulary, true
 
+      # @param [String] base
+      # @param [Hash] host_defaults
+      # @option host_defaults [Hash{String => URIRef}] :term_mappings Hash of NCName => URIRef
+      # @option host_defaults [Hash{String => Namespace}] :vocabulary Hash of prefix => URIRef
       def initialize(base, host_defaults)
         # Initialize the evaluation context, [5.1]
         @base = base
@@ -65,10 +96,12 @@ module RdfContext
         @incomplete_triples = []
         @language = nil
         @term_mappings = host_defaults.fetch(:term_mappings, {})
-        @default_voabulary = host_defaults.fetch(:voabulary, nil)
+        @default_vocabulary = host_defaults.fetch(:vocabulary, nil)
       end
 
       # Copy this Evaluation Context
+      #
+      # @param [EvaluationContext] from
       def initialize_copy(from)
           # clone the evaluation context correctly
           @uri_mappings = from.uri_mappings.clone
@@ -87,11 +120,10 @@ module RdfContext
     ## 
     # Creates a new parser for RDFa.
     #
-    # @param [Hash] options:: Options from
-    # <em>options[:graph]</em>:: Graph to parse into, otherwise a new RdfContext::Graph instance is created
-    # <em>options[:debug]</em>:: Array to place debug messages
-    # <em>options[:type]</em>:: One of _rdfxml_, _html_, or _n3_
-    # <em>options[:strict]</em>:: Raise Error if true, continue with lax parsing, otherwise
+    # @option options [Graph] :graph (nil) Graph to parse into, otherwise a new RdfContext::Graph instance is created
+    # @option options [Array] :debug (nil) Array to place debug messages
+    # @option options [:rdfxml, :html, :n3] :type (nil)
+    # @option options [Boolean] :strict (false) Raise Error if true, continue with lax parsing, otherwise
     def initialize(options = {})
       super
       @@vocabulary_cache ||= {}
@@ -105,12 +137,13 @@ module RdfContext
     # Optionally, the stream may be a Nokogiri::HTML::Document or Nokogiri::XML::Document
     # With a block, yeilds each statement with URIRef, BNode or Literal elements
     #
-    # @param  [IO] stream:: the HTML+RDFa IO stream, string, Nokogiri::HTML::Document or Nokogiri::XML::Document
-    # @param [String] uri:: the URI of the document
-    # @param [Hash] options:: Parser options, one of
-    # <em>options[:debug]</em>:: Array to place debug messages
-    # <em>options[:strict]</em>:: Raise Error if true, continue with lax parsing, otherwise
-    # @return [Graph]:: Returns the graph containing parsed triples
+    # @param  [Nokogiri::HTML::Document, Nokogiri::XML::Document, #read, #to_s] stream the HTML+RDFa IO stream, string, Nokogiri::HTML::Document or Nokogiri::XML::Document
+    # @param [String] uri (nil) the URI of the document
+    # @option options [Array] :debug (nil) Array to place debug messages
+    # @option options [Boolean] :strict (false) Raise Error if true, continue with lax parsing, otherwise
+    # @return [Graph] Returns the graph containing parsed triples
+    # @yield  [triple]
+    # @yieldparam [Triple] triple
     # @raise [Error]:: Raises RdfError if _strict_
     def parse(stream, uri = nil, options = {}, &block) # :yields: triple
       super
@@ -353,7 +386,7 @@ module RdfContext
       unless vocab.nil?
         default_vocabulary = if vocab.to_s.empty?
           # Set default_vocabulary to host language default
-          @host_defaults.fetch(:voabulary, nil)
+          @host_defaults.fetch(:vocabulary, nil)
         else
           vocab.to_s
         end

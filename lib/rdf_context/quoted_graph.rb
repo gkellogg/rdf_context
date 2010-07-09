@@ -14,15 +14,15 @@ module RdfContext
     ## 
     # Adds one or more extant triples to a graph. Delegates to Store.
     #
-    # ==== Example
+    # @example
     #   g = Graph.new;
     #   t1 = Triple.new(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new);
     #   t2 = Triple.new(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new);
     #   g.add(t1, t2, ...)
     #
-    # @param [Triple] triples:: one or more triples. Last element may be a hash for options
-    # <em>options[:context]</em>:: Graph context in which to deposit triples, defaults to default_context or self
-    # @return [Graph]:: Returns the graph
+    # @param [Array<Triple>] triples one or more triples. Last element may be a hash for options
+    # @option [Resource] :context Graph context in which to deposit triples, defaults to default_context or self
+    # @return [Graph] Returns the graph
     def add(*triples)
       options = triples.last.is_a?(Hash) ? triples.pop : {}
       ctx = options[:context] || @default_context || self
@@ -31,6 +31,7 @@ module RdfContext
     end
     
     # Return an n3 identifier for the Graph
+    # @return [String]
     def n3
       "{#{self.identifier.to_n3}}"
     end

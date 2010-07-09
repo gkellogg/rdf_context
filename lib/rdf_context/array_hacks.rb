@@ -15,9 +15,9 @@ class Array
   end
   
   # Converts the array to a comma-separated sentence where the last element is joined by the connector word. Options:
-  # * <tt>:words_connector</tt> - The sign or word used to join the elements in arrays with two or more elements (default: ", ")
-  # * <tt>:two_words_connector</tt> - The sign or word used to join the elements in arrays with two elements (default: " and ")
-  # * <tt>:last_word_connector</tt> - The sign or word used to join the last element in arrays with three or more elements (default: ", and ")
+  # @option [String] :words_connector (", ") The sign or word used to join the elements in arrays with two or more elements
+  # @option [String] :two_words_connector (" and ") The sign or word used to join the elements in arrays with two elements
+  # @option [String] :last_word_connector (", ") The sign or word used to join the elements in arrays with two or more elements
   def to_sentence(options = {})
     default_words_connector     = ", "
     default_two_words_connector = " and "

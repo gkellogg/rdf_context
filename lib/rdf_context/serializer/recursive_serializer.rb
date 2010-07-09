@@ -8,12 +8,16 @@ module RdfContext
     MAX_DEPTH = 10
     INDENT_STRING = " "
     
+    # New RecursiveSerializer
+    # @param [Graph] graph
+    # @return [RecursiveSerializer]
     def initialize(graph)
       super(graph)
       @stream = nil
       self.reset
     end
 
+    protected
     def top_classes; [RDFS_NS.Class]; end
     def predicate_order; [RDF_TYPE, RDFS_NS.label, DC_NS.title]; end
     

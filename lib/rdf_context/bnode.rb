@@ -13,8 +13,8 @@ module RdfContext
     # to lookup previoiusly defined BNodes using the same identifier. Names are *not* preserved
     # within the underlying storage model.
     #
-    # @param [String] identifier:: Legal NCName or nil for a named BNode
-    # @param [Hash] context:: Context used to store named BNodes
+    # @param [String] identifier (nil) Legal NCName or nil for a named BNode
+    # @param [Hash] context ({}) Context used to store named BNodes
     def initialize(identifier = nil, context = {})
       if identifier.nil?
         @identifier = generate_bn_identifier
@@ -38,7 +38,7 @@ module RdfContext
     # ==== Example
     #   b = BNode.new; b.to_n3  # => returns a string of the BNode in n3 form
     #
-    # @return [String]:: The BNode in n3.
+    # @return [String] The BNode in n3.
     #
     # @author Tom Morris
     def to_n3

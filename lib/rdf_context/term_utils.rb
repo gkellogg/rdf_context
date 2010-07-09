@@ -222,6 +222,8 @@ module RdfContext
 
     # Takes an instance of a Graph (Graph, QuotedGraph, ConjunctiveGraph)
     # and returns the Graphs identifier and 'type' ('U' for Graphs, 'F' for QuotedGraphs ).
+    # @param [Graph] graph
+    # @return [Resource, String]
     def normalizeGraph(graph)
       t = case graph
       when QuotedGraph  then "F"
@@ -232,6 +234,10 @@ module RdfContext
       [identifier, t]
     end
     
+    # Return the type of a term (Resource)
+    # @param [URIRef, BNode, Literal, QuotedGraph, Variable, Graph, nil] term
+    # @return [String]
+    # @raise RdfException
     def term2Letter(term)
       case term
       when URIRef       then "U"

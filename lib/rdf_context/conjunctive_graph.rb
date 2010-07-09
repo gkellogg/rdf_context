@@ -36,8 +36,8 @@ module RdfContext
     # Triples across all contexts in store, optionally matching subject, predicate, or object.
     # Delegates to Store#triples.
     #
-    # @param [Triple, nil] triple:: Triple to match, may be a pattern triple or nil
-    # @return [Array]:: List of matched triples
+    # @param [Triple] triple (nil) Triple to match, may be a pattern triple or nil
+    # @return [Array] List of matched triples
     def triples(triple = Triple.new(nil, nil, nil), &block) # :yields: triple, context
       @store.triples(triple, nil, &block) || []
     end
@@ -46,13 +46,13 @@ module RdfContext
     #
     # Create a new context (Graph) and parse into that.
     #
-    # @param  [IO, String] stream:: the RDF IO stream, string, Nokogiri::HTML::Document or Nokogiri::XML::Document
-    # @param [String] uri:: the URI of the document
+    # @param  [IO, String] stream the RDF IO stream, string, Nokogiri::HTML::Document or Nokogiri::XML::Document
+    # @param [URIRef, String] uri the URI of the document
     # @param [Hash] options:: Options from
-    # <em>options[:debug]</em>:: Array to place debug messages
-    # <em>options[:type]</em>:: One of _rdfxml_, _html_, or _n3_
-    # <em>options[:strict]</em>:: Raise Error if true, continue with lax parsing, otherwise
-    # @return [Graph]:: Returns the graph containing parsed triples
+    # @option options [Array] :debug (nil) Array to place debug messages
+    # @option options [:rdfxml, :html, :n3] :type (nil)
+    # @option options [Boolean] :strict (false) Raise Error if true, continue with lax parsing, otherwise
+    # @return [Graph] Returns the graph containing parsed triples
     def parse(stream, uri, options = {}, &block) # :yields: triple
       graph = Graph.new(:identifier => uri, :store => self.store)
       Parser.parse(stream, uri, options.merge(:graph => graph), &block)

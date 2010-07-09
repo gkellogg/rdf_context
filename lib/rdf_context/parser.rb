@@ -9,11 +9,10 @@ module RdfContext
     ## 
     # Creates a new parser
     #
-    # @param [Hash] options:: Options from
-    # <em>options[:graph]</em>:: Graph to parse into, otherwise a new RdfContext::Graph instance is created
-    # <em>options[:debug]</em>:: Array to place debug messages
-    # <em>options[:type]</em>:: One of _rdfxml_, _html_, or _n3_
-    # <em>options[:strict]</em>:: Raise Error if true, continue with lax parsing, otherwise
+    # @option options [Graph] :graph (nil) Graph to parse into, otherwise a new RdfContext::Graph instance is created
+    # @option options [Array] :debug (nil) Array to place debug messages
+    # @option options [:rdfxml, :html, :n3] :type (nil)
+    # @option options [Boolean] :strict (false) Raise Error if true, continue with lax parsing, otherwise
     def initialize(options = {})
       # initialize the triplestore
       @graph = options[:graph]
@@ -24,12 +23,15 @@ module RdfContext
     
     # Instantiate Parser and parse document
     #
-    # @param  [IO, String] stream:: the RDF IO stream, string, Nokogiri::HTML::Document or Nokogiri::XML::Document
-    # @param [String] uri:: the URI of the document
-    # @param [Hash] options::  Options from
-    # <em>options[:debug]</em>:: Array to place debug messages
-    # <em>options[:type]</em>:: One of _rdfxml_, _html_, or _n3_ (among others)
-    # <em>options[:strict]</em>:: Raise Error if true, continue with lax parsing, otherwise
+    # @param  [#read, #to_s] stream the HTML+RDFa IO stream, string, Nokogiri::HTML::Document or Nokogiri::XML::Document
+    # @param [String] uri (nil) the URI of the document
+    # @option options [Array] :debug (nil) Array to place debug messages
+    # @option options [:rdfxml, :html, :n3] :type (nil)
+    # @option options [Boolean] :strict (false) Raise Error if true, continue with lax parsing, otherwise
+    # @return [Graph] Returns the graph containing parsed triples
+    # @yield  [triple]
+    # @yieldparam [Triple] triple
+    # @raise [Error]:: Raises RdfError if _strict_
     # @return [Graph]:: Returns the graph containing parsed triples
     # @raise [Error]:: Raises RdfError if _strict_
     def self.parse(stream, uri = nil, options = {}, &block) # :yields: triple
@@ -44,11 +46,15 @@ module RdfContext
     #
     # Virtual Class, prototype for Parser subclass.
     #
-    # @param  [IO, String] stream:: the RDF IO stream, string, Nokogiri::HTML::Document or Nokogiri::XML::Document
-    # @param [String] uri:: the URI of the document
-    # @param [Hash] options::  Options from
-    # <em>options[:debug]</em>:: Array to place debug messages
-    # <em>options[:strict]</em>:: Raise Error if true, continue with lax parsing, otherwise
+    # @param  [#read, #to_s] stream the HTML+RDFa IO stream, string, Nokogiri::HTML::Document or Nokogiri::XML::Document
+    # @param [String] uri (nil) the URI of the document
+    # @option options [Array] :debug (nil) Array to place debug messages
+    # @option options [:rdfxml, :html, :n3] :type (nil)
+    # @option options [Boolean] :strict (false) Raise Error if true, continue with lax parsing, otherwise
+    # @return [Graph] Returns the graph containing parsed triples
+    # @yield  [triple]
+    # @yieldparam [Triple] triple
+    # @raise [Error]:: Raises RdfError if _strict_
     # @return [Graph]:: Returns the graph containing parsed triples
     # @raise [Error]:: Raises RdfError if _strict_
     def parse(stream, uri = nil, options = {}, &block) # :yields: triple
@@ -81,17 +87,26 @@ module RdfContext
     end
     
     
+    # @return [Graph]
     def graph; @delegate ? @delegate.graph : (@graph || Graph.new); end
+    
+    # @return [Array<String>]
     def debug; @delegate ? @delegate.debug : @debug; end
 
     # Return N3 Parser instance
+    # @return [N3Parser]
     def self.n3_parser(options = {}); N3Parser.new(options); end
     # Return RDF/XML Parser instance
+    # @return [RdfXmlParser]
     def self.rdfxml_parser(options = {}); RdfXmlParser.new(options); end
     # Return Rdfa Parser instance
+    # @return [RdfaParser]
     def self.rdfa_parser(options = {}); RdfaParser.new(options); end
 
     # Heuristically detect the format of the uri
+    # @param [#read, #to_s] stream
+    # @param [#to_s] uri (nil)
+    # @return [:rdfxml, :rdfa, :n3]
     def detect_format(stream, uri = nil)
       uri ||= stream.path if stream.respond_to?(:path)
       format = case uri.to_s

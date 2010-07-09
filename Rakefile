@@ -1,4 +1,6 @@
 require 'rubygems'
+require 'yard'
+
 begin
   gem 'jeweler'
   require 'jeweler'
@@ -28,6 +30,7 @@ begin
     gemspec.add_dependency('patron', '>= 0.4.6')
     gemspec.add_development_dependency('rspec')
     gemspec.add_development_dependency('activesupport', '>= 2.3.0')
+    gemspec.add_development_dependency('yard')
     gemspec.extra_rdoc_files     = %w(README.rdoc History.txt)
   end
   Jeweler::GemcutterTasks.new
@@ -78,8 +81,12 @@ Rake::RDocTask.new("doc:rdoc") do |rdoc|
 
   rdoc.rdoc_dir = 'doc/rdoc'
   rdoc.title = "rdf_context #{version}"
-  rdoc.rdoc_files.include('README*', "History.txt")
+  rdoc.rdoc_files.include('README*', "History.rdoc")
   rdoc.rdoc_files.include('lib/**/*.rb')
+end
+
+YARD::Rake::YardocTask.new do |t|
+  t.files   = %w(lib/**/*.rb README.rdoc History.rdoc)   # optional
 end
 
 desc "Generate RDF Core Manifest.yml"

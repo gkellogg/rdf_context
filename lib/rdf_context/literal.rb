@@ -277,6 +277,7 @@ module RdfContext
       end
     end
 
+    # @private
     class Language
       attr_accessor :value
       def initialize(string)
@@ -302,10 +303,25 @@ module RdfContext
       def to_s; @value; end
     end
 
-    attr_accessor :contents, :encoding, :lang
+    # Contents of Literal
+    attr_accessor :contents
+    
+    # Encoding defined for literal
+    # @return [Literal::Encoding]
+    attr_accessor :encoding
+    
+    # Language associated with literal
+    # @return [String]
+    attr_accessor :lang
     
     # Create a new Literal. Optinally pass a namespaces hash
     # for use in applying to rdf::XMLLiteral values.
+    # @param [Object] contents
+    # @param [Encoding] encoding
+    # @option options [String] :language
+    # @option options [Hash{String => Namespace}] :namespaces
+    # @return [Literal]
+    # @raise [TypeError]
     def initialize(contents, encoding, options = {})
       unless encoding.is_a?(Encoding)
         raise TypeError, "#{encoding.inspect} should be an instance of Encoding"
@@ -319,6 +335,11 @@ module RdfContext
     end
     
     # Create literal from a string that is already N3 encoded.
+    # @param [Object] contents
+    # @param [String] language
+    # @param [Encoding] encoding (nil)
+    # @return [Literal]
+    # @raise [TypeError]
     def self.n3_encoded(contents, language, encoding = nil)
       encoding = encoding.nil? ? Encoding.the_null_encoding : Encoding.coerce(encoding)
       options = {}
@@ -330,6 +351,10 @@ module RdfContext
     end
     
     # Create an un-typed literal with a language
+    # @param [Object] contents
+    # @param [String] language (nil)
+    # @return [Literal]
+    # @raise [TypeError]
     def self.untyped(contents, language = nil)
       options = {}
       options[:language] = language if language
@@ -337,19 +362,27 @@ module RdfContext
     end
     
     # Create a typed literal
-    # Options include:
-    # _namespaces_:: A hash of namespace entries (for XMLLiteral)
+    # @param [Object] contents
+    # @param [Encoding] encoding (nil)
+    # @option options [Hash{String => Namespace}] :namespaces
+    # @return [Literal]
+    # @raise [TypeError]
     def self.typed(contents, encoding, options = {})
       encoding = Encoding.coerce(encoding)
       new(contents, encoding, options)
     end
     
     # Create a literal appropriate for type of object by datatype introspection
+    # @param [Object] contents
+    # @return [Literal]
+    # @raise [TypeError]
     def self.build_from(object)
       new(object.to_s, infer_encoding_for(object))
     end
 
     # Infer the proper XML datatype for the given object
+    # @param [Object] contents
+    # @return [Encoding]
     def self.infer_encoding_for(object)
       case object
       when TrueClass  then Encoding.boolean

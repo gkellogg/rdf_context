@@ -8,33 +8,52 @@ module RdfContext
       @triples = []
     end
     
+    # Create a new ListStore Store, should be subclassed
+    # @param [Resource] identifier
+    # @param[Hash] configuration Specific to type of storage
+    # @return [ListStore]
     def inspect
       "ListStore[id=#{identifier}, size=#{@triples.length}]"
     end
     
-    # 
-    # Adds an extant triple to a graph.
-    #
-    # _context_ and _quoted_ are ignored
+    # Add triple to store
+    # @param [Triple] triple
+    # @param [Graph] context (nil) ignored
+    # @param [Boolean] quoted (false) ignored
+    # @return [Triple]
     def add(triple, context, quoted = false)
       @triples << triple unless contains?(triple, context)
     end
     
-    # Remove a triple from the graph
+    # Remove a triple from the store
     #
     # If the triple does not provide a context attribute, removes the triple
     # from all contexts.
+    # @param [Triple] triple
+    # @param [Graph] context (nil) ignored
+    # @param [Boolean] quoted (false) ignored
+    # @return [nil]
     def remove(triple, context, quoted = false)
       @triples.delete(triple)
     end
 
-    # Check to see if this graph contains the specified triple
+    # Check to see if this store contains the specified triple
+    # @param [Triple] triple
+    # @param [Graph] context (nil) ignored
+    # @return [Boolean]
     def contains?(triple, context = nil)
       @triples.any? {|t| t == triple}
     end
 
     # Triples from graph, optionally matching subject, predicate, or object.
     # Delegated from Graph. See Graph#triples for details.
+    #
+    # @param [Triple] triple
+    # @param [Graph] context (nil)
+    # @return [Array<Triplle>]
+    # @yield [triple, context]
+    # @yieldparam [Triple] triple
+    # @yieldparam [Graph] context
     def triples(triple, context = nil)
       subject = triple.subject
       predicate = triple.predicate

@@ -12,6 +12,10 @@ module RdfContext
   #
   # Based on Python RdfLib SQLite
   class SQLite3Store < AbstractSQLStore
+    # Create a new SQLite3Store Store, should be subclassed
+    # @param [URIRef] identifier
+    # @param[Hash] configuration Specific to type of storage
+    # @return [SQLite3Store]
     def initialize(identifier = nil, configuration = {})
       super(identifier, configuration)
 
@@ -27,8 +31,7 @@ module RdfContext
     # exists, but there is insufficient permissions to open the
     # store.
     #
-    # @param(Hash) options: Configuration hash
-    # <em>_path_:: Path to database file defaults to a file in the current directory based on a hash of the store identifier
+    # @option options[String] :path Path to database file defaults to a file in the current directory based on a hash of the store identifier
     def open(options)
       unless File.exist?(options[:path])
         @db = SQLite3::Database.new(options[:path])
@@ -82,8 +85,7 @@ module RdfContext
 
     # Destroy databse
     #
-    # @param(Hash) options: Configuration hash
-    # <em>_path_:: Path to database file
+    # @option options[String] :path Path to database file defaults to a file in the current directory based on a hash of the store identifier
     def destroy(options = {})
       File.delete(@path)
     end

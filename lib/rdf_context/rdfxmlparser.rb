@@ -6,14 +6,38 @@ module RdfContext
     OLD_TERMS = %w(aboutEach aboutEachPrefix bagID).map {|n| "http://www.w3.org/1999/02/22-rdf-syntax-ns##{n}"}
 
     # The Recursive Baggage
+    # @private
     class EvaluationContext # :nodoc:
+      # The base.
+      #
+      # This will usually be the URL of the document being processed,
+      # but it could be some other URL, set by some other mechanism,
+      # such as the (X)HTML base element. The important thing is that it establishes
+      # a URL against which relative paths can be resolved.
+      #
+      # @return [URIRef]
       attr_reader :base
+      # @return [URIRef]
       attr :subject, true
+      # A list of current, in-scope URI mappings.
+      #
+      # @return [Hash{String => Namespace}]
       attr :uri_mappings, true
+      # The language. Note that there is no default language.
+      #
+      # @return [String]
       attr :language, true
+      # Graph for binding Namespaces
+      # @return [Graph]
       attr :graph, true
+      # Counter for creating rdf:_n values
+      # @return [Integer]
       attr :li_counter, true
 
+      # @param [String] base Base URI for creating absolute URIs from relative URIs
+      # @param [Nokogiri::XML::Element] element XML Element context
+      # @param [Graph] graph Graph for binding Namespaces
+      # @return [RdfXmlParser::EvaluationContext]
       def initialize(base, element, graph)
         # Initialize the evaluation context, [5.1]
         self.base = base
@@ -27,6 +51,8 @@ module RdfContext
       end
       
       # Clone existing evaluation context adding information from element
+      # @param [Nokogiri::XML::Element] element XML Element context
+      # @return [RdfXmlParser::EvaluationContext]
       def clone(element, options = {})
         new_ec = EvaluationContext.new(@base, nil, @graph)
         new_ec.uri_mappings = self.uri_mappings.clone
@@ -39,26 +65,32 @@ module RdfContext
       end
       
       # Extract Evaluation Context from an element by looking at ancestors recurively
-      def extract_from_ancestors(el)
-        ancestors = el.ancestors
+      # @param [Nokogiri::XML::Element] element XML Element context
+      # @return [Hash{URIRef => Namespace}]
+      def extract_from_ancestors(element)
+        ancestors = element.ancestors
         while ancestors.length > 0
           a = ancestors.pop
           next unless a.element?
           extract_from_element(a)
         end
-        extract_from_element(el)
+        extract_from_element(element)
       end
 
       # Extract Evaluation Context from an element
-      def extract_from_element(el)
-        b = el.attribute_with_ns("base", XML_NS.uri.to_s)
-        lang = el.attribute_with_ns("lang", XML_NS.uri.to_s)
+      # @param [Nokogiri::XML::Element] element XML Element context
+      # @return [Hash{URIRef => Namespace}]
+      def extract_from_element(element)
+        b = element.attribute_with_ns("base", XML_NS.uri.to_s)
+        lang = element.attribute_with_ns("lang", XML_NS.uri.to_s)
         self.base = URIRef.new(b.to_s.rdf_unescape, self.base, :normalize => false) if b
         self.language = lang if lang
-        self.uri_mappings.merge!(extract_mappings(el))
+        self.uri_mappings.merge!(extract_mappings(element))
       end
       
       # Extract the XMLNS mappings from an element
+      # @param [Nokogiri::XML::Element] element XML Element context
+      # @return [Hash{URIRef => Namespace}]
       def extract_mappings(element)
         mappings = {}
 
@@ -75,6 +107,8 @@ module RdfContext
       end
       
       # Produce the next list entry for this context
+      # @param [URIRef] predicate
+      # @return [URIRef]
       def li_next(predicate)
         @li_counter += 1
         predicate = Addressable::URI.parse(predicate.to_s)
@@ -83,6 +117,8 @@ module RdfContext
       end
 
       # Set XML base. Ignore any fragment
+      # @param [Nokogiri::XML::Element] b
+      # @return [String] b.to_s
       def base=(b)
         b = Addressable::URI.parse(b.to_s)
         b.fragment = nil
@@ -103,12 +139,13 @@ module RdfContext
     #
     # Optionally, the stream may be a string or Nokogiri::XML::Document
     # 
-    # @param [IO] stream:: the RDF/XML IO stream, string or Nokogiri::XML::Document
-    # @param [String] uri:: the URI of the document
-    # @param [Hash] options:: Parser options, one of
-    # <em>options[:debug]</em>:: Array to place debug messages
-    # <em>options[:strict]</em>:: Raise Error if true, continue with lax parsing, otherwise
-    # @return [Graph]:: Returns the graph containing parsed triples
+    # @param  [Nokogiri::XML::Document, #read, #to_s] stream the HTML+RDFa IO stream, string, Nokogiri::HTML::Document or Nokogiri::XML::Document
+    # @param [String] uri (nil) the URI of the document
+    # @option options [Array] :debug (nil) Array to place debug messages
+    # @option options [Boolean] :strict (false) Raise Error if true, continue with lax parsing, otherwise
+    # @return [Graph] Returns the graph containing parsed triples
+    # @yield  [triple]
+    # @yieldparam [Triple] triple
     # @raise [Error]:: Raises RdfError if _strict_
     def parse(stream, uri = nil, options = {}, &block) # :yields: triple
       super

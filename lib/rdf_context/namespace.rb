@@ -10,10 +10,10 @@ module RdfContext
     # ==== Example
     #   Namespace.new("http://xmlns.com/foaf/0.1/", "foaf") # => returns a new Foaf namespace
     #
-    # @param [String] uri:: the URI of the namespace
-    # @param [String] prefix:: the prefix of the namespace
-    # @return [Namespace]:: The newly created namespace.
-    # @raise [Error]:: Checks validity of the desired prefix and raises if it is incorrect.
+    # @param [#to_s] uri the URI of the namespace
+    # @param [#to_s] prefix the prefix of the namespace
+    # @return [Namespace] The newly created namespace.
+    # @raise [ParserException] Checks validity of the desired prefix and raises if it is incorrect.
     #
     # @author Tom Morris, Pius Uzamere
     def initialize(uri, prefix)
@@ -28,15 +28,18 @@ module RdfContext
     ## 
     # Allows the construction of arbitrary URIs on the namespace.
     #
-    # ==== Example
+    # @example
     #   foaf = Namespace.new("http://xmlns.com/foaf/0.1/", "foaf"); foaf.knows # => returns a new URIRef with URI "http://xmlns.com/foaf/0.1/knows"
     #   foaf = Namespace.new("http://xmlns.com/foaf/0.1/", "foaf", true); foaf.knows # => returns a new URIRef with URI "http://xmlns.com/foaf/0.1/#knows"
     #
     # To avoid naming problems, a suffix may have an appended '_', which will be removed when the URI is generated.
     #
-    # @return [String]:: The newly created URI.
-    # @raise [Error]:: Checks validity of the desired prefix and raises if it is incorrect.
-    # @author Tom Morris, Pius Uzamere
+    # @param [#to_s] methodname to append to NS URI to create a new URI
+    # @param [Array] args Ignored arguments
+    # @return [URIRef] The newly created URI.
+    # @raise [Error] Checks validity of the desired prefix and raises if it is incorrect.
+    # @author Tom Morris
+    # @author Pius Uzamere
     def method_missing(methodname, *args)
       self + methodname
     end
@@ -44,6 +47,8 @@ module RdfContext
     # Construct a URIRef from a namespace as in method_missing, but without method collision issues.
     # Rules are somewhat different than for normal URI unions, as the raw URI is used as the source,
     # not a normalized URI, and the result is not normalized
+    # @param [#to_s] methodname to append to NS URI to create a new URI
+    # @return [URIRef] The newly created URI.
     def +(suffix)
       prefix = @uri
       suffix = suffix.to_s.sub(/^\#/, "") if prefix.index("#")
@@ -52,31 +57,39 @@ module RdfContext
     end
 
     # Make sure to attach fragment
+    # @return [URIRef] The newly created URI.
     def uri
       self + ""
     end
     
     # Bind this namespace to a Graph
+    # @param [Graph] graph
+    # @return [Namespace] The newly created URI.
     def bind(graph)
       graph.bind(self)
     end
 
     # Compare namespaces
+    # @param [Namespace] other
+    # @return [Boolean]
     def eql?(other)
       self.uri == other.uri
     end
     alias_method :==, :eql?
 
     # Output xmlns attribute name
+    # @return [String]
     def xmlns_attr
       prefix.empty? ? "xmlns" : "xmlns:#{prefix}"
     end
     
     # Output namespace definition as a hash
+    # @return [Hash{String => String}]
     def xmlns_hash
       {xmlns_attr => @uri.to_s}
     end
     
+    # @return [String]
     def to_s
       "#{prefix}: #{@uri}"
     end

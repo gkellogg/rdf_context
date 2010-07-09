@@ -31,10 +31,9 @@ module RdfContext
     # by name.  If none is given, the graph is assigned a BNode for it's identifier.
     # For more on named graphs, see: http://en.wikipedia.org/wiki/RDFLib
     #
-    # @param [Hash] options:: Options
-    # <em>options[:store]</em>:: storage, defaults to a new ListStore instance. May be symbol :list_store or :memory_store
-    # <em>options[:identifier]</em>:: Identifier for this graph, BNode or URIRef
-    # <em>options[:allow_n3]</em>:: Allow N3-specific triples: Literals as subject, BNodes as predicate
+    # @option options [AbstractStore, Symbol] :store defaults to a new ListStore instance. May be symbol :list_store or :memory_store
+    # @option options[Resource] :identifier Identifier for this graph, BNode or URIRef
+    # @option options[Boolean] :allow_n3 Allow N3-specific triples: Literals as subject, BNodes as predicate
     def initialize(options = {})
       # Instantiate triple store
       @store = case options[:store]
@@ -54,14 +53,17 @@ module RdfContext
     end
     
     # Hash of graph, based on graph type and identifier
+    # @return [String]
     def hash
       [self.class.to_s, self.identifier].hash
     end
     
+    # @return [Boolean]
     def context_aware?; @store.context_aware?; end
     
     # Destroy the store identified by _configuration_ if supported
     # If configuration is nil, remove the graph context
+    # @return [nil]
     def destroy(configuration = nil)
       if configuration
         @store.destroy(configuration)
@@ -73,15 +75,18 @@ module RdfContext
     end
 
     # Commit changes to graph
+    # @return [nil]
     def commit; @store.commit; end
 
     # Rollback active transactions
+    # @return [nil]
     def rollback; @store.rollback; end
 
     # Open the graph store
     #
     # Might be necessary for stores that require opening a connection to a
     # database or acquiring some resource.
+    # @return [nil]
     def open(configuration = {})
       @store.open(configuration)
     end
@@ -90,20 +95,21 @@ module RdfContext
     #
     # Might be necessary for stores that require closing a connection to a
     # database or releasing some resource.
+    # @param [Boolean] commit_pending_transaction (false)
+    # @return [nil]
     def close(commit_pending_transaction=false)
       @store.close(commit_pending_transaction)
     end
 
     # Serialize graph using specified serializer class.
     #
-    # @param [Hash] options:: Options
-    # <em>options[:format]</em>:: serializer, defaults to a new NTSerializer instance. Otherwise may be a symbol from :nt, :turtle, :xml
-    # <em>options[:io]</em>:: IO (or StringIO) object, otherwise serializes to a string
-    # <em>options[:base]</em>:: Base URI for output
+    # @option options [#to_sym] :format serializer, defaults to a new NTSerializer instance. Otherwise may be a symbol from :nt, :turtle, :xml
+    # @option options [#read, #to_s] :io IO (or StringIO) object, otherwise serializes to a string
+    # @option options [URIRef] :base serializer, defaults to a new NTSerializer instance. Otherwise may be a symbol from :nt, :turtle, :xml
     #
     # Other options are parser specific.
     #
-    # @returns [IO, String]:: Passed IO/StringIO object or a string
+    # @return [IO, String]:: Passed IO/StringIO object or a string
     def serialize(options)
       serializer = case options[:format].to_sym
       when AbstractSerializer   then options[:serializer]
@@ -122,10 +128,10 @@ module RdfContext
     ## 
     # Exports the graph to RDF in N-Triples form.
     #
-    # ==== Example
+    # @example
     #   g = Graph.new; g.add_triple(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new); g.to_ntriples  # => returns a string of the graph in N-Triples form
     #
-    # @return [String]:: The graph in N-Triples.
+    # @return [String] The serialized graph in N-Triples.
     #
     # @author Tom Morris
     def to_ntriples
@@ -133,12 +139,13 @@ module RdfContext
     end
     
     # Output graph using to_ntriples
+    # @return [String] The serialized graph in N-Triples.
     def to_s; self.to_ntriples; end
 
     ## 
     # Exports the graph to RDF in RDF/XML form.
     #
-    # @return [String]:: The RDF/XML graph
+    # @return [String] The serialized RDF/XML graph
     def to_rdfxml
       serialize(:format => :rdfxml)
     end
@@ -146,24 +153,26 @@ module RdfContext
     ## 
     # Bind a namespace to the graph.
     #
-    # ==== Example
+    # @example
     #   g = Graph.new; g.bind(Namespace.new("http://xmlns.com/foaf/0.1/", "foaf")) # => binds the Foaf namespace to g
     #
-    # @param [String] namespace:: the namespace to bind
-    # @return [Namespace]:: The newly bound or pre-existing namespace.
+    # @param [Nameespace] namespace the namespace to bind
+    # @return [Namespace] The newly bound or pre-existing namespace.
     def bind(namespace)
       raise GraphException, "Can't bind #{namespace.inspect} as namespace" unless namespace.is_a?(Namespace)
       @store.bind(namespace)
     end
 
-    # Hash of prefix => Namespace bindings
+    # @return [Hash{String => Namespace}]
     def nsbinding; @store.nsbinding; end
     
-    # Hash of uri => Namespace bindings
+    # @return [Hash{URIRef => Namespace}]
     def uri_binding; @store.uri_binding; end
     
     # QName for a URI
     # Try bound namespaces, and if not found, try well-known namespaces
+    # @param [URIRef] uri
+    # @return [String]
     def qname(uri)
       uri.to_qname(self.uri_binding) || begin
         qn = uri.to_qname(WELLKNOWN_NAMESPACES)
@@ -173,36 +182,45 @@ module RdfContext
     end
     
     # Namespace for prefix
+    # @param [String] prefix
+    # @return [Namespace]
     def namespace(prefix); @store.namespace(prefix); end
 
     # Prefix for namespace
+    # @param [Namespace] namespcae
+    # @return [String]
     def prefix(namespace); @store.prefix(namespace); end
     
     # Number of Triples in the graph
+    # @return [Integer]
     def size; @store.size(self); end
 
     # List of distinct subjects in graph
+    # @return [Array<Resource>]
     def subjects; @store.subjects(self); end
     
     # List of distinct predicates in graph
+    # @return [Array<Resource>]
     def predicates; @store.predicates(self); end
     
     # List of distinct objects in graph
+    # @return [Array<Resource>]
     def objects; @store.objects(self); end
     
     # Indexed statement in serialized graph triples. Equivalent to graph.triples[item] 
+    # @return [Triple]
     def [] (item); @store.item(item, self); end
 
     # Adds a triple to a graph directly from the intended subject, predicate, and object.
     #
-    # ==== Example
+    # @example
     #   g = Graph.new; g.add_triple(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new) # => results in the triple being added to g; returns an array of g's triples
     #
-    # @param [URIRef, BNode] subject:: the subject of the triple
-    # @param [URIRef] predicate:: the predicate of the triple
-    # @param [URIRef, BNode, Literal] object:: the object of the triple
-    # @return [Graph]:: Returns the graph
-    # @raise [Error]:: Checks parameter types and raises if they are incorrect.
+    # @param [URIRef, BNode] subject the subject of the triple
+    # @param [URIRef] predicate the predicate of the triple
+    # @param [URIRef, BNode, Literal] object the object of the triple
+    # @return [Graph] Returns the graph
+    # @raise [Error] Checks parameter types and raises if they are incorrect.
     def add_triple(subject, predicate, object)
       self.add(Triple.new(subject, predicate, object))
       self
@@ -211,13 +229,13 @@ module RdfContext
     ## 
     # Adds an more extant triples to a graph. Delegates to Store.
     #
-    # ==== Example
+    # @example
     #   g = Graph.new;
     #   t = Triple.new(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new);
     #   g << t
     #
-    # @param [Triple] t:: the triple to be added to the graph
-    # @return [Graph]:: Returns the graph
+    # @param [Triple] triple the triple to be added to the graph
+    # @return [Graph] Returns the graph
     def << (triple)
       triple.validate_rdf unless @allow_n3 # Only add triples if n3-mode is set
       @store.add(triple, self)
@@ -227,15 +245,15 @@ module RdfContext
     ## 
     # Adds one or more extant triples to a graph. Delegates to Store.
     #
-    # ==== Example
+    # @example
     #   g = Graph.new;
     #   t1 = Triple.new(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new);
     #   t2 = Triple.new(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new);
     #   g.add(t1, t2, ...)
     #
-    # @param [Triple] triples:: one or more triples. Last element may be a hash for options
-    # <em>options[:context]</em>:: Graph context in which to deposit triples, defaults to default_context or self
-    # @return [Graph]:: Returns the graph
+    # @param [Array<Triple>] triples one or more triples. Last element may be a hash for options
+    # @option [Resource] :context Graph context in which to deposit triples, defaults to default_context or self
+    # @return [Graph] Returns the graph
     def add(*triples)
       options = triples.last.is_a?(Hash) ? triples.pop : {}
       ctx = options[:context] || @default_context || self
@@ -249,11 +267,11 @@ module RdfContext
     
     ##
     # Adds a list of resources as an RDF list by creating bnodes and first/rest triples
-    # @param [URIRef, BNode] subject:: the subject of the triple
-    # @param [URIRef] predicate:: the predicate of the triple
-    # @param [Array] objects:: List of objects to serialize
-    # @return [Graph]:: Returns the graph
-    # @raise [Error]:: Checks parameter types and raises if they are incorrect.
+    # @param [URIRef, BNode] subject the subject of the triple
+    # @param [URIRef] predicate the predicate of the triple
+    # @param [Array] objects List of objects to serialize
+    # @return [Graph] Returns the graph
+    # @raise [Error] Checks parameter types and raises if they are incorrect.
     def add_seq(subject, predicate, objects)
       if objects.empty?
         add_triple(subject, predicate, RDF_NS.nil)
@@ -282,19 +300,23 @@ module RdfContext
     
     # Remove a triple from the graph. Delegates to store.
     # Nil matches all triples and thus empties the graph
+    # @param [Triple] triple
+    # @return [nil]
     def remove(triple); @store.remove(triple, self); end
     
     # Triples from graph, optionally matching subject, predicate, or object.
     # Delegates to Store#triples.
     #
-    # @param [Triple, nil] triple:: Triple to match, may be a pattern triple or nil
-    # @return [Array]:: List of matched triples
+    # @param [Triple] triple (nil) Triple to match, may be a pattern triple or nil
+    # @return [Array<Triple>] List of matched triples
     def triples(triple = Triple.new(nil, nil, nil), &block) # :yields: triple, context
       @store.triples(triple, self, &block) || []
     end
     alias_method :find, :triples
     
     # Returns ordered rdf:_n objects or rdf:first, rdf:rest for a given subject
+    # @param [Resource] subject
+    # @return [Array<Resource>]
     def seq(subject)
       props = properties(subject)
       rdf_type = (props[RDF_TYPE.to_s] || []).map {|t| t.to_s}
@@ -328,13 +350,17 @@ module RdfContext
     #
     # Properties arranged as a hash with the predicate Term as index to an array of resources or literals
     #
-    # Example:
+    # @example
     #   graph.parse(':foo a :bar; rdfs:label "An example" .', "http://example.com/")
     #   graph.resources("http://example.com/subject") =>
     #   {
     #     "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" => [<http://example.com/#bar>],
     #     "http://example.com/#label"                       => ["An example"]
     #   }
+    #
+    # @param [Resource] subject
+    # @param [Boolean] recalc Refresh cache of property values
+    # @return [Hash{String => Resource}]
     def properties(subject, recalc = false)
       @properties ||= {}
       @properties.delete(subject.to_s) if recalc
@@ -352,6 +378,8 @@ module RdfContext
     
     
     # Synchronize properties to graph
+    # @param [Resource] subject
+    # @return [nil]
     def sync_properties(subject)
       props = properties(subject)
       
@@ -369,14 +397,15 @@ module RdfContext
     end
     
     # Return an n3 identifier for the Graph
+    # @return [String]
     def n3
       "[#{self.identifier.to_n3}]"
     end
 
     # Detect the presence of a BNode in the graph, either as a subject or an object
     #
-    # @param [BNode] bn:: BNode to find
-    #
+    # @param [BNode] bn BNode to find
+    # @return [Boolean]
     def has_bnode_identifier?(bn)
       self.triples do |triple, context|
         return true if triple.subject.eql?(bn) || triple.object.eql?(bn)
@@ -385,11 +414,14 @@ module RdfContext
     end
 
     # Check to see if this graph contains the specified triple
+    # @param [Triple] triple
+    # @return [Boolean]
     def contains?(triple)
       @store.contains?(triple, self)
     end
     
     # Get all BNodes with usage count used within graph
+    # @return [Array<BNode>]
     def bnodes
       @store.bnodes(self)
     end
@@ -397,16 +429,21 @@ module RdfContext
     # Get list of subjects having rdf:type == object
     #
     # @param [Resource, Regexp, String] object:: Type resource
+    # @return [Array<Triple>]
     def get_by_type(object)
       triples(Triple.new(nil, RDF_TYPE, object)).map {|t, ctx| t.subject}
     end
     
     # Get type(s) of subject, returns a list of symbols
+    # @param [Resource] subject
+    # @return [URIRef]
     def type_of(subject)
       triples(Triple.new(subject, RDF_TYPE, nil)).map {|t, ctx| t.object}
     end
     
     # Merge a graph into this graph
+    # @param [Graph] graph
+    # @return [nil]
     def merge!(graph)
       raise GraphException.new("merge without a graph") unless graph.is_a?(Graph)
       
@@ -432,6 +469,8 @@ module RdfContext
     # after sorting each graph.
     #
     # We just follow Python RDFlib's lead and do a simple comparison
+    # @param [Graph] graph
+    # @return [Boolean]
     def eql?(other)
       #puts "eql? size #{self.size} vs #{other.size}" if $DEBUG
       return false if !other.is_a?(Graph) || self.size != other.size
@@ -486,12 +525,11 @@ module RdfContext
     #
     # @param  [IO, String] stream:: the RDF IO stream, string, Nokogiri::HTML::Document or Nokogiri::XML::Document
     # @param [String] uri:: the URI of the document
-    # @param [Hash] options:: Options from
-    # <em>options[:debug]</em>:: Array to place debug messages
-    # <em>options[:type]</em>:: One of _rdfxml_, _html_, or _n3_
-    # <em>options[:strict]</em>:: Raise Error if true, continue with lax parsing, otherwise
-    # <em>options[:allow_n3]</em>:: Allow N3-specific triples: Literals as subject, BNodes as predicate
-    # @return [Graph]:: Returns the graph containing parsed triples
+    # @option options [Array] :debug (nil) Array to place debug messages
+    # @option options [:rdfxml, :html, :n3] :type (nil)
+    # @option options [Boolean] :strict (false) Raise Error if true, continue with lax parsing, otherwise
+    # @option options [Boolean] :allow_n3 (false) Allow N3-specific triples: Literals as subject, BNodes as predicate
+    # @return [Graph] Returns the graph containing parsed triples
     def parse(stream, uri = nil, options = {}, &block) # :yields: triple
       @allow_n3 ||= options[:allow_n3]
       Parser.parse(stream, uri, options.merge(:graph => self), &block)

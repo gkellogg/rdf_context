@@ -15,14 +15,14 @@ module RdfContext
     # Any or all of _subject_, _predicate_ or _object_ may be nil, to create a triple pattern.
     # A pattern may not be added to a graph.
     #
-    # ==== Example
+    # @example
     #   Triple.new(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new) # => results in the creation of a new triple and returns it
     #
-    # @param [URIRef, BNode] subject:: the subject of the triple
-    # @param [URIRef] predicate:: the predicate of the triple
-    # @param [URIRef, BNode, Literal, TypedLiteral] object:: the object of the triple
-    # @return [Triple]:: Generated triple
-    # @raise [Error]:: Checks parameter types and raises if they are incorrect.
+    # @param [URIRef, BNode] subject the subject of the triple
+    # @param [URIRef] predicate the predicate of the triple
+    # @param [URIRef, BNode, Literal] object the object of the triple
+    # @return [Triple] Generated triple
+    # @raise [Error] Checks parameter types and raises if they are incorrect.
     #
     # @author Tom Morris
     def initialize (subject, predicate, object)
@@ -32,17 +32,21 @@ module RdfContext
       @pattern = subject.nil? || predicate.nil? || object.nil?
     end
 
+    # Is this a pattern triple (subject, predicate or object nil)
+    # @return [Boolean]
     def is_pattern?
       @pattern
     end
     
     # Serialize Triple to N3
+    # @return [String]
     def to_n3
       raise RdfException.new("Can't serialize pattern triple '#{@subject.inspect}, #{@predicate.inspect}, #{@object.inspect}'") if is_pattern?
       @subject.to_ntriples + " " + @predicate.to_ntriples + " " + @object.to_ntriples + " ."
     end
     alias_method :to_ntriples, :to_n3
     
+    # @return [String]
     def to_s; self.to_ntriples; end
     
     def inspect
@@ -56,12 +60,15 @@ module RdfContext
     end
 
     # Is the predicate of this statment rdf:type?
+    # @return [Boolean]
     def is_type?
       @predicate.to_s == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
     end
 
     # Two triples are equal if their of their subjects, predicates and objects are equal.
     # Or self or other is a pattern and subject, predicate, object matches
+    # @param [Triple] other
+    # @return [Boolean]
     def eql? (other)
       other.is_a?(Triple) &&
       (other.subject == self.subject || other.subject.nil? || self.subject.nil?) &&
@@ -72,6 +79,7 @@ module RdfContext
     alias_method :==, :eql?
 
     # Clone triple, keeping references to literals and URIRefs, but cloning BNodes
+    # @return [Triple]
     def clone
       raise RdfException.new("Can't clone pattern triple") if is_pattern?
       s = subject.is_a?(BNode) ? subject.clone : subject
@@ -81,12 +89,15 @@ module RdfContext
     end
     
     # Validate that this triple is legal RDF, not extended for Notation-3
+    # @raise [InvalidNode, InvalidPredicate]
+    # @return [nil]
     def validate_rdf
       raise InvalidNode, "Triple has illegal RDF subject #{subject.inspect}" unless subject.is_a?(URIRef) || subject.is_a?(BNode)
       raise InvalidPredicate, "Triple has illegal RDF predicate #{predicate.inspect}" unless predicate.is_a?(URIRef)
     end
     
     # For indexes
+    # @return [String]
     def hash
       [subject, predicate, object].hash
     end

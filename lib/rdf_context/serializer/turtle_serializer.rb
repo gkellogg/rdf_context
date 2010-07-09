@@ -7,6 +7,34 @@ module RdfContext
     VERB = 1
     OBJECT = 2
     
+    # Serialize the graph
+    #
+    # @param [IO, StreamIO] stream Stream in which to place serialized graph
+    # @option options [URIRef, String] :base (nil) Base URI of graph, used to shorting URI references
+    # @return [nil]
+    def serialize(stream, options = {})
+      puts "\nserialize: #{@graph.inspect}" if $DEBUG
+      reset
+      @stream = stream
+      @base = options[:base]
+      
+      @graph.bind(RDF_NS)
+      @graph.bind(RDFS_NS)
+      
+      preprocess
+      start_document
+
+      order_subjects.each do |subject|
+        #puts "subj: #{subject.inspect}"
+        unless is_done?(subject)
+          statement(subject)
+        end
+      end
+      
+      end_document
+    end
+
+    protected
     def reset
       super
       @shortNames = {}
@@ -187,33 +215,6 @@ module RdfContext
       puts "statement: #{subject.inspect}, s2?: #{s_squared(subject)}" if $DEBUG
       subject_done(subject)
       s_squared(subject) || s_default(subject)
-    end
-    
-    # Serialize the graph
-    #
-    # @param [IO, StreamIO] stream:: Stream in which to place serialized graph
-    # @param [Hash] options:: Options for parser
-    # <em>options[:base]</em>:: Base URI of graph, used to shorting URI references
-    def serialize(stream, options = {})
-      puts "\nserialize: #{@graph.inspect}" if $DEBUG
-      reset
-      @stream = stream
-      @base = options[:base]
-      
-      @graph.bind(RDF_NS)
-      @graph.bind(RDFS_NS)
-      
-      preprocess
-      start_document
-
-      order_subjects.each do |subject|
-        #puts "subj: #{subject.inspect}"
-        unless is_done?(subject)
-          statement(subject)
-        end
-      end
-      
-      end_document
     end
   end
 end
