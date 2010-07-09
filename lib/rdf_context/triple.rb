@@ -90,7 +90,7 @@ module RdfContext
     
     # Validate that this triple is legal RDF, not extended for Notation-3
     # @raise [InvalidNode, InvalidPredicate]
-    # @return [nil]
+    # @return [void]
     def validate_rdf
       raise InvalidNode, "Triple has illegal RDF subject #{subject.inspect}" unless subject.is_a?(URIRef) || subject.is_a?(BNode)
       raise InvalidPredicate, "Triple has illegal RDF predicate #{predicate.inspect}" unless predicate.is_a?(URIRef)

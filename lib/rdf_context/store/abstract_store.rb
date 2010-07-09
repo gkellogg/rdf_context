@@ -53,7 +53,7 @@ module RdfContext
     # @param [Triple] triple
     # @param [Graph] context (nil)
     # @raise [StoreException] Not Implemented
-    # @return [nil]
+    # @return [void]
     def remove(triple, context = nil); raise StoreException, "not implemented"; end
     
     # Check to see if this store contains the specified triple

@@ -36,13 +36,13 @@ module RdfContext
     def n3; raise ReadOnlyGraphException; end
     
     # Open the graphs
-    # @return [nil]
+    # @return [void]
     def open(configuration = {})
       @graphs.each {|g| g.open(configuration)}
     end
     
     # Close the graphs
-    # @return [nil]
+    # @return [void]
     def close(configuration = {})
       @graphs.each {|g| g.close(configuration)}
     end

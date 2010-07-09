@@ -20,7 +20,7 @@ module RdfContext
     # @option options [Integer] :max_depth (3) Maximum depth for recursively defining resources
     # @option options [String] :lang (nil) Output as root xml:lang attribute, and avoid generation xml:lang where possible
     # @option options [:none, :untyped, :typed] :attributes (:none) How to use XML attributes when serializing, one of :none, :untyped, :typed. The default is none.
-    # @return [nil]
+    # @return [void]
     #
     # @example
     #   attributes == :none

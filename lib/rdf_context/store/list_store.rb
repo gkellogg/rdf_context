@@ -32,7 +32,7 @@ module RdfContext
     # @param [Triple] triple
     # @param [Graph] context (nil) ignored
     # @param [Boolean] quoted (false) ignored
-    # @return [nil]
+    # @return [void]
     def remove(triple, context, quoted = false)
       @triples.delete(triple)
     end

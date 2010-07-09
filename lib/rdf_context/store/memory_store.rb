@@ -105,7 +105,7 @@ module RdfContext
     #
     # @param [Triple] triple
     # @param [Graph] context (nil)
-    # @return [nil]
+    # @return [void]
     def remove(triple, context = nil)
       context = nil if context == @identifier || (context.respond_to?(:identifier) && context.identifier == @identifier)
     

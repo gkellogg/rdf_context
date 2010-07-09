@@ -63,7 +63,7 @@ module RdfContext
     
     # Destroy the store identified by _configuration_ if supported
     # If configuration is nil, remove the graph context
-    # @return [nil]
+    # @return [void]
     def destroy(configuration = nil)
       if configuration
         @store.destroy(configuration)
@@ -75,18 +75,18 @@ module RdfContext
     end
 
     # Commit changes to graph
-    # @return [nil]
+    # @return [void]
     def commit; @store.commit; end
 
     # Rollback active transactions
-    # @return [nil]
+    # @return [void]
     def rollback; @store.rollback; end
 
     # Open the graph store
     #
     # Might be necessary for stores that require opening a connection to a
     # database or acquiring some resource.
-    # @return [nil]
+    # @return [void]
     def open(configuration = {})
       @store.open(configuration)
     end
@@ -96,7 +96,7 @@ module RdfContext
     # Might be necessary for stores that require closing a connection to a
     # database or releasing some resource.
     # @param [Boolean] commit_pending_transaction (false)
-    # @return [nil]
+    # @return [void]
     def close(commit_pending_transaction=false)
       @store.close(commit_pending_transaction)
     end
@@ -301,7 +301,7 @@ module RdfContext
     # Remove a triple from the graph. Delegates to store.
     # Nil matches all triples and thus empties the graph
     # @param [Triple] triple
-    # @return [nil]
+    # @return [void]
     def remove(triple); @store.remove(triple, self); end
     
     # Triples from graph, optionally matching subject, predicate, or object.
@@ -379,7 +379,7 @@ module RdfContext
     
     # Synchronize properties to graph
     # @param [Resource] subject
-    # @return [nil]
+    # @return [void]
     def sync_properties(subject)
       props = properties(subject)
       
@@ -443,7 +443,7 @@ module RdfContext
     
     # Merge a graph into this graph
     # @param [Graph] graph
-    # @return [nil]
+    # @return [void]
     def merge!(graph)
       raise GraphException.new("merge without a graph") unless graph.is_a?(Graph)
       

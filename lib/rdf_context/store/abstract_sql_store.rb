@@ -65,7 +65,7 @@ module RdfContext
 
     # Close the store
     # @param [Boolean] commit_pending_transactions (false)
-    # @return [nil]
+    # @return [void]
     def close(commit_pending_transactions = false)
       @db.commit if commit_pending_transactions && @db.transaction_active?
       @db.close
@@ -103,7 +103,7 @@ module RdfContext
     #
     # @param [Triple] triple
     # @param [Graph] context (nil)
-    # @return [nil]
+    # @return [void]
     def remove(triple, context = nil)
       if context
         if triple.subject == nil && triple.predicate.nil? && triple.object.nil?

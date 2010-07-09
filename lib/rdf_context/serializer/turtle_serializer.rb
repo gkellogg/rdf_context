@@ -11,7 +11,7 @@ module RdfContext
     #
     # @param [IO, StreamIO] stream Stream in which to place serialized graph
     # @option options [URIRef, String] :base (nil) Base URI of graph, used to shorting URI references
-    # @return [nil]
+    # @return [void]
     def serialize(stream, options = {})
       puts "\nserialize: #{@graph.inspect}" if $DEBUG
       reset
