@@ -50,7 +50,7 @@ def rdfa_tc(number, parse, store)
   head = "" +
   %(<?xml version="1.0" encoding="UTF-8"?>\n) +
   %(<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN" "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd">\n) +
-  %(<html xmlns="http://www.w3.org/1999/xhtml" version="XHTML+RDFa 1.1"\n)
+  %(<html xmlns="http://www.w3.org/1999/xhtml" version="XHTML+RDFa #{$rdfa_version}"\n)
   tc = head + "#{namespaces}>\n#{body.gsub(/\$TCPATH/, tcpath)}\n</html>"
   
   puts "Input file: #{tc}" if $DEBUG || $verbose
@@ -62,6 +62,7 @@ raise "Mode must be one of 'parse'" unless mode == "parse"
 
 $verbose = false
 $format = "ttl"
+$rdfa_version = "1.1"
 base_uri  = "http://example.com"
 store = :list_store
 opts = GetoptLong.new(
@@ -71,7 +72,8 @@ opts = GetoptLong.new(
   ["--format", GetoptLong::REQUIRED_ARGUMENT],
   ["--store", GetoptLong::REQUIRED_ARGUMENT],
   ["--uri", GetoptLong::REQUIRED_ARGUMENT],
-  ["--rdfa", GetoptLong::NO_ARGUMENT]
+  ["--rdfa", GetoptLong::NO_ARGUMENT],
+  ["--1_0", GetoptLong::NO_ARGUMENT]
 )
 opts.each do |opt, arg|
   case opt
@@ -81,6 +83,7 @@ opts.each do |opt, arg|
   when '--format' then $format = arg
   when '--uri' then base_uri = arg
   when '--rdfa' then $rdfa = true
+  when '--1_0' then $rdfa_version = "1.0"
   when '--store'
     case arg
     when /list/
