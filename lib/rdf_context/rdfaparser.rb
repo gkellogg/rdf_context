@@ -698,7 +698,7 @@ module RdfContext
         options[:term_mappings][value.to_s.downcase]
       when options[:vocab]
         # Otherwise, if there is a local default vocabulary the URI is obtained by concatenating that value and the term.
-        options[:vocab] + value
+        URIRef.new(options[:vocab].to_s + value)
       else
         # Finally, if there is no local default vocabulary, the term has no associated URI and must be ignored.
         nil
