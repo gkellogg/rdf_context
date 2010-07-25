@@ -2403,8 +2403,8 @@
   informationResourceResults: http://rdfa.digitalbazaar.com/test-suite/test-cases/xhtml11/0086.sparql
   name: 0086
   purpose: Test that NO triple should be generated for a non-reserved @rel value
-  reviewStatus: http://www.w3.org/2006/03/test-description#approved
-  specificationReference: ""
+  reviewStatus: http://www.w3.org/2006/03/test-description#onhold
+  specificationReference: 7.4.3 General Use of Terms in Attributes
   suite: xhtml11
   title: NO triple for a non-reserved @rel value
 - !ruby/object:RdfaHelper::TestCase 
@@ -2937,8 +2937,8 @@
   informationResourceResults: http://rdfa.digitalbazaar.com/test-suite/test-cases/xhtml11/0105.sparql
   name: "0105"
   purpose: Test the behavior of triple generation in a corner case where the inner @rel is neither a CURIE or a LinkType. This test effectively causes a rel="" to be inserted between the outer div subject and the inner @href, which halts chaining.
-  reviewStatus: http://www.w3.org/2006/03/test-description#approved
-  specificationReference: ""
+  reviewStatus: http://www.w3.org/2006/03/test-description#onhold
+  specificationReference: 7.4.3 General Use of Terms in Attributes
   suite: xhtml11
   title: inner @rel neither CURIE nor LinkType
 - !ruby/object:RdfaHelper::TestCase 
@@ -3246,7 +3246,7 @@
   name: "0116"
   purpose: Checks to make sure that reserved words that are used in @property do not generate triples. This is a NEGATIVE test case.
   reviewStatus: http://www.w3.org/2006/03/test-description#onhold
-  specificationReference: ""
+  specificationReference: 7.4.3 General Use of Terms in Attributes
   suite: xhtml11
   title: Reserved word used in @property should not generate triple
 - !ruby/object:RdfaHelper::TestCase 
@@ -4319,6 +4319,62 @@
   specificationReference: ""
   suite: xhtml11
   title: Test term case insensitivity
+- !ruby/object:RdfaHelper::TestCase 
+  about: !ruby/object:Addressable::URI 
+    authority: rdfa.digitalbazaar.com
+    fragment: 
+    hash: 763118708
+    host: rdfa.digitalbazaar.com
+    normalized_host: 
+    normalized_path: 
+    normalized_scheme: 
+    password: 
+    path: /test-suite/test-cases/xhtml11/0191
+    port: 
+    query: 
+    scheme: http
+    uri_string: http://rdfa.digitalbazaar.com/test-suite/test-cases/xhtml11/0191
+    user: 
+    userinfo: 
+    validation_deferred: false
+  contributor: Gregg Kellogg
+  expectedResults: true
+  informationResourceInput: http://rdfa.digitalbazaar.com/test-suite/test-cases/xhtml11/0191.xhtml
+  informationResourceResults: http://rdfa.digitalbazaar.com/test-suite/test-cases/xhtml11/0191.sparql
+  name: 0191
+  purpose: Test that a triple is generated for a non-reserved @rel value using the default vocabulary
+  reviewStatus: http://www.w3.org/2006/03/test-description#unreviewed
+  specificationReference: ""
+  suite: xhtml11
+  title: Triple is generated for a non-reserved @rel value (opposite of 0086)
+- !ruby/object:RdfaHelper::TestCase 
+  about: !ruby/object:Addressable::URI 
+    authority: rdfa.digitalbazaar.com
+    fragment: 
+    hash: 763118707
+    host: rdfa.digitalbazaar.com
+    normalized_host: 
+    normalized_path: 
+    normalized_scheme: 
+    password: 
+    path: /test-suite/test-cases/xhtml11/0192
+    port: 
+    query: 
+    scheme: http
+    uri_string: http://rdfa.digitalbazaar.com/test-suite/test-cases/xhtml11/0192
+    user: 
+    userinfo: 
+    validation_deferred: false
+  contributor: Gregg Kellogg
+  expectedResults: true
+  informationResourceInput: http://rdfa.digitalbazaar.com/test-suite/test-cases/xhtml11/0192.xhtml
+  informationResourceResults: http://rdfa.digitalbazaar.com/test-suite/test-cases/xhtml11/0192.sparql
+  name: 0192
+  purpose: Checks to make sure that reserved words that are used in @property generate triples.
+  reviewStatus: http://www.w3.org/2006/03/test-description#onhold
+  specificationReference: 7.4.3 General Use of Terms in Attributes
+  suite: xhtml11
+  title: Reserved word used in @property should generate triple (opposite of 0116)
 - !ruby/object:RdfaHelper::TestCase 
   about: !ruby/object:Addressable::URI 
     authority: rdfa.digitalbazaar.com

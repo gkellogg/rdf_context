@@ -1,3 +1,10 @@
+=== 0.5.7
+* Add back support for RDFa 1.0 as well as RDFa 1.1. Parser checks @version to determine which
+* Remove specs for html4 and html5 until sorted out.
+* Don't allow _ as a prefix name.
+* Don't emit non-URI predicate values
+* Use sqlite3-ruby version 1.2.5, as 1.3.1 breaks multiple argument execs.
+
 === 0.5.6
 * Remove trailing ' in #encoding for treetop grammer, which caused problems installing rdoc in ruby 1.9.
 * Fixed corner case in RDFa parser where document doesn't exist, which was raising an error.
@@ -45,7 +52,7 @@
 === 0.5.0
 * Support for Ruby 1.9, 1.8.7 and 1.8.6.
   * Unicode escapes and URIRefs only work properly in Ruby 1.9
-  * Replaced some (&:meth) spells with {|c| c.meth} for Ruby 1.8.6 compatibility
+  * Replaced some <code>(&:meth)</code> spells with <code>{|c| c.meth}</code> for Ruby 1.8.6 compatibility
 * Fully compliant N3 parser (n3-rdf level) with extnensive tests, including SWAP, CWM and Turtle test suites.
   * Supports paths, keywords, all semantic expressions.
   * No support yet for Formulae, variables, rules or automatic reification

@@ -1,3 +1,4 @@
+gem 'sqlite3-ruby', "=1.2.5"  # XXX version 1.3.0 & 1.3.1 break executes with multiple arguments: http://groups.google.com/group/sqlite3-ruby/browse_frm/thread/93494ce04bc07fd5
 require 'sqlite3'
 require File.join(File.dirname(__FILE__), 'abstract_sql_store')
 
