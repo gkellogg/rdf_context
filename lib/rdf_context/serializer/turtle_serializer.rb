@@ -170,7 +170,7 @@ module RdfContext
       return if objects.empty?
 
       objects.each_with_index do |obj, i|
-        write(",\n#{indent(2)}") if i > 0
+        write(",\n#{indent(4)}") if i > 0
         path(obj, OBJECT)
       end
     end
