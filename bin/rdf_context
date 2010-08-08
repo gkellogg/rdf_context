@@ -10,9 +10,7 @@ class Parse
     graph_opts[:store] = store if store
     parser = Parser.new(:graph => Graph.new(graph_opts))
     parser.parse(file.respond_to?(:read) ? file : File.open(file), base_uri, :strict => true)
-    output = parser.graph.serialize(:format => $format.to_sym, :base => base_uri)
-    puts output unless $quiet
-
+    puts parser.graph.serialize(:format => $format.to_sym, :base => base_uri) unless $quiet
     puts parser.debug.to_a.join("\n\t") if $verbose
   rescue RdfException => e
     puts "Parse failure: #{e.message}"
@@ -25,44 +23,12 @@ class Parse
   end
 end
 
-TEST_DIR = File.join(File.dirname(__FILE__), '..', 'spec', 'rdfa-test-suite', 'tests')
-BASE_MANIFEST_URL = "http://rdfa.digitalbazaar.com/test-suite/"
-BASE_TEST_CASE_URL = "#{BASE_MANIFEST_URL}test-cases/"
-
-def rdfa_tc(number, parse, store)
-  f = File.expand_path("#{TEST_DIR}/#{number}.txt")
-  found_head = false
-  namespaces = ""
-  body = File.readlines(f).map do |line|
-    found_head ||= line.match(/<head/)
-    if found_head
-      line.chop
-    else
-      namespaces << line
-      nil
-    end
-  end.compact.join("\n")
-
-  namespaces.chop!  # Remove trailing newline
-  
-  tcpath = BASE_TEST_CASE_URL + "xhtml1"
-  
-  head = "" +
-  %(<?xml version="1.0" encoding="UTF-8"?>\n) +
-  %(<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN" "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd">\n) +
-  %(<html xmlns="http://www.w3.org/1999/xhtml" version="XHTML+RDFa #{$rdfa_version}"\n)
-  tc = head + "#{namespaces}>\n#{body.gsub(/\$TCPATH/, tcpath)}\n</html>"
-  
-  puts "Input file: #{tc}" if $DEBUG || $verbose
-  parse.parse(StringIO.new(tc), "#{tcpath}/#{number}.xhtml")
-end
-
 mode = ARGV.shift
 raise "Mode must be one of 'parse'" unless mode == "parse"
 
 $verbose = false
+$quiet = true
 $format = "ttl"
-$rdfa_version = "1.1"
 base_uri  = "http://example.com"
 store = :list_store
 opts = GetoptLong.new(
@@ -71,9 +37,7 @@ opts = GetoptLong.new(
   ["--debug", GetoptLong::NO_ARGUMENT],
   ["--format", GetoptLong::REQUIRED_ARGUMENT],
   ["--store", GetoptLong::REQUIRED_ARGUMENT],
-  ["--uri", GetoptLong::REQUIRED_ARGUMENT],
-  ["--rdfa", GetoptLong::NO_ARGUMENT],
-  ["--1_0", GetoptLong::NO_ARGUMENT]
+  ["--uri", GetoptLong::REQUIRED_ARGUMENT]
 )
 opts.each do |opt, arg|
   case opt
@@ -82,8 +46,6 @@ opts.each do |opt, arg|
   when '--debug' then $DEBUG = true
   when '--format' then $format = arg
   when '--uri' then base_uri = arg
-  when '--rdfa' then $rdfa = true
-  when '--1_0' then $rdfa_version = "1.0"
   when '--store'
     case arg
     when /list/
@@ -98,20 +60,9 @@ opts.each do |opt, arg|
 end
 
 x = Parse.new
-if $rdfa && ARGV.empty?
-  # Run all RDFa test cases
-  Dir.foreach(TEST_DIR) do |f|
-    next unless f.match(/^(.*)\.txt$/)
-    rdfa_tc($1, x, store)
-  end
-elsif ARGV.empty?
+if ARGV.empty?
   s = $stdin.read
   x.parse(StringIO.new(s), base_uri, store)
-elsif $rdfa
-  # Run specified RDFa test cases
-  ARGV.each do |tc|
-    rdfa_tc(tc, x, store)
-  end
 else
   ARGV.each do |test_file|
     x.parse(test_file, base_uri, store)
