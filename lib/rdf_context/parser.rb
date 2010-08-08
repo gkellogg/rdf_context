@@ -3,20 +3,36 @@ require File.join(File.dirname(__FILE__), 'graph')
 module RdfContext
   # Generic RdfContext Parser class
   class Parser
-    attr_reader :debug, :uri
-    attr_accessor :doc, :graph
+    attr_reader :debug
+    
+    # URI of parsed document
+    # @return [RdfContext::URIRef]
+    attr_reader :uri
+    
+    # Source of parsed document
+    # @return [Nokogiri::XML::Document, #read]
+    attr_accessor :doc
 
+    # Graph instance containing parsed statements
+    # @return [RdfContext::Graph]
+    attr_accessor :graph
+    
+    # Graph instance containing informationa, warning and error statements
+    # @return [RdfContext::Graph]
+    attr_accessor :processor_graph
+    
     ## 
     # Creates a new parser
     #
     # @option options [Graph] :graph (nil) Graph to parse into, otherwise a new RdfContext::Graph instance is created
-    # @option options [Array] :debug (nil) Array to place debug messages
+    # @option options [Graph] :processor_graph (nil) Graph to record information, warnings and errors.
     # @option options [:rdfxml, :html, :n3] :type (nil)
     # @option options [Boolean] :strict (false) Raise Error if true, continue with lax parsing, otherwise
     def initialize(options = {})
       # initialize the triplestore
       @graph = options[:graph]
-      @debug = options[:debug]
+      @processor_graph = options[:processor_graph] if options[:processor_graph]
+      @debug = options[:debug] # XXX deprecated
       @strict = options[:strict]
       @named_bnodes = {}
     end
@@ -25,7 +41,7 @@ module RdfContext
     #
     # @param  [#read, #to_s] stream the HTML+RDFa IO stream, string, Nokogiri::HTML::Document or Nokogiri::XML::Document
     # @param [String] uri (nil) the URI of the document
-    # @option options [Array] :debug (nil) Array to place debug messages
+    # @option options [Graph] :processor_graph (nil) Graph to record information, warnings and errors.
     # @option options [:rdfxml, :html, :n3] :type (nil)
     # @option options [Boolean] :strict (false) Raise Error if true, continue with lax parsing, otherwise
     # @return [Graph] Returns the graph containing parsed triples
@@ -48,7 +64,7 @@ module RdfContext
     #
     # @param  [#read, #to_s] stream the HTML+RDFa IO stream, string, Nokogiri::HTML::Document or Nokogiri::XML::Document
     # @param [String] uri (nil) the URI of the document
-    # @option options [Array] :debug (nil) Array to place debug messages
+    # @option options [Graph] :processor_graph (nil) Graph to record information, warnings and errors.
     # @option options [:rdfxml, :html, :n3] :type (nil)
     # @option options [Boolean] :strict (false) Raise Error if true, continue with lax parsing, otherwise
     # @return [Graph] Returns the graph containing parsed triples
@@ -62,7 +78,8 @@ module RdfContext
         
         options[:strict] ||= @strict if @strict
         options[:graph] ||= @graph if @graph
-        options[:debug] ||= @debug if @debug
+        options[:debug] ||= @debug if @debug  # XXX deprecated
+        @processor_graph = options[:processor_graph] if options[:processor_graph]
         # Intuit type, if not provided
         options[:type] ||= detect_format(stream, uri)
         
@@ -89,6 +106,8 @@ module RdfContext
     
     # @return [Graph]
     def graph; @delegate ? @delegate.graph : (@graph || Graph.new); end
+    # @return [Graph]
+    def processor_graph; @delegate ? @delegate.processor_graph : (@processor_graph || Graph.new); end
     
     # @return [Array<String>]
     def debug; @delegate ? @delegate.debug : @debug; end
@@ -146,10 +165,36 @@ module RdfContext
     # @param [XML Node, any] node:: XML Node or string for showing context
     # @param [String] message::
     def add_debug(node, message)
-      puts "#{node_path(node)}: #{message}" if $DEBUG
-      @debug << "#{node_path(node)}: #{message}" if @debug.is_a?(Array)
+      add_processor_message(node, message, RDFA_NS.InformationalMessage)
     end
 
+    def add_info(node, message, process_class = RDFA_NS.InformationalMessage)
+      add_processor_message(node, message, process_class)
+    end
+    
+    def add_warning(node, message, process_class = RDFA_NS.MiscellaneousWarning)
+      add_processor_message(node, message, process_class)
+    end
+    
+    def add_error(node, message, process_class = RDFA_NS.MiscellaneousError)
+      add_processor_message(node, message, process_class)
+      raise ParserException, message if @strict
+    end
+    
+    def add_processor_message(node, message, process_class)
+      puts "#{node_path(node)}: #{message}" if $DEBUG
+      @debug << "#{node_path(node)}: #{message}" if @debug.is_a?(Array)
+      if @processor_graph
+        @processor_sequence ||= 0
+        n = BNode.new
+        @processor_graph << Triple.new(n, RDF_TYPE, process_class)
+        @processor_graph << Triple.new(n, DC_NS.description, message)
+        @processor_graph << Triple.new(n, DC_NS.date, Literal.build_from(DateTime.now.to_date))
+        @processor_graph << Triple.new(n, RDFA_NS.sequence, Literal.build_from(@processor_sequence += 1))
+        @processor_graph << Triple.new(n, RDFA_NS.source, node_path(node))
+      end
+    end
+    
     # add a triple, object can be literal or URI or bnode
     #
     # If the parser is called with a block, triples are passed to the block rather

@@ -6,11 +6,20 @@ module RdfContext
   #
   # Based on processing rules described here:
   # @see http://www.w3.org/TR/rdfa-syntax/#s_model RDFa 1.0
-  # @see http://www.w3.org/2010/02/rdfa/drafts/2010/ED-rdfa-core-20100705/ RDFa 1.1
+  # @see http://www.w3.org/2010/02/rdfa/drafts/2010/WD-rdfa-core-20100803/ RDFa 1.1
   #
   # @author Ben Adida
   # @author Gregg Kellogg
   class RdfaParser < Parser
+    SafeCURIEorCURIEorURI = {
+      :rdfa_1_0 => [:term, :safe_curie, :uri, :bnode],
+      :rdfa_1_1 => [:safe_curie, :curie, :term, :uri, :bnode],
+    }
+    TERMorCURIEorAbsURI = {
+      :rdfa_1_0 => [:curie],
+      :rdfa_1_1 => [:term, :curie, :absuri],
+    }
+
     # Host language
     # @return [:xhtml]
     attr_reader :host_language
@@ -92,7 +101,7 @@ module RdfContext
         @base = base
         @parent_subject = @base
         @parent_object = nil
-        @uri_mappings = {}
+        @uri_mappings = host_defaults.fetch(:uri_mappings, {}).merge("rdf" => RDF_NS.uri.to_s)
         @incomplete_triples = []
         @language = nil
         @term_mappings = host_defaults.fetch(:term_mappings, {})
@@ -121,6 +130,7 @@ module RdfContext
     # Creates a new parser for RDFa.
     #
     # @option options [Graph] :graph (nil) Graph to parse into, otherwise a new RdfContext::Graph instance is created
+    # @option options [Graph] :processor_graph (nil) Graph to record information, warnings and errors.
     # @option options [Array] :debug (nil) Array to place debug messages
     # @option options [:rdfxml, :html, :n3] :type (nil)
     # @option options [Boolean] :strict (false) Raise Error if true, continue with lax parsing, otherwise
@@ -140,6 +150,8 @@ module RdfContext
     # @param  [Nokogiri::HTML::Document, Nokogiri::XML::Document, #read, #to_s] stream the HTML+RDFa IO stream, string, Nokogiri::HTML::Document or Nokogiri::XML::Document
     # @param [String] uri (nil) the URI of the document
     # @option options [Array] :debug (nil) Array to place debug messages
+    # @option options [:rdfa_1_0, :rdfa_1_1] :version (:rdfa_1_1) Parser version information
+    # @option options [:xhtml] :host_language (:xhtml) Host Language
     # @option options [Boolean] :strict (false) Raise Error if true, continue with lax parsing, otherwise
     # @return [Graph] Returns the graph containing parsed triples
     # @yield  [triple]
@@ -154,22 +166,18 @@ module RdfContext
       else   Nokogiri::XML.parse(stream, uri.to_s)
       end
       
-      raise ParserException, "Empty document" if @doc.nil? && @strict
+      add_error(nil, "Empty document", RDFA_NS.HostLanguageMarkupError) if @doc.nil?
+      
       @callback = block
 
-      # Determine host language
-      # XXX - right now only XHTML defined
-      version = @doc.root.attributes["version"].to_s if @doc.root
-      
-      @host_language = case version.to_s
-      when /XHTML+RDFa/ then :xhtml
-      end
-      
-      # If none found, assume xhtml
-      @host_language ||= :xhtml
-      
-      @version = version.to_s.match(/RDFa 1.0/) ? :rdfa_1_0 : :rdfa_1_1
+      @version = options[:version] ? options[:version].to_sym : :rdfa_1_1
+      @host_language = options[:host_language] || :xhtml
 
+      # Section 4.2 RDFa Host Language Conformance
+      #
+      # The Host Language may define a default RDFa Profile. If it does, the RDFa Profile triples that establish term or
+      # URI mappings associated with that profile must not change without changing the profile URI. RDFa Processors may
+      # embed, cache, or retrieve the RDFa Profile triples associated with that profile.
       @host_defaults = case @host_language
       when :xhtml
         @graph.bind(XHV_NS)
@@ -188,7 +196,7 @@ module RdfContext
 
       @host_defaults.delete(:vocabulary) if @version == :rdfa_1_0
       
-      add_debug(@doc, "version = #{@version},  host_language = #{@host_language}")
+      add_debug(@doc.root, "version = #{@version.inspect},  host_language = #{@host_language}")
       # parse
       parse_whole_document(@doc, @uri)
 
@@ -206,7 +214,7 @@ module RdfContext
         base = base_el.attributes['href']
         # Strip any fragment from base
         base = base.to_s.split("#").first
-        @uri = URIRef.new(base, :normalize => false, :normalize => false)
+        @uri = URIRef.intern(base, :normalize => false, :normalize => false)
         add_debug(base_el, "parse_whole_doc: base='#{base}'")
       end
 
@@ -222,7 +230,7 @@ module RdfContext
       # Next the current element is parsed for any updates to the local term mappings and
       # local list of URI mappings via @profile.
       # If @profile is present, its value is processed as defined in RDFa Profiles.
-      element.attributes['profile'].to_s.split(/\s/).each do |profile|
+      element.attributes['profile'].to_s.split(/\s/).reverse.each do |profile|
         # Don't try to open ourselves!
         if @uri == profile
           add_debug(element, "extract_mappings: skip recursive profile <#{profile}>")
@@ -243,7 +251,7 @@ module RdfContext
             sess = Patron::Session.new
             sess.timeout = 10
             resp = sess.get(profile)
-            raise RuntimeError, "HTTP returned status #{resp.status} when reading #{profile}" if resp.status >= 400
+            raise ParserException, "Empty document" if resp.status >= 400 && @strict
       
             # Parse profile, and extract mappings from graph
             old_debug, old_verbose, = $DEBUG, $verbose
@@ -285,14 +293,11 @@ module RdfContext
               # triple that is the common subject of an rdfa:term and an rdfa:uri predicate, create a
               # mapping from the object literal of the rdfa:term predicate to the object literal of the
               # rdfa:uri predicate. Add or update this mapping in the local term mappings.
-              tm[term.to_s] = URIRef.new(uri.to_s, :normalize => false) if term
+              tm[term.to_s] = URIRef.intern(uri.to_s, :normalize => false) if term
             end
           rescue ParserException
-            add_debug(element, "extract_mappings: profile subject #{subject.to_s}: #{e.message}")
-            raise if @strict
-          rescue RuntimeError => e
-            add_debug(element, "extract_mappings: profile: #{e.message}")
-            raise if @strict
+            add_error(element, e.message, RDFA_NS.ProfileReferenceError)
+            raise # Incase we're not in strict mode, we need to be sure processing stops
           end
         end
         
@@ -306,17 +311,21 @@ module RdfContext
       # Regardless of how the mapping is declared, the value to be mapped must be converted to lower case,
       # and the URI is not processed in any way; in particular if it is a relative path it is
       # not resolved against the current base.
-      element.namespaces.each do |attr_name, attr_value|
+      element.namespace_definitions.each do |ns|
+        add_debug(element, "extract_mappings: namespace #{ns.prefix} => <#{ns.href}>")
         begin
-          abbr, prefix = attr_name.split(":")
           # A Conforming RDFa Processor must ignore any definition of a mapping for the '_' prefix.
-          next if prefix == "_"
+          next if ns.prefix == "_"
 
-          pfx_lc = @version == :rdfa_1_0 || prefix.nil? ? prefix : prefix.to_s.downcase
-          uri_mappings[pfx_lc] = @graph.bind(Namespace.new(attr_value, prefix.to_s)) if abbr.downcase == "xmlns" && prefix
+          # Downcase prefix for RDFa 1.1
+          pfx_lc = (@version == :rdfa_1_0 || ns.prefix.nil?) ? ns.prefix : ns.prefix.to_s.downcase
+          if ns.prefix
+            uri_mappings[pfx_lc] = @graph.bind(Namespace.new(ns.href, ns.prefix.to_s))
+            add_debug(element, "extract_mappings: xmlns:#{ns.prefix} => <#{ns.href}>")
+          end
+          
         rescue RdfException => e
-          add_debug(element, "extract_mappings raised #{e.class}: #{e.message}")
-          raise if @strict
+          add_error(element, "extract_mappings raised #{e.class}: #{e.message}")
         end
       end
 
@@ -335,6 +344,7 @@ module RdfContext
         next if prefix == "_"
 
         uri_mappings[prefix] = @graph.bind(Namespace.new(uri, prefix))
+        add_debug(element, "extract_mappings: profile #{prefix} => <#{uri}>")
       end unless @version == :rdfa_1_0
       
       add_debug(element, "uri_mappings: #{uri_mappings.values.map{|ns|ns.to_s}.join(", ")}")
@@ -374,12 +384,12 @@ module RdfContext
       vocab = attrs['vocab']
 
       # Pull out the attributes needed for the skip test.
-      property = attrs['property'].to_s if attrs['property']
-      typeof = attrs['typeof'].to_s if attrs['typeof']
+      property = attrs['property'].to_s.strip if attrs['property']
+      typeof = attrs['typeof'].to_s.strip if attrs['typeof']
       datatype = attrs['datatype'].to_s if attrs['datatype']
       content = attrs['content'].to_s if attrs['content']
-      rel = attrs['rel'].to_s if attrs['rel']
-      rev = attrs['rev'].to_s if attrs['rev']
+      rel = attrs['rel'].to_s.strip if attrs['rel']
+      rev = attrs['rev'].to_s.strip if attrs['rev']
 
       # Default vocabulary [7.5 Step 2]
       # First the current element is examined for any change to the default vocabulary via @vocab.
@@ -390,7 +400,7 @@ module RdfContext
           # Set default_vocabulary to host language default
           @host_defaults.fetch(:vocabulary, nil)
         else
-          URIRef.new(vocab)
+          URIRef.intern(vocab)
         end
         add_debug(element, "[Step 2] traverse, default_vocaulary: #{default_vocabulary.inspect}")
       end
@@ -398,7 +408,15 @@ module RdfContext
       # Local term mappings [7.5 Steps 3 & 4]
       # Next the current element is parsed for any updates to the local term mappings and local list of URI mappings via @profile.
       # If @profile is present, its value is processed as defined in RDFa Profiles.
-      extract_mappings(element, uri_mappings, term_mappings)
+      begin
+        extract_mappings(element, uri_mappings, term_mappings)
+      rescue
+        # Skip this element and all sub-elements
+        # If any referenced RDFa Profile is not available, then the current element and its children must not place any
+        # triples in the default graph .
+        raise if @strict
+        return
+      end
     
       # Language information [7.5 Step 5]
       # From HTML5 [3.2.3.3]
@@ -421,12 +439,12 @@ module RdfContext
                           :uri_mappings => uri_mappings,
                           :term_mappings => term_mappings,
                           :vocab => default_vocabulary,
-                          :r_1_0_restrictions => [:uri, :bnode, :term])
+                          :restrictions => SafeCURIEorCURIEorURI[@version])
       revs = process_uris(element, rev, evaluation_context,
                           :uri_mappings => uri_mappings,
                           :term_mappings => term_mappings,
                           :vocab => default_vocabulary,
-                          :r_1_0_restrictions => [:uri, :bnode, :term])
+                          :restrictions => SafeCURIEorCURIEorURI[@version])
     
       add_debug(element, "traverse, about: #{about.nil? ? 'nil' : about}, src: #{src.nil? ? 'nil' : src}, resource: #{resource.nil? ? 'nil' : resource}, href: #{href.nil? ? 'nil' : href}")
       add_debug(element, "traverse, property: #{property.nil? ? 'nil' : property}, typeof: #{typeof.nil? ? 'nil' : typeof}, datatype: #{datatype.nil? ? 'nil' : datatype}, content: #{content.nil? ? 'nil' : content}")
@@ -438,15 +456,15 @@ module RdfContext
         new_subject = if about
           process_uri(element, about, evaluation_context,
                       :uri_mappings => uri_mappings,
-                      :r_1_0_restrictions => [:uri, :safe_curie, :bnode])
+                      :restrictions => SafeCURIEorCURIEorURI[@version])
         elsif src
-          process_uri(element, src, evaluation_context, :r_1_0_restrictions => [:uri])
+          process_uri(element, src, evaluation_context, :restrictions => [:uri])
         elsif resource
           process_uri(element, resource, evaluation_context,
                       :uri_mappings => uri_mappings,
-                      :r_1_0_restrictions => [:uri, :safe_curie, :bnode])
+                      :restrictions => SafeCURIEorCURIEorURI[@version])
         elsif href
-          process_uri(element, href, evaluation_context, :r_1_0_restrictions => [:uri])
+          process_uri(element, href, evaluation_context, :restrictions => [:uri])
         end
 
         # If no URI is provided by a resource attribute, then the first match from the following rules
@@ -459,7 +477,7 @@ module RdfContext
           # From XHTML+RDFa 1.1:
           # if no URI is provided, then first check to see if the element is the head or body element.
           # If it is, then act as if there is an empty @about present, and process it according to the rule for @about.
-          URIRef.new(evaluation_context.base, :normalize => false)
+          URIRef.intern(evaluation_context.base, :normalize => false)
         elsif element.attributes['typeof']
           BNode.new
         else
@@ -472,16 +490,19 @@ module RdfContext
         # [7.5 Step 7]
         # If the current element does contain a @rel or @rev attribute, then the next step is to
         # establish both a value for new subject and a value for current object resource:
-        new_subject = process_uri(element, about || src, evaluation_context,
+        new_subject = process_uri(element, about, evaluation_context,
                                   :uri_mappings => uri_mappings,
-                                  :r_1_0_restrictions => [:uri, :safe_curie, :bnode])
-      
+                                  :restrictions => SafeCURIEorCURIEorURI[@version]) ||
+                      process_uri(element, src, evaluation_context,
+                                  :uri_mappings => uri_mappings,
+                                  :restrictions => [:uri])
+
         # If no URI is provided then the first match from the following rules will apply
         new_subject ||= if @host_language == :xhtml && element.name =~ /^(head|body)$/
           # From XHTML+RDFa 1.1:
           # if no URI is provided, then first check to see if the element is the head or body element.
           # If it is, then act as if there is an empty @about present, and process it according to the rule for @about.
-          URIRef.new(evaluation_context.base, :normalize => false)
+          URIRef.intern(evaluation_context.base, :normalize => false)
         elsif element.attributes['typeof']
           BNode.new
         else
@@ -494,10 +515,10 @@ module RdfContext
         current_object_resource = if resource
           process_uri(element, resource, evaluation_context,
                       :uri_mappings => uri_mappings,
-                      :r_1_0_restrictions => [:uri, :safe_curie, :bnode])
+                      :restrictions => SafeCURIEorCURIEorURI[@version])
         elsif href
           process_uri(element, href, evaluation_context,
-                      :r_1_0_restrictions => [:uri])
+                      :restrictions => [:uri])
         end
 
         add_debug(element, "[Step 7] new_subject: #{new_subject}, current_object_resource = #{current_object_resource.nil? ? 'nil' : current_object_resource}")
@@ -505,12 +526,12 @@ module RdfContext
     
       # Process @typeof if there is a subject [Step 8]
       if new_subject and typeof
-        # Typeof is TERMorCURIEorURIs
+        # Typeof is TERMorCURIEorAbsURIs
         types = process_uris(element, typeof, evaluation_context,
                             :uri_mappings => uri_mappings,
                             :term_mappings => term_mappings,
                             :vocab => default_vocabulary,
-                            :r_1_0_restrictions => [:curie, :bnode])
+                            :restrictions => TERMorCURIEorAbsURI[@version])
         add_debug(element, "typeof: #{typeof}")
         types.each do |one_type|
           add_triple(element, new_subject, RDF_TYPE, one_type)
@@ -546,7 +567,7 @@ module RdfContext
                                   :uri_mappings => uri_mappings,
                                   :term_mappings => term_mappings,
                                   :vocab => default_vocabulary,
-                                  :r_1_0_restrictions => [:curie, :bnode])
+                                  :restrictions => TERMorCURIEorAbsURI[@version])
 
         properties.reject! do |p|
           if p.is_a?(URIRef)
@@ -559,28 +580,40 @@ module RdfContext
         end
 
         # get the literal datatype
-        type = datatype
         children_node_types = element.children.collect{|c| c.class}.uniq
       
         # the following 3 IF clauses should be mutually exclusive. Written as is to prevent extensive indentation.
-        type_resource = process_uri(element, type, evaluation_context,
-                                    :uri_mappings => uri_mappings,
-                                    :term_mappings => term_mappings,
-                                    :vocab => default_vocabulary,
-                                    :r_1_0_restrictions => [:curie, :bnode]) if type
-        current_object_literal = if type and !type.empty? and (type_resource.to_s != XML_LITERAL.to_s)
+        datatype = process_uri(element, datatype, evaluation_context,
+                              :uri_mappings => uri_mappings,
+                              :term_mappings => term_mappings,
+                              :vocab => default_vocabulary,
+                              :restrictions => TERMorCURIEorAbsURI[@version]) unless datatype.to_s.empty?
+        current_object_literal = if datatype && datatype.to_s != XML_LITERAL.to_s
           # typed literal
           add_debug(element, "[Step 11] typed literal")
-          Literal.typed(content || element.inner_text, type_resource, :language => language)
-        elsif content or (children_node_types == [Nokogiri::XML::Text]) or (element.children.length == 0) or (type == '')
-          # plain literal
-          add_debug(element, "[Step 11] plain literal")
-          Literal.untyped(content || element.inner_text, language)
-        elsif children_node_types != [Nokogiri::XML::Text] and (type == nil or type_resource.to_s == XML_LITERAL.to_s)
-          # XML Literal
-          add_debug(element, "[Step 11] XML Literal: #{element.inner_html}")
-          recurse = false
-          Literal.typed(element.children, XML_LITERAL, :language => language, :namespaces => uri_mappings)
+          Literal.typed(content || element.inner_text, datatype, :language => language)
+        elsif @version == :rdfa_1_1
+          if datatype.to_s == XML_LITERAL.to_s
+            # XML Literal
+            add_debug(element, "[Step 11(1.1)] XML Literal: #{element.inner_html}")
+            recurse = false
+            Literal.typed(element.children, XML_LITERAL, :language => language, :namespaces => uri_mappings)
+          else
+            # plain literal
+            add_debug(element, "[Step 11(1.1)] plain literal")
+            Literal.untyped(content || element.inner_text, language)
+          end
+        else
+          if content || (children_node_types == [Nokogiri::XML::Text]) || (element.children.length == 0) || datatype == ""
+            # plain literal
+            add_debug(element, "[Step 11 (1.0)] plain literal")
+            Literal.untyped(content || element.inner_text, language)
+          elsif children_node_types != [Nokogiri::XML::Text] and (datatype == nil or datatype.to_s == XML_LITERAL.to_s)
+            # XML Literal
+            add_debug(element, "[Step 11 (1.0)] XML Literal: #{element.inner_html}")
+            recurse = false
+            Literal.typed(element.children, XML_LITERAL, :language => language, :namespaces => uri_mappings)
+          end
         end
       
         # add each property
@@ -640,7 +673,7 @@ module RdfContext
       end
     end
 
-    # space-separated TERMorCURIEorURI
+    # space-separated TERMorCURIEorAbsURI or SafeCURIEorCURIEorURI
     def process_uris(element, value, evaluation_context, options)
       return [] if value.to_s.empty?
       add_debug(element, "process_uris: #{value}")
@@ -649,8 +682,8 @@ module RdfContext
 
     def process_uri(element, value, evaluation_context, options = {})
       return if value.nil?
-      restrictions = @version == :rdfa_1_0 ? options[:r_1_0_restrictions] : [:uri, :bnode, :curie, :safe_curie, :term]
-      add_debug(element, "process_uri: restrictions = #{restrictions.inspect}")
+      restrictions = options[:restrictions]
+      add_debug(element, "process_uri: #{value}, restrictions = #{restrictions.inspect}")
       options = {:uri_mappings => {}}.merge(options)
       if !options[:term_mappings] && options[:uri_mappings] && value.to_s.match(/^\[(.*)\]$/) && restrictions.include?(:safe_curie)
         # SafeCURIEorCURIEorURI
@@ -661,23 +694,33 @@ module RdfContext
         add_debug(element, "process_uri: #{value} => safeCURIE => <#{uri}>")
         uri
       elsif options[:term_mappings] && NC_REGEXP.match(value.to_s) && restrictions.include?(:term)
-        # TERMorCURIEorURI
+        # TERMorCURIEorAbsURI
         # If the value is an NCName, then it is evaluated as a term according to General Use of Terms in
         # Attributes. Note that this step may mean that the value is to be ignored.
-        uri = process_term(value.to_s, options)
+        uri = process_term(element, value.to_s, options)
         add_debug(element, "process_uri: #{value} => term => <#{uri}>")
         uri
       else
-        # SafeCURIEorCURIEorURI or TERMorCURIEorURI
+        # SafeCURIEorCURIEorURI or TERMorCURIEorAbsURI
         # Otherwise, the value is evaluated as a CURIE.
         # If it is a valid CURIE, the resulting URI is used; otherwise, the value will be processed as a URI.
         uri = curie_to_resource_or_bnode(element, value, options[:uri_mappings], evaluation_context.parent_subject, restrictions)
         if uri
           add_debug(element, "process_uri: #{value} => CURIE => <#{uri}>")
-        elsif @version == :rdfa_1_0 && value.to_s.match(/^xml/)
+        elsif @version == :rdfa_1_0 && value.to_s.match(/^xml/i)
           # Special case to not allow anything starting with XML to be treated as a URI
         else
-          uri = URIRef.new(value, evaluation_context.base, :normalize => false)
+          begin
+            # AbsURI does not use xml:base
+            uri = URIRef.intern(value, restrictions.include?(:absuri) ? nil : evaluation_context.base, :normalize => false)
+          rescue ParserException => e
+            add_debug(element, e.message)
+            if value.to_s =~ /^\(^\w\):/
+              add_warning(element, "Undefined prefix #{$1}", RDFA_NS.UndefinedPrefixError)
+            else
+              add_warning(element, "Relative URI #{value}")
+            end
+          end
           add_debug(element, "process_uri: #{value} => URI => <#{uri}>")
         end
         uri
@@ -690,17 +733,17 @@ module RdfContext
     # @param [Hash] options:: Parser options, one of
     # <em>options[:term_mappings]</em>:: Term mappings
     # <em>options[:vocab]</em>:: Default vocabulary
-    def process_term(value, options)
+    def process_term(element, value, options)
       case
       when options[:term_mappings].is_a?(Hash) && options[:term_mappings].has_key?(value.to_s.downcase)
         # If the term is in the local term mappings, use the associated URI.
-        # XXX Spec Confusion: are terms always downcased? Or only for XHTML Vocab?
         options[:term_mappings][value.to_s.downcase]
       when options[:vocab]
         # Otherwise, if there is a local default vocabulary the URI is obtained by concatenating that value and the term.
-        URIRef.new(options[:vocab].to_s + value)
+        URIRef.intern(options[:vocab].to_s + value)
       else
         # Finally, if there is no local default vocabulary, the term has no associated URI and must be ignored.
+        add_warning(element, "Term #{value} is not defined", RDFA_NS.UndefinedTermError)
         nil
       end
     end
@@ -713,6 +756,7 @@ module RdfContext
       # consider the bnode situation
       if prefix == "_" && restrictions.include?(:bnode)
         # we force a non-nil name, otherwise it generates a new name
+        # As a special case, _: is also a valid reference for one specific bnode.
         BNode.new(reference || "", @named_bnodes)
       elsif curie.to_s.match(/^:/)
         add_debug(element, "curie_to_resource_or_bnode: default prefix: defined? #{!!uri_mappings[""]}, defaults: #{@host_defaults[:prefix]}")
@@ -721,6 +765,9 @@ module RdfContext
           uri_mappings[""].send("#{reference}_")
         elsif @host_defaults[:prefix]
           @host_defaults[:prefix].send("#{reference}_")
+        else
+          #add_warning(element, "Default namespace prefix is not defined", RDFA_NS.UndefinedPrefixError)
+          nil
         end
       elsif !curie.to_s.match(/:/)
         # No prefix, undefined (in this context, it is evaluated as a term elsewhere)
@@ -732,7 +779,7 @@ module RdfContext
         if ns
           ns + reference
         else
-          add_debug(element, "curie_to_resource_or_bnode No namespace mapping for #{prefix}")
+          #add_debug(element, "curie_to_resource_or_bnode No namespace mapping for #{prefix}")
           nil
         end
       end
