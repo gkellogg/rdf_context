@@ -92,7 +92,7 @@ describe "RDFa parser" do
       <body>
       	<div about="">
           Author: <span property="dc:creator">Albert Einstein</span>
-          <h2 property="dc:title">E = mc<sup>2</sup>: The Most Urgent Problem of Our Time</h2>
+          <h2 property="dc:title" datatype="rdf:XMLLiteral">E = mc<sup>2</sup>: The Most Urgent Problem of Our Time</h2>
     	</div>
       </body>
     </html>
@@ -155,7 +155,7 @@ describe "RDFa parser" do
             #puts t.results
             begin
               t.run_test do |rdfa_string, rdfa_parser|
-                rdfa_parser.parse(rdfa_string, t.informationResourceInput, :debug => [])
+                rdfa_parser.parse(rdfa_string, t.informationResourceInput, :debug => [], :version => t.version)
               end
             rescue SparqlException => e
               pending(e.message) { raise }
@@ -171,7 +171,7 @@ describe "RDFa parser" do
           specify "test #{t.name}: #{t.title}#{",  (negative test)" unless t.expectedResults}" do
             begin
               t.run_test do |rdfa_string, rdfa_parser|
-                rdfa_parser.parse(rdfa_string, t.informationResourceInput, :debug => [])
+                rdfa_parser.parse(rdfa_string, t.informationResourceInput, :debug => [], :version => t.version)
               end
             rescue SparqlException => e
               pending(e.message) { raise }
