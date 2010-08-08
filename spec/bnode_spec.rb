@@ -25,7 +25,7 @@ describe "Blank nodes" do
     end
 
     it "should be able to determine inequality" do
-      other = URIRef.new('http://somehost.com/wherever.xml')
+      other = URIRef.intern('http://somehost.com/wherever.xml')
       should_not == other
     end
 
