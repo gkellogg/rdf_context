@@ -24,7 +24,7 @@ module RdfContext
       if args.size == 1
         uri = Addressable::URI.parse(args[0].to_s.rdf_unescape.rdf_escape)
       else
-        uri = Addressable::URI.join(*args.map{|s| s.to_s.rdf_unescape.rdf_escape}.reverse)
+        uri = Addressable::URI.join(*args.compact.map{|s| s.to_s.rdf_unescape.rdf_escape}.reverse)
       end
 
       raise ParserException, "<" + uri.to_s + "> is a relative URI" if uri.relative?
@@ -33,10 +33,17 @@ module RdfContext
       @@uri_hash ||= {}
       @uri = @@uri_hash["#{uri}#{@normalize}"] ||= begin
         # Special case if URI has no path, and the authority ends with a '#'
-        uri = Addressable::URI.parse($1) if @normalize && uri.to_s.match(/^(.*)\#$/)
+        #uri = Addressable::URI.parse($1) if @normalize && uri.to_s.match(/^(.*)\#$/)
 
-        @normalize ? uri.normalize : uri
+        #@normalize ? uri.normalize : uri
+        uri
       end.freeze
+    end
+    
+    # Internalized version of URIRef
+    def self.intern(*args)
+      @@uri_hash ||= {}
+      @@uri_hash[args.to_s] ||= URIRef.new(*args)
     end
     
     # Create a URI, either by appending a fragment, or using the input URI
@@ -44,7 +51,7 @@ module RdfContext
     # @return [URIRef]
     def + (input)
       input_uri = Addressable::URI.parse(input.to_s)
-      return URIRef.new(input_uri, self.to_s)
+      return URIRef.intern(input_uri, self.to_s)
     end
     
     # short_name of URI for creating QNames.

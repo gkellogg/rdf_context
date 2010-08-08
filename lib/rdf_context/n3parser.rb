@@ -269,7 +269,7 @@ module RdfContext
     
     def process_uri(uri)
       uri = uri.text_value if uri.respond_to?(:text_value)
-      URIRef.new(uri, @uri, :normalize => false)
+      URIRef.intern(uri, @uri, :normalize => false)
     end
     
     def process_properties(properties)

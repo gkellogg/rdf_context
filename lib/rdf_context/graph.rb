@@ -388,7 +388,7 @@ module RdfContext
       
       # Iterate through and add properties to graph
       props.each_pair do |pred, list|
-        predicate = URIRef.new(pred)
+        predicate = URIRef.intern(pred)
         [list].flatten.compact.each do |object|
           add(Triple.new(subject, predicate, object))
         end

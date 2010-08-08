@@ -53,7 +53,7 @@ module RdfContext
       prefix = @uri
       suffix = suffix.to_s.sub(/^\#/, "") if prefix.index("#")
       suffix = suffix.to_s.sub(/_$/, '')
-      URIRef.new(prefix + suffix.to_s, :normalize => false, :namespace => self)
+      URIRef.intern(prefix + suffix.to_s, :normalize => false, :namespace => self)
     end
 
     # Make sure to attach fragment
