@@ -224,29 +224,27 @@ module RdfContext
       traverse(doc.root, evaluation_context)
     end
   
-    # Extract the XMLNS mappings from an element
-    def extract_mappings(element, uri_mappings, term_mappings)
-      # Process @profile
-      # Next the current element is parsed for any updates to the local term mappings and
-      # local list of URI mappings via @profile.
-      # If @profile is present, its value is processed as defined in RDFa Profiles.
+    # Parse and process URI mappings, Term mappings and a default vocabulary from @profile
+    #
+    # Yields each mapping
+    def process_profile(element)
       element.attributes['profile'].to_s.split(/\s/).reverse.each do |profile|
         # Don't try to open ourselves!
         if @uri == profile
-          add_debug(element, "extract_mappings: skip recursive profile <#{profile}>")
-          @@vocabulary_cache[profile]
+          add_debug(element, "process_profile: skip recursive profile <#{profile}>")
         elsif @@vocabulary_cache.has_key?(profile)
-          add_debug(element, "extract_mappings: skip previously parsed profile <#{profile}>")
+          add_debug(element, "process_profile: skip previously parsed profile <#{profile}>")
         else
           begin
-            add_debug(element, "extract_mappings: parse profile <#{profile}>")
+            add_debug(element, "process_profile: parse profile <#{profile}>")
             @@vocabulary_cache[profile] = {
               :uri_mappings => {},
-              :term_mappings => {}
+              :term_mappings => {},
+              :default_vocabulary => nil
             }
             um = @@vocabulary_cache[profile][:uri_mappings]
             tm = @@vocabulary_cache[profile][:term_mappings]
-            add_debug(element, "extract_mappings: profile open <#{profile}>")
+            add_debug(element, "process_profile: profile open <#{profile}>")
             require 'patron' unless defined?(Patron)
             sess = Patron::Session.new
             sess.timeout = 10
@@ -269,19 +267,23 @@ module RdfContext
               uri = props[RDFA_NS.uri_.to_s]
               term = props[RDFA_NS.term_.to_s]
               prefix = props[RDFA_NS.prefix_.to_s]
-              add_debug(element, "extract_mappings: uri=#{uri.inspect}, term=#{term.inspect}, prefix=#{prefix.inspect}")
+              vocab = props[RDFA_NS.vocabulary.to_s]
+              add_debug(element, "process_profile: uri=#{uri.inspect}, term=#{term.inspect}, prefix=#{prefix.inspect}, vocabulary=#{vocab.inspect}")
 
               next if !uri || (!term && !prefix)
               raise ParserException, "multi-valued rdf:uri" if uri.length != 1
               raise ParserException, "multi-valued rdf:term." if term && term.length != 1
               raise ParserException, "multi-valued rdf:prefix" if prefix && prefix.length != 1
+              raise ParserException, "multi-valued rdf:vocabulary" if vocab && vocab.length != 1
             
               uri = uri.first
               term = term.first if term
               prefix = prefix.first if prefix
+              @@vocabulary_cache[profile][:default_vocabulary] = vocab.first if vocab
               raise ParserException, "rdf:uri must be a Literal" unless uri.is_a?(Literal)
               raise ParserException, "rdf:term must be a Literal" unless term.nil? || term.is_a?(Literal)
               raise ParserException, "rdf:prefix must be a Literal" unless prefix.nil? || prefix.is_a?(Literal)
+              raise ParserException, "rdf:vocabulary must be a Literal" unless vocab.nil? || vocab.is_a?(Literal)
               
               # For every extracted triple that is the common subject of an rdfa:prefix and an rdfa:uri
               # predicate, create a mapping from the object literal of the rdfa:prefix predicate to the
@@ -300,12 +302,15 @@ module RdfContext
             raise # Incase we're not in strict mode, we need to be sure processing stops
           end
         end
-        
-        # Merge mappings from this vocabulary
-        uri_mappings.merge!(@@vocabulary_cache[profile][:uri_mappings])
-        term_mappings.merge!(@@vocabulary_cache[profile][:term_mappings])
-      end unless @version == :rdfa_1_0
-      
+        profile_mappings = @@vocabulary_cache[profile]
+        yield :uri_mappings, profile_mappings[:uri_mappings] unless profile_mappings[:uri_mappings].empty?
+        yield :term_mappings, profile_mappings[:term_mappings] unless profile_mappings[:term_mappings].empty?
+        yield :default_vocabulary, profile_mappings[:default_vocabulary] if profile_mappings[:default_vocabulary]
+      end
+    end
+
+    # Extract the XMLNS mappings from an element
+    def extract_mappings(element, uri_mappings)
       # look for xmlns
       # (note, this may be dependent on @host_language)
       # Regardless of how the mapping is declared, the value to be mapped must be converted to lower case,
@@ -346,9 +351,6 @@ module RdfContext
         uri_mappings[prefix] = @graph.bind(Namespace.new(uri, prefix))
         add_debug(element, "extract_mappings: profile #{prefix} => <#{uri}>")
       end unless @version == :rdfa_1_0
-      
-      add_debug(element, "uri_mappings: #{uri_mappings.values.map{|ns|ns.to_s}.join(", ")}")
-      add_debug(element, "term_mappings: #{term_mappings.keys.join(", ")}")
     end
 
     # The recursive helper function
@@ -361,7 +363,7 @@ module RdfContext
       
       add_debug(element, "traverse, ec: #{evaluation_context.inspect}")
 
-      # local variables [5.5 Step 1]
+      # local variables [7.5 Step 1]
       recurse = true
       skip = false
       new_subject = nil
@@ -391,8 +393,29 @@ module RdfContext
       rel = attrs['rel'].to_s.strip if attrs['rel']
       rev = attrs['rev'].to_s.strip if attrs['rev']
 
-      # Default vocabulary [7.5 Step 2]
-      # First the current element is examined for any change to the default vocabulary via @vocab.
+      # Local term mappings [7.5 Steps 2]
+      # Next the current element is parsed for any updates to the local term mappings and local list of URI mappings via @profile.
+      # If @profile is present, its value is processed as defined in RDFa Profiles.
+      unless @version == :rdfa_1_0
+        begin
+          process_profile(element) do |which, value|
+            case which
+            when :uri_mappings        then uri_mappings.merge!(value)
+            when :term_mappings       then term_mappings.merge!(value)
+            when :default_vocabulary  then default_vocabulary = value
+            end
+          end 
+        rescue
+          # Skip this element and all sub-elements
+          # If any referenced RDFa Profile is not available, then the current element and its children must not place any
+          # triples in the default graph .
+          raise if @strict
+          return
+        end
+      end
+    
+      # Default vocabulary [7.5 Step 3]
+      # Next the current element is examined for any change to the default vocabulary via @vocab.
       # If @vocab is present and contains a value, its value updates the local default vocabulary.
       # If the value is empty, then the local default vocabulary must be reset to the Host Language defined default.
       unless vocab.nil?
@@ -405,18 +428,10 @@ module RdfContext
         add_debug(element, "[Step 2] traverse, default_vocaulary: #{default_vocabulary.inspect}")
       end
       
-      # Local term mappings [7.5 Steps 3 & 4]
-      # Next the current element is parsed for any updates to the local term mappings and local list of URI mappings via @profile.
-      # If @profile is present, its value is processed as defined in RDFa Profiles.
-      begin
-        extract_mappings(element, uri_mappings, term_mappings)
-      rescue
-        # Skip this element and all sub-elements
-        # If any referenced RDFa Profile is not available, then the current element and its children must not place any
-        # triples in the default graph .
-        raise if @strict
-        return
-      end
+      # Local term mappings [7.5 Steps 4]
+      # Next, the current element is then examined for URI mapping s and these are added to the local list of URI mappings.
+      # Note that a URI mapping will simply overwrite any current mapping in the list that has the same name
+      extract_mappings(element, uri_mappings)
     
       # Language information [7.5 Step 5]
       # From HTML5 [3.2.3.3]
