@@ -1,5 +1,7 @@
 # coding: utf-8
+$:.unshift "."
 require File.join(File.dirname(__FILE__), 'spec_helper')
+
 describe "String RDF encoding" do
   {
     "Gregg" => 'Gregg',
