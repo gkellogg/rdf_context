@@ -59,21 +59,21 @@ describe "URI References" do
   end
   
   describe "QName" do
-      it "should find with trailing /" do
-        ex = Namespace.new("http://example.org/foo/", "ex")
-        ex.bar.to_qname(ex.uri.to_s => ex).should == "ex:bar"
-      end
-
-      it "should find with trailing #" do
-        ex = Namespace.new("http://example.org/foo#", "ex")
-        ex.bar.to_qname(ex.uri.to_s => ex).should == "ex:bar"
-      end
-
-      it "should find with trailing word" do
-        ex = Namespace.new("http://example.org/foo", "ex")
-        ex.bar.to_qname(ex.uri.to_s => ex).should == "ex:bar"
-      end
+    it "should find with trailing /" do
+      ex = Namespace.new("http://example.org/foo/", "ex")
+      ex.bar.to_qname(ex.uri.to_s => ex).should == "ex:bar"
     end
+
+    it "should find with trailing #" do
+      ex = Namespace.new("http://example.org/foo#", "ex")
+      ex.bar.to_qname(ex.uri.to_s => ex).should == "ex:bar"
+    end
+
+    it "should find with trailing word" do
+      ex = Namespace.new("http://example.org/foo", "ex")
+      ex.bar.to_qname(ex.uri.to_s => ex).should == "ex:bar"
+    end
+  end
   
   describe "namespace" do
     it "should find with trailing /" do

@@ -455,6 +455,14 @@ HERE
         g.add_seq(@ex.List, RDF_NS.first, [])
         g.seq(@ex.List).should == []
       end
+      
+      it "should add a list with a predicate" do
+        g = Graph.new(:store => ListStore.new)
+        g.add_seq(@ex.List, @ex.includes, [@ex.john, @ex.jane, @ex.rick])
+        l = g.properties(@ex.List)[@ex.includes.to_s].first
+        l.should be_a(BNode)
+        g.seq(l).should == [@ex.john, @ex.jane, @ex.rick]
+      end
     end
   end
 
