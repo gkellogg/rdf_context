@@ -328,8 +328,9 @@ module RdfContext
     
     # Returns ordered rdf:_n objects or rdf:first, rdf:rest for a given subject
     # @param [Resource] subject
+    # @param [Resource] predicate defaults to rdf:first, not used of subject is an rdf:List type
     # @return [Array<Resource>]
-    def seq(subject)
+    def seq(subject, predicate = RDF_NS.first)
       props = properties(subject)
       rdf_type = (props[RDF_TYPE.to_s] || []).map {|t| t.to_s}
 
@@ -339,8 +340,12 @@ module RdfContext
           sort_by {|i| i.sub(RDF_NS._.to_s, "").to_i}.
           map {|key| props[key]}.
           flatten
-      elsif !self.triples(Triple.new(subject, RDF_NS.first, nil)).empty?
+      elsif !self.triples(Triple.new(subject, predicate, nil)).empty?
         # N3-style first/rest chain
+        unless predicate == RDF_NS.first
+          subject = (properties(subject)[predicate.to_s] || []).first
+        end
+        
         list = []
         while subject != RDF_NS.nil
           props = properties(subject)

@@ -456,6 +456,12 @@ HERE
         g.seq(@ex.List).should == []
       end
       
+      it "should return a list with a predicate" do
+        g = Graph.new(:store => ListStore.new)
+        g.add_seq(@ex.List, @ex.includes, [@ex.john, @ex.jane, @ex.rick])
+        g.seq(@ex.List, @ex.includes).should == [@ex.john, @ex.jane, @ex.rick]
+      end
+
       it "should add a list with a predicate" do
         g = Graph.new(:store => ListStore.new)
         g.add_seq(@ex.List, @ex.includes, [@ex.john, @ex.jane, @ex.rick])
