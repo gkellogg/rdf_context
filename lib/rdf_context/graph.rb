@@ -266,13 +266,25 @@ module RdfContext
     end
     
     ##
-    # Adds a list of resources as an RDF list by creating bnodes and first/rest triples
+    # Adds a list of resources as an RDF list by creating bnodes and first/rest triples.
+    # Removes existing sequence nodes.
+    #
     # @param [URIRef, BNode] subject the subject of the triple
     # @param [URIRef] predicate the predicate of the triple
     # @param [Array] objects List of objects to serialize
     # @return [Graph] Returns the graph
     # @raise [Error] Checks parameter types and raises if they are incorrect.
     def add_seq(subject, predicate, objects)
+      self.triples(Triple.new(subject, predicate, nil)).each do |t, ctx|
+        bn = t.object
+        while bn != RDF_NS.nil
+          rest = properties(bn)[RDF_NS.rest.to_s].first
+          remove(Triple.new(bn, nil, nil))
+          bn = rest
+        end
+      end
+      remove(Triple.new(subject, predicate, nil))
+      
       if objects.empty?
         add_triple(subject, predicate, RDF_NS.nil)
         return self

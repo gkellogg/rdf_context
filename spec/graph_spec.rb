@@ -463,6 +463,18 @@ HERE
         l.should be_a(BNode)
         g.seq(l).should == [@ex.john, @ex.jane, @ex.rick]
       end
+      
+      it "should remove existing sequence when adding entry to sequence" do
+        g = Graph.new(:store => ListStore.new)
+        g.add_seq(@ex.List, @ex.includes, [@ex.john, @ex.jane, @ex.rick])
+        g.add_seq(@ex.List, @ex.includes, [@ex.john, @ex.jane, @ex.rick, @ex.julie])
+        puts g.properties(@ex.List).inspect
+        l = g.properties(@ex.List)[@ex.includes.to_s].first
+        l.should be_a(BNode)
+        g.seq(l).should == [@ex.john, @ex.jane, @ex.rick, @ex.julie]
+        
+        g.triples(Triple.new(nil, RDF_NS.first, @ex.john)).length.should == 1
+      end
     end
   end
 
