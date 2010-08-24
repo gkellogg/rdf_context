@@ -265,6 +265,59 @@ module RdfContext
       self
     end
     
+    # Remove a triple from the graph. Delegates to store.
+    # Nil matches all triples and thus empties the graph
+    # @param [Triple] triple
+    # @return [void]
+    def remove(triple); @store.remove(triple, self); end
+    
+    # Triples from graph, optionally matching subject, predicate, or object.
+    # Delegates to Store#triples.
+    #
+    # @param [Triple] triple (nil) Triple to match, may be a pattern triple or nil
+    # @return [Array<Triple>] List of matched triples
+    def triples(triple = Triple.new(nil, nil, nil), &block) # :yields: triple, context
+      @store.triples(triple, self, &block) || []
+    end
+    alias_method :find, :triples
+    
+    # Returns ordered rdf:_n objects or rdf:first, rdf:rest for a given subject
+    # @param [Resource] subject
+    # @param [Resource] predicate defaults to rdf:first, not used of subject is an rdf:List type
+    # @return [Array<Resource>]
+    def seq(subject, predicate = RDF_NS.first)
+      props = properties(subject)
+      rdf_type = (props[RDF_TYPE.to_s] || [])
+
+      #puts "seq; #{rdf_type} #{rdf_type - [RDF_NS.Seq, RDF_NS.Bag, RDF_NS.Alt]}"
+      if rdf_type.include?(RDF_NS.Seq) || rdf_type.include?(RDF_NS.Bag) || rdf_type.include?(RDF_NS.Alt)
+        props.keys.select {|k| k.match(/#{RDF_NS.uri}_(\d)$/)}.
+          sort_by {|i| i.sub(RDF_NS._.to_s, "").to_i}.
+          map {|key| props[key]}.
+          flatten
+      elsif !self.triples(Triple.new(subject, predicate, nil)).empty?
+        # N3-style first/rest chain
+        unless predicate == RDF_NS.first
+          subject = (properties(subject)[predicate.to_s] || []).first
+        end
+        
+        list = []
+        while subject != RDF_NS.nil
+          props = properties(subject)
+          f = props[RDF_NS.first.to_s]
+          if f.to_s.empty? || f.first == RDF_NS.nil
+            subject = RDF_NS.nil
+          else
+            list += f
+            subject = props[RDF_NS.rest.to_s].first
+          end
+        end
+        list
+      else
+        []
+      end
+    end
+
     ##
     # Adds a list of resources as an RDF list by creating bnodes and first/rest triples.
     # Removes existing sequence nodes.
@@ -308,61 +361,10 @@ module RdfContext
       # Last item in list
       add_triple(subject, RDF_NS.first, last)
       add_triple(subject, RDF_NS.rest, RDF_NS.nil)
+      
+      self
     end
     
-    # Remove a triple from the graph. Delegates to store.
-    # Nil matches all triples and thus empties the graph
-    # @param [Triple] triple
-    # @return [void]
-    def remove(triple); @store.remove(triple, self); end
-    
-    # Triples from graph, optionally matching subject, predicate, or object.
-    # Delegates to Store#triples.
-    #
-    # @param [Triple] triple (nil) Triple to match, may be a pattern triple or nil
-    # @return [Array<Triple>] List of matched triples
-    def triples(triple = Triple.new(nil, nil, nil), &block) # :yields: triple, context
-      @store.triples(triple, self, &block) || []
-    end
-    alias_method :find, :triples
-    
-    # Returns ordered rdf:_n objects or rdf:first, rdf:rest for a given subject
-    # @param [Resource] subject
-    # @param [Resource] predicate defaults to rdf:first, not used of subject is an rdf:List type
-    # @return [Array<Resource>]
-    def seq(subject, predicate = RDF_NS.first)
-      props = properties(subject)
-      rdf_type = (props[RDF_TYPE.to_s] || []).map {|t| t.to_s}
-
-      #puts "seq; #{rdf_type} #{rdf_type - [RDF_NS.Seq, RDF_NS.Bag, RDF_NS.Alt]}"
-      if !(rdf_type - [RDF_NS.Seq, RDF_NS.Bag, RDF_NS.Alt]).empty?
-        props.keys.select {|k| k.match(/#{RDF_NS.uri}_(\d)$/)}.
-          sort_by {|i| i.sub(RDF_NS._.to_s, "").to_i}.
-          map {|key| props[key]}.
-          flatten
-      elsif !self.triples(Triple.new(subject, predicate, nil)).empty?
-        # N3-style first/rest chain
-        unless predicate == RDF_NS.first
-          subject = (properties(subject)[predicate.to_s] || []).first
-        end
-        
-        list = []
-        while subject != RDF_NS.nil
-          props = properties(subject)
-          f = props[RDF_NS.first.to_s]
-          if f.to_s.empty? || f.first == RDF_NS.nil
-            subject = RDF_NS.nil
-          else
-            list += f
-            subject = props[RDF_NS.rest.to_s].first
-          end
-        end
-        list
-      else
-        []
-      end
-    end
-
     # Resource properties
     #
     # Properties arranged as a hash with the predicate Term as index to an array of resources or literals
