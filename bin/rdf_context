@@ -27,7 +27,7 @@ mode = ARGV.shift
 raise "Mode must be one of 'parse'" unless mode == "parse"
 
 $verbose = false
-$quiet = true
+$quiet = false
 $format = "ttl"
 base_uri  = "http://example.com"
 store = :list_store
