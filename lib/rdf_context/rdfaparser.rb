@@ -270,20 +270,21 @@ module RdfContext
               vocab = props[RDFA_NS.vocabulary.to_s]
               add_debug(element, "process_profile: uri=#{uri.inspect}, term=#{term.inspect}, prefix=#{prefix.inspect}, vocabulary=#{vocab.inspect}")
 
-              next if !uri || (!term && !prefix)
-              raise ParserException, "multi-valued rdf:uri" if uri.length != 1
+              raise ParserException, "multi-valued rdf:uri" if uri && uri.length != 1
               raise ParserException, "multi-valued rdf:term." if term && term.length != 1
               raise ParserException, "multi-valued rdf:prefix" if prefix && prefix.length != 1
               raise ParserException, "multi-valued rdf:vocabulary" if vocab && vocab.length != 1
             
-              uri = uri.first
+              uri = uri.first if uri
               term = term.first if term
               prefix = prefix.first if prefix
-              @@vocabulary_cache[profile][:default_vocabulary] = vocab.first if vocab
-              raise ParserException, "rdf:uri must be a Literal" unless uri.is_a?(Literal)
-              raise ParserException, "rdf:term must be a Literal" unless term.nil? || term.is_a?(Literal)
-              raise ParserException, "rdf:prefix must be a Literal" unless prefix.nil? || prefix.is_a?(Literal)
-              raise ParserException, "rdf:vocabulary must be a Literal" unless vocab.nil? || vocab.is_a?(Literal)
+              vocab = vocab.first if vocab
+              raise ParserException, "rdf:uri #{uri.inspect} must be a Literal" unless uri.nil? || uri.is_a?(Literal)
+              raise ParserException, "rdf:term #{term.inspect} must be a Literal" unless term.nil? || term.is_a?(Literal)
+              raise ParserException, "rdf:prefix #{prefix.inspect} must be a Literal" unless prefix.nil? || prefix.is_a?(Literal)
+              raise ParserException, "rdf:vocabulary #{vocab.inspect} must be a Literal" unless vocab.nil? || vocab.is_a?(Literal)
+
+              @@vocabulary_cache[profile][:default_vocabulary] = vocab if vocab
               
               # For every extracted triple that is the common subject of an rdfa:prefix and an rdfa:uri
               # predicate, create a mapping from the object literal of the rdfa:prefix predicate to the
@@ -295,9 +296,9 @@ module RdfContext
               # triple that is the common subject of an rdfa:term and an rdfa:uri predicate, create a
               # mapping from the object literal of the rdfa:term predicate to the object literal of the
               # rdfa:uri predicate. Add or update this mapping in the local term mappings.
-              tm[term.to_s] = URIRef.intern(uri.to_s, :normalize => false) if term
+              tm[term.to_s.downcase] = URIRef.intern(uri.to_s, :normalize => false) if term
             end
-          rescue ParserException
+          rescue ParserException => e
             add_error(element, e.message, RDFA_NS.ProfileReferenceError)
             raise # Incase we're not in strict mode, we need to be sure processing stops
           end
@@ -349,7 +350,7 @@ module RdfContext
         next if prefix == "_"
 
         uri_mappings[prefix] = @graph.bind(Namespace.new(uri, prefix))
-        add_debug(element, "extract_mappings: profile #{prefix} => <#{uri}>")
+        add_debug(element, "extract_mappings: prefix #{prefix} => <#{uri}>")
       end unless @version == :rdfa_1_0
     end
 
@@ -399,6 +400,7 @@ module RdfContext
       unless @version == :rdfa_1_0
         begin
           process_profile(element) do |which, value|
+            add_debug(element, "[Step 2] traverse, #{which}: #{value.inspect}")
             case which
             when :uri_mappings        then uri_mappings.merge!(value)
             when :term_mappings       then term_mappings.merge!(value)
@@ -420,6 +422,7 @@ module RdfContext
       # If the value is empty, then the local default vocabulary must be reset to the Host Language defined default.
       unless vocab.nil?
         default_vocabulary = if vocab.to_s.empty?
+          add_debug(element, "[Step 2] traverse, reset default_vocaulary to #{@host_defaults.fetch(:vocabulary, nil).inspect}")
           # Set default_vocabulary to host language default
           @host_defaults.fetch(:vocabulary, nil)
         else
