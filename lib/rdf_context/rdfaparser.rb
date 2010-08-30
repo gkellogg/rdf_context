@@ -167,6 +167,7 @@ module RdfContext
       end
       
       add_error(nil, "Empty document", RDFA_NS.HostLanguageMarkupError) if @doc.nil?
+      add_warning(nil, "Synax errors:\n#{@doc.errors}", RDFA.HostLanguageMarkupError) unless @doc.errors.empty?
       
       @callback = block
 
