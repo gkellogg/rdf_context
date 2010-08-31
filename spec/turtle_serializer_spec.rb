@@ -26,9 +26,9 @@ describe "Turtle Serializer" do
     end
 
     it "should use qname URIs with empty prefix" do
-      input = %(@prefix : <http://a/> . <http://a/b> <http://a/c> <http://a/d> .)
+      input = %(@prefix : <http://np/> . <http://np/b> <http://np/c> <http://np/d> .)
       serialize(input, nil,
-        %r(^@prefix : <http://a/> \.$),
+        %r(^@prefix : <http://np/> \.$),
         %r(^:b :c :d \.$)
       )
     end
