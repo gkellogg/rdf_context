@@ -5,37 +5,9 @@ require 'rdf_context'
 require 'spec/rdfa_helper'
 require 'getoptlong'
 
-def rdfa_tc(number, parse, store)
-  f = File.expand_path("#{TEST_DIR}/#{number}.txt")
-  found_head = false
-  namespaces = ""
-  body = File.readlines(f).map do |line|
-    found_head ||= line.match(/<head/)
-    if found_head
-      line.chop
-    else
-      namespaces << line
-      nil
-    end
-  end.compact.join("\n")
-
-  namespaces.chop!  # Remove trailing newline
-  
-  tcpath = BASE_TEST_CASE_URL + "xhtml1"
-  
-  head = "" +
-  %(<?xml version="1.0" encoding="UTF-8"?>\n) +
-  %(<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN" "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd">\n) +
-  %(<html xmlns="http://www.w3.org/1999/xhtml" version="XHTML+RDFa #{$rdfa_version}"\n)
-  tc = head + "#{namespaces}>\n#{body.gsub(/\$TCPATH/, tcpath)}\n</html>"
-  
-  puts "Input file: #{tc}" if $DEBUG || $verbose
-  parse.parse(StringIO.new(tc), "#{tcpath}/#{number}.xhtml")
-end
-
 def run_tc(tc)
   puts "run #{tc.name}"
-  graph = RdfContext::RdfaParser.parse(tc.input, tc.informationResourceInput, :strict => $strict)
+  graph = RdfContext::RdfaParser.parse(tc.input, tc.informationResourceInput, :strict => $strict, :version => tc.version)
   puts graph.serialize(:format => $format.to_sym, :base => tc.informationResourceInput) unless $quiet
 end
 

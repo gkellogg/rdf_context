@@ -92,7 +92,7 @@ module RdfContext
       # @return [URIRef]
       attr :default_vocabulary, true
 
-      # @param [String] base
+      # @param [URIRef] base
       # @param [Hash] host_defaults
       # @option host_defaults [Hash{String => URIRef}] :term_mappings Hash of NCName => URIRef
       # @option host_defaults [Hash{String => Namespace}] :vocabulary Hash of prefix => URIRef
@@ -220,7 +220,7 @@ module RdfContext
       end
 
       # initialize the evaluation context with the appropriate base
-      evaluation_context = EvaluationContext.new(base, @host_defaults)
+      evaluation_context = EvaluationContext.new(@uri, @host_defaults)
 
       traverse(doc.root, evaluation_context)
     end
@@ -496,7 +496,7 @@ module RdfContext
           # From XHTML+RDFa 1.1:
           # if no URI is provided, then first check to see if the element is the head or body element.
           # If it is, then act as if there is an empty @about present, and process it according to the rule for @about.
-          URIRef.intern(evaluation_context.base, :normalize => false)
+          evaluation_context.base
         elsif element.attributes['typeof']
           BNode.new
         else
@@ -521,7 +521,7 @@ module RdfContext
           # From XHTML+RDFa 1.1:
           # if no URI is provided, then first check to see if the element is the head or body element.
           # If it is, then act as if there is an empty @about present, and process it according to the rule for @about.
-          URIRef.intern(evaluation_context.base, :normalize => false)
+          evaluation_context.base
         elsif element.attributes['typeof']
           BNode.new
         else
@@ -607,7 +607,7 @@ module RdfContext
                               :term_mappings => term_mappings,
                               :vocab => default_vocabulary,
                               :restrictions => TERMorCURIEorAbsURI[@version]) unless datatype.to_s.empty?
-        current_object_literal = if datatype && datatype.to_s != XML_LITERAL.to_s
+        current_object_literal = if !datatype.to_s.empty? && datatype.to_s != XML_LITERAL.to_s
           # typed literal
           add_debug(element, "[Step 11] typed literal")
           Literal.typed(content || element.inner_text, datatype, :language => language)
@@ -711,6 +711,7 @@ module RdfContext
         # value must be ignored.
         uri = curie_to_resource_or_bnode(element, $1, options[:uri_mappings], evaluation_context.parent_subject, restrictions)
         add_debug(element, "process_uri: #{value} => safeCURIE => <#{uri}>")
+        
         uri
       elsif options[:term_mappings] && NC_REGEXP.match(value.to_s) && restrictions.include?(:term)
         # TERMorCURIEorAbsURI
@@ -728,7 +729,7 @@ module RdfContext
           add_debug(element, "process_uri: #{value} => CURIE => <#{uri}>")
         elsif @version == :rdfa_1_0 && value.to_s.match(/^xml/i)
           # Special case to not allow anything starting with XML to be treated as a URI
-        else
+        elsif restrictions.include?(:absuri) || restrictions.include?(:uri)
           begin
             # AbsURI does not use xml:base
             uri = URIRef.intern(value, restrictions.include?(:absuri) ? nil : evaluation_context.base, :normalize => false)
