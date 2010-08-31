@@ -167,7 +167,7 @@ module RdfContext
       end
       
       add_error(nil, "Empty document", RDFA_NS.HostLanguageMarkupError) if @doc.nil?
-      add_warning(nil, "Synax errors:\n#{@doc.errors}", RDFA.HostLanguageMarkupError) unless @doc.errors.empty?
+      add_warning(nil, "Synax errors:\n#{@doc.errors}", RDFA_NS.HostLanguageMarkupError) unless @doc.errors.empty?
       
       @callback = block
 
@@ -732,6 +732,8 @@ module RdfContext
           begin
             # AbsURI does not use xml:base
             uri = URIRef.intern(value, restrictions.include?(:absuri) ? nil : evaluation_context.base, :normalize => false)
+          rescue Addressable::URI::InvalidURIError => e
+            add_warning(element, "Malformed prefix #{value}", RDFA_NS.UndefinedPrefixError)
           rescue ParserException => e
             add_debug(element, e.message)
             if value.to_s =~ /^\(^\w\):/
