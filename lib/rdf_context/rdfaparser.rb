@@ -101,7 +101,7 @@ module RdfContext
         @base = base
         @parent_subject = @base
         @parent_object = nil
-        @uri_mappings = host_defaults.fetch(:uri_mappings, {}).merge("rdf" => RDF_NS.uri.to_s)
+        @uri_mappings = host_defaults.fetch(:uri_mappings, {})
         @incomplete_triples = []
         @language = nil
         @term_mappings = host_defaults.fetch(:term_mappings, {})
