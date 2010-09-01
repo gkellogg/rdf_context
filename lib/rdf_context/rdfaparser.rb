@@ -246,16 +246,13 @@ module RdfContext
             um = @@vocabulary_cache[profile][:uri_mappings]
             tm = @@vocabulary_cache[profile][:term_mappings]
             add_debug(element, "process_profile: profile open <#{profile}>")
-            require 'patron' unless defined?(Patron)
-            sess = Patron::Session.new
-            sess.timeout = 10
-            resp = sess.get(profile)
-            raise ParserException, "Empty document" if resp.status >= 400 && @strict
+            prof_body = OpenURI.open_uri(profile)
+            raise ParserException, "Empty profile #{profile}" if prof_body.to_s.empty?
       
             # Parse profile, and extract mappings from graph
             old_debug, old_verbose, = $DEBUG, $verbose
             $DEBUG, $verbose = false, false
-            p_graph = Parser.parse(resp.body, profile)
+            p_graph = Parser.parse(prof_body, profile)
             ttl = p_graph.serialize(:format => :ttl) if @debug || $DEBUG
             $DEBUG, $verbose = old_debug, old_verbose
             add_debug(element, ttl) if ttl
@@ -299,7 +296,7 @@ module RdfContext
               # rdfa:uri predicate. Add or update this mapping in the local term mappings.
               tm[term.to_s.downcase] = URIRef.intern(uri.to_s, :normalize => false) if term
             end
-          rescue ParserException => e
+          rescue Exception => e
             add_error(element, e.message, RDFA_NS.ProfileReferenceError)
             raise # Incase we're not in strict mode, we need to be sure processing stops
           end

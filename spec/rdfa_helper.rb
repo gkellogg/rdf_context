@@ -229,3 +229,24 @@ module RdfaHelper
     end
   end
 end
+
+class OpenURI
+  #alias_method :open_uri_orig, :open_uri
+  def self.open_uri(uri)
+    case uri
+    when %r(http://rdfa.digitalbazaar.com/test-suite/test-cases/\w+)
+      file = uri.to_s.sub(%r(http://rdfa.digitalbazaar.com/test-suite/test-cases/\w+),
+        File.join(File.expand_path(File.dirname(__FILE__)), 'rdfa-test-suite', 'tests'))
+      puts "file: #{file}"
+      File.open(file)
+    when "http://www.w3.org/1999/xhtml/vocab"
+      file = File.join(File.expand_path(File.dirname(__FILE__)), 'rdfa-test-suite', 'profile', "xhv")
+      File.open(file)
+    when "http://www.w3.org/2005/10/profile"
+      "PROFILE"
+    else raise Exception, "No such file #{uri}"
+    end
+  end
+end
+
+

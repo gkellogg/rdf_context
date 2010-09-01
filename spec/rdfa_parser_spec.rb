@@ -2,44 +2,12 @@ $:.unshift "."
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
 require 'rdfa_helper'
-require 'patron'
 
 # Time to add your specs!
 # http://rspec.info/
 describe "RDFa parser" do
   before(:each) do
      @parser = RdfaParser.new
-
-     # Don't load external profiles when testing
-     basic_resp = mock("basic_resp")
-     basic_resp.stub(:status).and_return(200)
-     basic_resp.stub(:body).and_return(File.read(File.join(RDFA_DIR, "profiles", "basic.html")))
-
-     foaf_resp = mock("foaf_resp")
-     foaf_resp.stub(:status).and_return(200)
-     foaf_resp.stub(:body).and_return(File.read(File.join(RDFA_DIR, "profiles", "foaf.html")))
-
-     hcard_resp = mock("hcard_resp")
-     hcard_resp.stub(:status).and_return(200)
-     hcard_resp.stub(:body).and_return("HCARD")
-
-     profile_resp = mock("profile_resp")
-     profile_resp.stub(:status).and_return(200)
-     profile_resp.stub(:body).and_return("PROFILE")
-
-     xhv_resp = mock("xhv_resp")
-     xhv_resp.stub(:status).and_return(200)
-     xhv_resp.stub(:body).and_return(File.read(File.join(RDFA_DIR, "profiles", "xhv.html")))
-
-     sess = mock("session")
-     sess.stub(:base_url=)
-     sess.stub(:timeout=)
-     sess.stub(:get).with("http://www.w3.org/2007/08/pyRdfa/profiles/foaf").and_return(foaf_resp)
-     sess.stub(:get).with("http://www.w3.org/2007/08/pyRdfa/profiles/basic").and_return(basic_resp)
-     sess.stub(:get).with("http://www.w3.org/1999/xhtml/vocab").and_return(xhv_resp)
-     sess.stub(:get).with("http://microformats.org/profiles/hcard").and_return(hcard_resp)
-     sess.stub(:get).with("http://www.w3.org/2005/10/profile").and_return(profile_resp)
-     Patron::Session.stub!(:new).and_return(sess)
    end
   
    it "should parse simple doc" do
