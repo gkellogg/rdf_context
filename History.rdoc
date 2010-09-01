@@ -1,3 +1,16 @@
+=== 0.5.8
+* Remove dependency on whatlanguage.
+* Added support for Processor Graphs.
+* Change Graph#seq to specifically look for subject type of rdf:Seq, rdf:Bag or rdf:Alt to trigger rdf:_n processing.
+* Update RDFa processing to WD-rdfa-core-20100803 semantics
+  * Added Processor Graph and required output
+  * Reverse order of processing profiles
+  * Don't process element if any profile fails
+  * XMLLiterals must be explicitly specified as @datatype
+  * TERMorCURIEorAbsURI requires an absolute URI, not document relative
+  * Move @profile parsing before @vocabulary.
+  * Extract a new default vocabulary from @profile.*
+
 === 0.5.7
 * Add back support for RDFa 1.0 as well as RDFa 1.1. Parser checks @version to determine which
 * Remove specs for html4 and html5 until sorted out.
@@ -35,7 +48,7 @@
 * Remove old binding for a namespace URI creating a new binding
 
 === 0.5.1
-* Avoid stack-overflow when checking graph size (if $DEBUG == true)
+* Avoid stack-overflow when checking graph size (if ::RdfContext::debug? == true)
 * Refactor serializers to be based on AbstractSerializer
 * Graph
   * Add Graph#serialize taking a serializer or symbol identifing a serialzer and a base URI

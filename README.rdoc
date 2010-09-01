@@ -192,6 +192,8 @@ These interfaces work on contexts and formulae (for stores that are formula-awar
 * Reasoner/inference engine
 * SPARQL
 * RDFS logic and RDF entailment tests
+* OWL 2 Test Cases
+  * http://owl.semanticweb.org/page/OWL_2_Test_Cases
 
 == Resources:
 * Distiller[http://kellogg-assoc/distiller]
