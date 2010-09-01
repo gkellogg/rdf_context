@@ -244,7 +244,6 @@ module OpenURI
       File.open(file)
     when "http://www.w3.org/2005/10/profile"
       "PROFILE"
-    else raise Exception, "No such file #{uri}"
     end
   end
 end

@@ -297,7 +297,7 @@ module RdfContext
             end
           rescue Exception => e
             add_error(element, e.message, RDFA_NS.ProfileReferenceError)
-            raise # Incase we're not in strict mode, we need to be sure processing stops
+            raise # We need to be sure processing stops
           end
         end
         profile_mappings = @@vocabulary_cache[profile]
