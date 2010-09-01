@@ -123,7 +123,7 @@ module RdfContext
         prop_list << prop.to_s
       end
       
-      puts "sort_properties: #{prop_list.to_sentence}" if $DEBUG
+      puts "sort_properties: #{prop_list.to_sentence}" if ::RdfContext::debug?
       prop_list
     end
 

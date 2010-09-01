@@ -34,7 +34,7 @@ module RdfContext
       
       doc = Nokogiri::XML::Document.new
 
-      puts "\nserialize: graph namespaces: #{@graph.nsbinding.inspect}" if $DEBUG
+      puts "\nserialize: graph namespaces: #{@graph.nsbinding.inspect}" if ::RdfContext::debug?
 
       preprocess
 
@@ -67,7 +67,7 @@ module RdfContext
       # Add bindings for predicates not already having bindings
       tmp_ns = "ns0"
       required_namespaces.keys.each do |uri|
-        puts "create namespace definition for #{uri}" if $DEBUG
+        puts "create namespace definition for #{uri}" if ::RdfContext::debug?
         add_namespace(Namespace.new(uri, tmp_ns))
         tmp_ns = tmp_ns.succ
       end
@@ -100,7 +100,7 @@ module RdfContext
         subject_done(subject)
         properties = @graph.properties(subject)
         prop_list = sort_properties(properties)
-        puts "subject: #{subject.to_n3}, props: #{properties.inspect}" if $DEBUG
+        puts "subject: #{subject.to_n3}, props: #{properties.inspect}" if ::RdfContext::debug?
 
         rdf_type, *rest = properties.fetch(RDF_TYPE.to_s, [])
         if rdf_type.is_a?(URIRef)
@@ -133,7 +133,7 @@ module RdfContext
           end
         end
       elsif @force_RDF_about.include?(subject)
-        puts "subject: #{subject.to_n3}, force about" if $DEBUG
+        puts "subject: #{subject.to_n3}, force about" if ::RdfContext::debug?
         node = Nokogiri::XML::Element.new("rdf:Description", parent_node.document)
         node["rdf:about"] = relativize(subject)
         @force_RDF_about.delete(subject)
@@ -177,7 +177,7 @@ module RdfContext
         end
       end
 
-      puts "predicate: #{qname}, as_attr: #{as_attr}, object: #{object.inspect}, done: #{is_done?(object)}, sub: #{@subjects.include?(object)}" if $DEBUG
+      puts "predicate: #{qname}, as_attr: #{as_attr}, object: #{object.inspect}, done: #{is_done?(object)}, sub: #{@subjects.include?(object)}" if ::RdfContext::debug?
       qname = "rdf:li" if qname.match(/rdf:_\d+/)
       pred_node = Nokogiri::XML::Element.new(qname, node.document)
       
@@ -185,7 +185,7 @@ module RdfContext
         # Literals or references to objects that aren't subjects, or that have already been serialized
         
         args = object.xml_args
-        puts "predicate: args=#{args.inspect}" if $DEBUG
+        puts "predicate: args=#{args.inspect}" if ::RdfContext::debug?
         attrs = args.pop
         
         if as_attr
@@ -198,10 +198,10 @@ module RdfContext
           attrs.each_pair do |a, av|
             next if a == "xml:lang" && av == @lang # Lang already specified, don't repeat
             av = relativize(object) if a == "#{RDF_NS.prefix}:resource"
-            puts "  elt attr #{a}=#{av}" if $DEBUG
+            puts "  elt attr #{a}=#{av}" if ::RdfContext::debug?
             pred_node[a] = av.to_s
           end
-          puts "  elt #{'xmllit ' if object.is_a?(Literal) && object.xmlliteral?}content=#{args.first}" if $DEBUG && !args.empty?
+          puts "  elt #{'xmllit ' if object.is_a?(Literal) && object.xmlliteral?}content=#{args.first}" if ::RdfContext::debug? && !args.empty?
           if object.is_a?(Literal) && object.xmlliteral?
             pred_node.add_child(Nokogiri::XML::CharacterData.new(args.first, node.document))
           elsif args.first

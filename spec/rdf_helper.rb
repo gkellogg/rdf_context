@@ -55,17 +55,17 @@ module RdfHelper
         if statement.is_type?
           self.rdf_type = statement.object.short_name
         elsif statement.predicate.short_name =~ /Document\Z/i
-          puts "#{statement.predicate.short_name}: #{statement.object.inspect}" if $DEBUG
+          puts "#{statement.predicate.short_name}: #{statement.object.inspect}" if ::RdfContext::debug?
           self.send("#{statement.predicate.short_name}=", statement.object.to_s.sub(uri_prefix, test_dir))
-          puts "#{statement.predicate.short_name}: " + self.send("#{statement.predicate.short_name}") if $DEBUG
+          puts "#{statement.predicate.short_name}: " + self.send("#{statement.predicate.short_name}") if ::RdfContext::debug?
           if statement.predicate.short_name == "inputDocument"
             self.about ||= statement.object
             self.name ||= statement.subject.short_name
           end
         elsif statement.predicate.short_name == "referenceOutput"
-          puts "referenceOutput: #{statement.object.inspect}" if $DEBUG
+          puts "referenceOutput: #{statement.object.inspect}" if ::RdfContext::debug?
           outputDocument = statement.object.to_s.sub(uri_prefix, test_dir)
-          puts "referenceOutput: " + self.send("#{statement.predicate.short_name}") if $DEBUG
+          puts "referenceOutput: " + self.send("#{statement.predicate.short_name}") if ::RdfContext::debug?
         elsif self.respond_to?("#{statement.predicate.short_name}=")
           self.send("#{statement.predicate.short_name}=", statement.object.to_s)
         end

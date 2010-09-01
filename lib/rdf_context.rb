@@ -74,4 +74,9 @@ module RdfContext
   WELLKNOWN_NAMESPACES = [DC_NS, OWL_NS, LOG_NS, RDF_NS, RDFA_NS, RDFS_NS, XHV_NS, XML_NS, XSD_NS, XSI_NS]
 
   XH_MAPPING  = {"" => Namespace.new("http://www.w3.org/1999/xhtml/vocab\#", nil)}
+
+
+  # Control debug output.
+  def self.debug?; @debug; end
+  def self.debug=(value); @debug = value; end
 end

@@ -87,7 +87,7 @@ module RdfContext
       oi = resource_to_int(triple.object) || gen_key(triple.object)
       ci = resource_to_int(context) || gen_key(context)
     
-      puts "add: #{si}=#{triple.subject}, #{pi}=#{triple.predicate}, #{oi}=#{triple.object}, #{ci}=#{context ? context.identifier : 'none'}" if $DEBUG
+      puts "add: #{si}=#{triple.subject}, #{pi}=#{triple.predicate}, #{oi}=#{triple.object}, #{ci}=#{context ? context.identifier : 'none'}" if ::RdfContext::debug?
       set_nested_index(@cspo, ci, si, pi, oi)
       set_nested_index(@cpos, ci, pi, oi, si)
       set_nested_index(@cosp, ci, oi, si, pi)
@@ -97,7 +97,7 @@ module RdfContext
         set_nested_index(@pos, pi, oi, si, ci)
         set_nested_index(@osp, oi, si, pi, ci)
       end
-      #dump if $DEBUG
+      #dump if ::RdfContext::debug?
     end
   
     # Remove a triple from the context and store
@@ -155,7 +155,7 @@ module RdfContext
     
       results = []
       si, pi, oi = triple_to_int(triple)
-      puts "triples? #{si}=#{triple.subject}, #{pi}=#{triple.predicate}, #{oi}=#{triple.object}, #{ci}=#{context ? context.identifier : 'none'}" if $DEBUG
+      puts "triples? #{si}=#{triple.subject}, #{pi}=#{triple.predicate}, #{oi}=#{triple.object}, #{ci}=#{context ? context.identifier : 'none'}" if ::RdfContext::debug?
 
       def result(v, si, pi, oi, ctx)
         triple = int_to_triple(si, pi, oi)
@@ -164,22 +164,22 @@ module RdfContext
             # keys are contexts
             v.keys.each do |ci|
               context = int_to_resource(ci)
-              puts "triples= #{si}=#{triple.subject}, #{pi}=#{triple.predicate}, #{oi}=#{triple.object}, #{ci}=#{context ? context.identifier : 'none'}" if $DEBUG
+              puts "triples= #{si}=#{triple.subject}, #{pi}=#{triple.predicate}, #{oi}=#{triple.object}, #{ci}=#{context ? context.identifier : 'none'}" if ::RdfContext::debug?
               yield triple, context
             end
           else
-            puts "triples= #{si}=#{triple.subject}, #{pi}=#{triple.predicate}, #{oi}=#{triple.object}, #{ctx ? ctx.identifier : 'none'}" if $DEBUG
+            puts "triples= #{si}=#{triple.subject}, #{pi}=#{triple.predicate}, #{oi}=#{triple.object}, #{ctx ? ctx.identifier : 'none'}" if ::RdfContext::debug?
             yield triple, ctx
           end
         else
-          puts "triples= #{si}=#{triple.subject}, #{pi}=#{triple.predicate}, #{oi}=#{triple.object}, #{ctx ? ctx.identifier : 'none'}" if $DEBUG
+          puts "triples= #{si}=#{triple.subject}, #{pi}=#{triple.predicate}, #{oi}=#{triple.object}, #{ctx ? ctx.identifier : 'none'}" if ::RdfContext::debug?
         end
         triple
       end
     
       if si # subject is given
         if spo.has_key?(si)
-          #puts "spo[#{si}] = #{spo[si].inspect}" if $DEBUG
+          #puts "spo[#{si}] = #{spo[si].inspect}" if ::RdfContext::debug?
           if pi # subject+predicate is given
             if spo[si].has_key?(pi)
               if oi # subject+predicate+object is given
@@ -194,13 +194,13 @@ module RdfContext
             end
           elsif triple.predicate.nil? # subject given, predicate unbound
             spo[si].keys.each do |pi|
-              #puts "spo[#{si}][#{pi}] = #{spo[si][pi].inspect}" if $DEBUG
+              #puts "spo[#{si}][#{pi}] = #{spo[si][pi].inspect}" if ::RdfContext::debug?
               if oi # object is given
                 results << result(spo[si][pi][oi], si, pi, oi, context, &block) if spo[si][pi].has_key?(oi)
               else # object unbound
                 #puts "spo[#{si}][#{pi}] = #{spo[si][pi].inspect}"
                 spo[si][pi].each_pair do |oi, value|
-                  #puts "spo[#{si}][#{pi}][#{oi}] = #{spo[si][pi][oi].inspect}" if $DEBUG
+                  #puts "spo[#{si}][#{pi}][#{oi}] = #{spo[si][pi][oi].inspect}" if ::RdfContext::debug?
                   results << result(value, si, pi, oi, context, &block)
                 end
                 oi = nil
@@ -240,13 +240,13 @@ module RdfContext
       elsif !triple.object.nil?
         # Subject+predicate unspecified, object specified but not found, skip
       else # subject+predicate+object unbound
-        #puts "spo = #{spo.inspect}" if $DEBUG
+        #puts "spo = #{spo.inspect}" if ::RdfContext::debug?
         spo.keys.each do |si|
-          #puts "spo[#{si}] = #{spo[si].inspect}" if $DEBUG
+          #puts "spo[#{si}] = #{spo[si].inspect}" if ::RdfContext::debug?
           spo[si].keys.each do |pi|
-            #puts "spo[#{si}][#{pi}] = #{spo[si][pi].inspect}" if $DEBUG
+            #puts "spo[#{si}][#{pi}] = #{spo[si][pi].inspect}" if ::RdfContext::debug?
             spo[si][pi].each_pair do |oi, value|
-              #puts "spo[#{si}][#{pi}][#{oi}] = #{spo[si][pi][oi].inspect}" if $DEBUG
+              #puts "spo[#{si}][#{pi}][#{oi}] = #{spo[si][pi][oi].inspect}" if ::RdfContext::debug?
               results << result(value, si, pi, oi, context, &block)
             end
           end
@@ -317,7 +317,7 @@ module RdfContext
         ndx = ndx[key]
       end
     
-      #puts("set_nested_index: #{index.inspect}, keys: #{keys.inspect}") if $DEBUG
+      #puts("set_nested_index: #{index.inspect}, keys: #{keys.inspect}") if ::RdfContext::debug?
     end
   
     # Remove context from the list of contexts in a nested index.

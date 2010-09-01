@@ -491,25 +491,25 @@ module RdfContext
     # @param [Graph] graph
     # @return [Boolean]
     def eql?(other)
-      #puts "eql? size #{self.size} vs #{other.size}" if $DEBUG
+      #puts "eql? size #{self.size} vs #{other.size}" if ::RdfContext::debug?
       return false if !other.is_a?(Graph) || self.size != other.size
       return false unless other.identifier.to_s == identifier.to_s unless other.identifier.is_a?(BNode) && identifier.is_a?(BNode)
       
       bn_self = bnodes.values.sort
       bn_other = other.bnodes.values.sort
-      puts "eql? bnodes '#{bn_self.to_sentence}' vs '#{bn_other.to_sentence}'" if $DEBUG
+      puts "eql? bnodes '#{bn_self.to_sentence}' vs '#{bn_other.to_sentence}'" if ::RdfContext::debug?
       return false unless bn_self == bn_other
       
       # Check each triple to see if it's contained in the other graph
       triples do |t, ctx|
         next if t.subject.is_a?(BNode) || t.predicate.is_a?(BNode) || t.object.is_a?(BNode)
-        puts "eql? contains '#{t.to_ntriples}: #{other.contains?(t)}'" if $DEBUG
+        puts "eql? contains '#{t.to_ntriples}: #{other.contains?(t)}'" if ::RdfContext::debug?
         return false unless other.contains?(t)
       end
       
       # For each BNode, check permutations of similar bnodes in other graph
       bnode_permutations(bnodes, other.bnodes) do |bn_map|
-        puts "bnode permutations: #{bn_map.inspect}" if $DEBUG
+        puts "bnode permutations: #{bn_map.inspect}" if ::RdfContext::debug?
         # bn_map contains 1-1 mapping of bnodes from self to other
         catch :next_perm do
           triples do |t, ctx|
@@ -519,10 +519,10 @@ module RdfContext
             predicate = bn_map[predicate] if bn_map.has_key?(predicate)
             object = bn_map[object] if bn_map.has_key?(object)
             tn = Triple.new(subject, predicate, object)
-            puts "  eql? contains '#{tn.inspect}': #{other.contains?(tn)}" if $DEBUG
+            puts "  eql? contains '#{tn.inspect}': #{other.contains?(tn)}" if ::RdfContext::debug?
             next if other.contains?(tn)
           
-            puts "  no, next permutation" if $DEBUG
+            puts "  no, next permutation" if ::RdfContext::debug?
             # Not a match, try next permutation
             throw :next_perm
           end
@@ -562,7 +562,7 @@ module RdfContext
     # Take source keys and run permutations mapping to other keys, if the permutation
     # maps to the same counts for each
     def bnode_permutations(bn_source, bn_other)
-      puts "compare #{bn_source.inspect}\n   with #{bn_other.inspect}" if $DEBUG
+      puts "compare #{bn_source.inspect}\n   with #{bn_other.inspect}" if ::RdfContext::debug?
 
       source_keys = bn_source.keys
       other_keys = bn_other.keys
@@ -575,14 +575,14 @@ module RdfContext
       when 1
         # All keys have equivalent counts, yield permutations
         if source_keys.length == 1
-          puts "yield #{{source_keys.first => other_keys.first}.inspect}" if $DEBUG
+          puts "yield #{{source_keys.first => other_keys.first}.inspect}" if ::RdfContext::debug?
           yield({source_keys.first => other_keys.first})
         else
           (0..(source_keys.length-1)).to_a.permute do |indicies|
-            puts "indicies #{indicies.inspect}" if $DEBUG
+            puts "indicies #{indicies.inspect}" if ::RdfContext::debug?
             ok = other_keys.dup
             map = indicies.inject({}) { |hash, i| hash[source_keys[i]] = ok.shift; hash}
-            puts "yield #{map.inspect}" if $DEBUG
+            puts "yield #{map.inspect}" if ::RdfContext::debug?
             yield(map)
           end
         end
@@ -600,7 +600,7 @@ module RdfContext
           bn_other_max[bn] = bn_other_min.delete(bn) if v == max
         end
 
-        puts "yield permutations of multiple with max #{bn_source_max.inspect}\n  and #{bn_other_max.inspect}" if $DEBUG
+        puts "yield permutations of multiple with max #{bn_source_max.inspect}\n  and #{bn_other_max.inspect}" if ::RdfContext::debug?
         # Yield for each permutation of max joined with permutations of min
         bnode_permutations(bn_source_max, bn_other_max) do |bn_perm_max|
           bnode_permutations(bn_source_min, bn_other_min) do |bn_perm_min|

@@ -167,18 +167,18 @@ module RdfContext
       #@statement_cache[qStr] ||= @db.prepare(qStr)
       @statement_cache[qStr] ||= qStr
 
-      puts "executeSQL: '#{qStr}', '#{params.join("', '")}'" if $DEBUG
+      puts "executeSQL: '#{qStr}', '#{params.join("', '")}'" if ::RdfContext::debug?
       if block_given?
         @db.execute(@statement_cache[qStr], *params) do |row|
-          puts "executeSQL res: #{row.inspect}" if $DEBUG
+          puts "executeSQL res: #{row.inspect}" if ::RdfContext::debug?
           yield(row)
         end
       else
-        puts "executeSQL no block given" if $DEBUG
+        puts "executeSQL no block given" if ::RdfContext::debug?
         @db.execute(@statement_cache[qStr], *params)
       end
     rescue SQLite3::SQLException => e
-      puts "SQL Exception (ignored): #{e.message}" if $DEBUG
+      puts "SQL Exception (ignored): #{e.message}" if ::RdfContext::debug?
     end
 
     CREATE_ASSERTED_STATEMENTS_TABLE = %(

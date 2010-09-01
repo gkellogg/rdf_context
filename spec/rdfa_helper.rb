@@ -230,7 +230,7 @@ module RdfaHelper
   end
 end
 
-class OpenURI
+module OpenURI
   #alias_method :open_uri_orig, :open_uri
   def self.open_uri(uri)
     case uri

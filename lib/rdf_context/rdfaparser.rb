@@ -237,7 +237,6 @@ module RdfContext
           add_debug(element, "process_profile: skip previously parsed profile <#{profile}>")
         else
           begin
-            add_debug(element, "process_profile: parse profile <#{profile}>")
             @@vocabulary_cache[profile] = {
               :uri_mappings => {},
               :term_mappings => {},
@@ -245,16 +244,16 @@ module RdfContext
             }
             um = @@vocabulary_cache[profile][:uri_mappings]
             tm = @@vocabulary_cache[profile][:term_mappings]
-            add_debug(element, "process_profile: profile open <#{profile}>")
+            add_debug(element, "process_profile: parse profile <#{profile}>")
             prof_body = OpenURI.open_uri(profile)
             raise ParserException, "Empty profile #{profile}" if prof_body.to_s.empty?
       
             # Parse profile, and extract mappings from graph
-            old_debug, old_verbose, = $DEBUG, $verbose
-            $DEBUG, $verbose = false, false
+            old_debug, old_verbose, = ::RdfContext::debug?, $verbose
+            ::RdfContext::debug, $verbose = false, false
             p_graph = Parser.parse(prof_body, profile)
-            ttl = p_graph.serialize(:format => :ttl) if @debug || $DEBUG
-            $DEBUG, $verbose = old_debug, old_verbose
+            ttl = p_graph.serialize(:format => :ttl) if @debug || ::RdfContext::debug?
+            ::RdfContext::debug, $verbose = old_debug, old_verbose
             add_debug(element, ttl) if ttl
             p_graph.subjects.each do |subject|
               props = p_graph.properties(subject)

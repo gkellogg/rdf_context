@@ -181,7 +181,7 @@ module RdfContext
     end
     
     def add_processor_message(node, message, process_class)
-      puts "#{node_path(node)}: #{message}" if $DEBUG
+      puts "#{node_path(node)}: #{message}" if ::RdfContext::debug?
       @debug << "#{node_path(node)}: #{message}" if @debug.is_a?(Array)
       if @processor_graph
         @processor_sequence ||= 0
@@ -216,7 +216,7 @@ module RdfContext
       triple
     rescue RdfException => e
       add_debug(node, "add_triple raised #{e.class}: #{e.message}")
-      puts e.backtrace if $DEBUG
+      puts e.backtrace if ::RdfContext::debug?
       raise if @strict
     end
   end

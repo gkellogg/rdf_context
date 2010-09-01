@@ -35,7 +35,7 @@ module RdfContext
       @graph.allow_n3 = true
       document = parser.parse(@doc)
       unless document
-        puts parser.inspect if $DEBUG
+        puts parser.inspect if ::RdfContext::debug?
         reason = parser.failure_reason
         raise ParserException.new(reason)
       end

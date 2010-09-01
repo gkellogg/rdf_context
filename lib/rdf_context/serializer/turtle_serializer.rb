@@ -13,7 +13,7 @@ module RdfContext
     # @option options [URIRef, String] :base (nil) Base URI of graph, used to shorting URI references
     # @return [void]
     def serialize(stream, options = {})
-      puts "\nserialize: #{@graph.inspect}" if $DEBUG
+      puts "\nserialize: #{@graph.inspect}" if ::RdfContext::debug?
       reset
       @stream = stream
       @base = options[:base]
@@ -84,23 +84,23 @@ module RdfContext
     # Checks if l is a valid RDF list, i.e. no nodes have other properties.
     def is_valid_list(l)
       props = @graph.properties(l)
-      #puts "is_valid_list: #{props.inspect}" if $DEBUG
+      #puts "is_valid_list: #{props.inspect}" if ::RdfContext::debug?
       return false unless props.has_key?(RDF_NS.first.to_s) || l == RDF_NS.nil
       while l && l != RDF_NS.nil do
-        #puts "is_valid_list(length): #{props.length}" if $DEBUG
+        #puts "is_valid_list(length): #{props.length}" if ::RdfContext::debug?
         return false unless props.has_key?(RDF_NS.first.to_s) && props.has_key?(RDF_NS.rest.to_s)
         n = props[RDF_NS.rest.to_s]
-        #puts "is_valid_list(n): #{n.inspect}" if $DEBUG
+        #puts "is_valid_list(n): #{n.inspect}" if ::RdfContext::debug?
         return false unless n.is_a?(Array) && n.length == 1
         l = n.first
         props = @graph.properties(l)
       end
-      #puts "is_valid_list: valid" if $DEBUG
+      #puts "is_valid_list: valid" if ::RdfContext::debug?
       true
     end
     
     def do_list(l)
-      puts "do_list: #{l.inspect}" if $DEBUG
+      puts "do_list: #{l.inspect}" if ::RdfContext::debug?
       position = SUBJECT
       while l do
         p = @graph.properties(l)
@@ -116,7 +116,7 @@ module RdfContext
     
     def p_list(node, position)
       return false if !is_valid_list(node)
-      #puts "p_list: #{node.inspect}, #{position}" if $DEBUG
+      #puts "p_list: #{node.inspect}, #{position}" if ::RdfContext::debug?
 
       write(position == SUBJECT ? "(" : " (")
       @depth += 2
@@ -134,7 +134,7 @@ module RdfContext
     def p_squared(node, position)
       return false unless p_squared?(node, position)
 
-      #puts "p_squared: #{node.inspect}, #{position}" if $DEBUG
+      #puts "p_squared: #{node.inspect}, #{position}" if ::RdfContext::debug?
       subject_done(node)
       write(position == SUBJECT ? '[' : ' [')
       @depth += 2
@@ -146,18 +146,18 @@ module RdfContext
     end
     
     def p_default(node, position)
-      #puts "p_default: #{node.inspect}, #{position}" if $DEBUG
+      #puts "p_default: #{node.inspect}, #{position}" if ::RdfContext::debug?
       l = (position == SUBJECT ? "" : " ") + label(node)
       write(l)
     end
     
     def path(node, position)
-      puts "path: #{node.inspect}, pos: #{position}, []: #{is_valid_list(node)}, p2?: #{p_squared?(node, position)}, rc: #{ref_count(node)}" if $DEBUG
+      puts "path: #{node.inspect}, pos: #{position}, []: #{is_valid_list(node)}, p2?: #{p_squared?(node, position)}, rc: #{ref_count(node)}" if ::RdfContext::debug?
       raise RdfException, "Cannot serialize node '#{node}'" unless p_list(node, position) || p_squared(node, position) || p_default(node, position)
     end
     
     def verb(node)
-      puts "verb: #{node.inspect}" if $DEBUG
+      puts "verb: #{node.inspect}" if ::RdfContext::debug?
       if node == RDF_TYPE
         write(" a")
       else
@@ -166,7 +166,7 @@ module RdfContext
     end
     
     def object_list(objects)
-      puts "object_list: #{objects.inspect}" if $DEBUG
+      puts "object_list: #{objects.inspect}" if ::RdfContext::debug?
       return if objects.empty?
 
       objects.each_with_index do |obj, i|
@@ -178,7 +178,7 @@ module RdfContext
     def predicate_list(subject)
       properties = @graph.properties(subject)
       prop_list = sort_properties(properties) - [RDF_NS.first.to_s, RDF_NS.rest.to_s]
-      puts "predicate_list: #{prop_list.inspect}" if $DEBUG
+      puts "predicate_list: #{prop_list.inspect}" if ::RdfContext::debug?
       return if prop_list.empty?
 
       prop_list.each_with_index do |prop, i|
@@ -212,7 +212,7 @@ module RdfContext
     end
     
     def statement(subject)
-      puts "statement: #{subject.inspect}, s2?: #{s_squared(subject)}" if $DEBUG
+      puts "statement: #{subject.inspect}, s2?: #{s_squared(subject)}" if ::RdfContext::debug?
       subject_done(subject)
       s_squared(subject) || s_default(subject)
     end

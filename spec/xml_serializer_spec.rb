@@ -298,7 +298,7 @@ describe "XML Serializer" do
       @graph.add_triple("http://release/", FOO_NS.pred, FOO_NS.obj)
       @graph.bind(Namespace.new(FOO_NS.uri, ""))
     
-      #$DEBUG = true
+      #::RdfContext::debug = true
       xml = serialize(:max_depth => 1, :attributes => :untyped)
       #puts xml
       xml.should =~ /<Release/
@@ -351,13 +351,13 @@ describe "XML Serializer" do
   end
   
   def check_xpaths(doc, paths)
-    puts doc if $DEBUG || $verbose
+    puts doc if ::RdfContext::debug? || $verbose
     doc = Nokogiri::XML.parse(doc)
     #puts "doc: #{doc.to_s}"
     doc.should be_a(Nokogiri::XML::Document)
     paths.each_pair do |path, value|
-      puts "xpath: #{path.inspect}" if $DEBUG
-      puts doc.root.at_xpath(path, @namespaces).inspect if $DEBUG
+      puts "xpath: #{path.inspect}" if ::RdfContext::debug?
+      puts doc.root.at_xpath(path, @namespaces).inspect if ::RdfContext::debug?
       case value
       when false
         doc.root.at_xpath(path, doc.namespaces).should be_nil
@@ -379,9 +379,9 @@ describe "XML Serializer" do
   
   # Serialize ntstr to a string and compare against regexps
   def serialize(options)
-    #$DEBUG = true
+    #::RdfContext::debug = true
     result = @graph.serialize(options.merge(:format => :xml))
-    #$DEBUG = false
+    #::RdfContext::debug = false
     result
   end
 end
