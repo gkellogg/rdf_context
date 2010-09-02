@@ -1,3 +1,4 @@
+=== 0.5.8.1
 === 0.5.8
 * Remove dependency on whatlanguage.
 * Added support for Processor Graphs.
