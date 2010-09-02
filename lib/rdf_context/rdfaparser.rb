@@ -1,4 +1,5 @@
 require File.join(File.dirname(__FILE__), 'parser')
+require 'open-uri'
 
 module RdfContext
   ##
