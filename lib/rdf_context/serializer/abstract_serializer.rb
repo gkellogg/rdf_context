@@ -30,7 +30,7 @@ module RdfContext
     # @return [String]
     def relativize(uri)
       uri = uri.to_s
-      self.base ? uri.sub(/^#{self.base}/, "") : uri
+      self.base ? uri.sub(self.base, "") : uri
     end
   end
 end
