@@ -39,10 +39,9 @@ module RdfContext
       preprocess
 
       predicates = @graph.predicates.uniq
-      possible = predicates + @graph.objects.uniq
       namespaces = {}
       required_namespaces = {}
-      possible.each do |res|
+      predicates.each do |res|
         next unless res.is_a?(URIRef)
         if res.namespace
           add_namespace(res.namespace)

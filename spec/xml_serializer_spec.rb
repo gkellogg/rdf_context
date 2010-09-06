@@ -357,7 +357,7 @@ describe "XML Serializer" do
     doc.should be_a(Nokogiri::XML::Document)
     paths.each_pair do |path, value|
       puts "xpath: #{path.inspect}" if ::RdfContext::debug?
-      puts doc.root.at_xpath(path, @namespaces).inspect if ::RdfContext::debug?
+      puts doc.root.at_xpath(path, doc.namespaces).inspect if ::RdfContext::debug?
       case value
       when false
         doc.root.at_xpath(path, doc.namespaces).should be_nil
