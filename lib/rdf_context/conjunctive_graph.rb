@@ -42,6 +42,28 @@ module RdfContext
       @store.triples(triple, nil, &block) || []
     end
 
+    # Adds a quad from the intended subject, predicate, object, and context.
+    #
+    # @example
+    #   g = Graph.new
+    #   cg = ConjunctiveGraph.new
+    #   cg.add_quad(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new, g)
+    #   # => results in the triple being added to g
+    #
+    # @param [URIRef, BNode] subject the subject of the triple
+    # @param [URIRef] predicate the predicate of the triple
+    # @param [URIRef, BNode, Literal] object the object of the triple
+    # @param [Graph, URIRef] context Graph or URIRef of graph context
+    # @return [Graph] Returns the graph
+    # @raise [Error] Checks parameter types and raises if they are incorrect.
+    def add_quad(subject, predicate, object, context)
+      graph = context if context.is_a?(Graph)
+      graph ||= contexts.detect {|g| g.identifier == context}
+      graph ||= Graph.new(:identifier => context, :store => @store)
+      graph.add_triple(subject, predicate, object)
+      graph
+    end
+
     # Parse source into a new context.
     #
     # Create a new context (Graph) and parse into that.
