@@ -69,22 +69,24 @@ task :spec => :check_dependencies
 
 task :default => :spec
 
-require 'rake/rdoctask'
-Rake::RDocTask.new("doc:rdoc") do |rdoc|
-  if File.exist?('VERSION')
-    version = File.read('VERSION')
-  else
-    version = RdfContext::VERSION
+namespace :doc do
+  require 'rake/rdoctask'
+  Rake::RDocTask.new("rdoc") do |rdoc|
+    if File.exist?('VERSION')
+      version = File.read('VERSION')
+    else
+      version = RdfContext::VERSION
+    end
+
+    rdoc.rdoc_dir = 'doc/rdoc'
+    rdoc.title = "rdf_context #{version}"
+    rdoc.rdoc_files.include('README*', "History.rdoc")
+    rdoc.rdoc_files.include('lib/**/*.rb')
   end
 
-  rdoc.rdoc_dir = 'doc/rdoc'
-  rdoc.title = "rdf_context #{version}"
-  rdoc.rdoc_files.include('README*', "History.rdoc")
-  rdoc.rdoc_files.include('lib/**/*.rb')
-end
-
-YARD::Rake::YardocTask.new do |t|
-  t.files   = %w(lib/**/*.rb README.rdoc History.rdoc)   # optional
+  YARD::Rake::YardocTask.new do |t|
+    t.files   = %w(lib/**/*.rb README.rdoc History.rdoc)   # optional
+  end
 end
 
 desc "Generate RDF Core Manifest.yml"

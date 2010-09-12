@@ -1,4 +1,15 @@
-=== 0.5.8.1
+=== 0.5.8.2
+* Don't create unnecessary namespaces when serializing RDF/XML.
+* Don't use regexp to substitute base URI in URI serialization.
+* Added :profile_graph option to RdfaParser#parse. This MUST be a ConjunctiveGraph and will be used to save profiles that are encountered.
+  * Fixme, for now, retrieval should include HTTP headers and perform appropriate HTTP cache control and check for potential updates.
+* Added ConjunctiveGraph#add_quad. Adds a quad from the intended subject, predicate, object, and context.
+    @example
+     g = Graph.new
+     cg = ConjunctiveGraph.new
+     cg.add_quad(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new, g)
+     => results in the triple being added to g
+
 === 0.5.8
 * Remove dependency on whatlanguage.
 * Added support for Processor Graphs.
