@@ -43,8 +43,8 @@ module RdfContext
     
     def get_qname(uri)
       if uri.is_a?(URIRef)
-        md = uri.to_s.match(/^#{@base}(.*)$/) if @base
-        return "<#{md[1]}>" if md
+        md = relativize(uri)
+        return "<#{md}>" unless md == uri.to_s
         
         super(uri)
       end
