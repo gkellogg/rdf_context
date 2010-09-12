@@ -15,7 +15,7 @@ class Parse
   rescue RdfException => e
     puts "Parse failure: #{e.message}"
     puts parser.debug if $verbose && parser
-    #raise
+    raise if RdfContext.debug?
   rescue Exception => e
     puts "Parser fault: #{e.message}"
     puts parser.debug if parser && !$quiet
