@@ -214,7 +214,9 @@ module RdfContext
     # Adds a triple to a graph directly from the intended subject, predicate, and object.
     #
     # @example
-    #   g = Graph.new; g.add_triple(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new) # => results in the triple being added to g; returns an array of g's triples
+    #   g = Graph.new
+    #   g.add_triple(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new)
+    #   # => results in the triple being added to g
     #
     # @param [URIRef, BNode] subject the subject of the triple
     # @param [URIRef] predicate the predicate of the triple
