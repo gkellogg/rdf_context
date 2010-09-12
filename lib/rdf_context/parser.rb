@@ -17,20 +17,18 @@ module RdfContext
     # @return [RdfContext::Graph]
     attr_accessor :graph
     
-    # Graph instance containing informationa, warning and error statements
+    # Graph instance containing informational, warning and error statements
     # @return [RdfContext::Graph]
     attr_accessor :processor_graph
     
     ## 
     # Creates a new parser
     #
-    # @option options [Graph] :graph (nil) Graph to parse into, otherwise a new RdfContext::Graph instance is created
     # @option options [Graph] :processor_graph (nil) Graph to record information, warnings and errors.
     # @option options [:rdfxml, :html, :n3] :type (nil)
     # @option options [Boolean] :strict (false) Raise Error if true, continue with lax parsing, otherwise
     def initialize(options = {})
       # initialize the triplestore
-      @graph = options[:graph]
       @processor_graph = options[:processor_graph] if options[:processor_graph]
       @debug = options[:debug] # XXX deprecated
       @strict = options[:strict]
@@ -41,6 +39,7 @@ module RdfContext
     #
     # @param  [#read, #to_s] stream the HTML+RDFa IO stream, string, Nokogiri::HTML::Document or Nokogiri::XML::Document
     # @param [String] uri (nil) the URI of the document
+    # @option options [Graph] :graph (Graph.new) Graph to parse into, otherwise a new Graph instance is created
     # @option options [Graph] :processor_graph (nil) Graph to record information, warnings and errors.
     # @option options [:rdfxml, :html, :n3] :type (nil)
     # @option options [Boolean] :strict (false) Raise Error if true, continue with lax parsing, otherwise
@@ -64,6 +63,7 @@ module RdfContext
     #
     # @param  [#read, #to_s] stream the HTML+RDFa IO stream, string, Nokogiri::HTML::Document or Nokogiri::XML::Document
     # @param [String] uri (nil) the URI of the document
+    # @option options [Graph] :graph (Graph.new) Graph to parse into, otherwise a new Graph instance is created
     # @option options [Graph] :processor_graph (nil) Graph to record information, warnings and errors.
     # @option options [:rdfxml, :html, :n3] :type (nil)
     # @option options [Boolean] :strict (false) Raise Error if true, continue with lax parsing, otherwise
@@ -74,22 +74,21 @@ module RdfContext
     # @return [Graph]:: Returns the graph containing parsed triples
     # @raise [Error]:: Raises RdfError if _strict_
     def parse(stream, uri = nil, options = {}, &block) # :yields: triple
+      @graph = options[:graph] || Graph.new(:identifier => @uri)
       if self.class == Parser
         
         options[:strict] ||= @strict if @strict
-        options[:graph] ||= @graph if @graph
+        options[:graph] ||= @graph
         options[:debug] ||= @debug if @debug  # XXX deprecated
-        @processor_graph = options[:processor_graph] if options[:processor_graph]
         # Intuit type, if not provided
         options[:type] ||= detect_format(stream, uri)
         
         # Create a delegate of a specific parser class
         @delegate ||= case options[:type].to_s
         when "n3", "ntriples", "turtle", "ttl", "n3", "notation3" then N3Parser.new(options)
-        when "rdfa", "html", "xhtml"                        then RdfaParser.new(options)
-        when "xml", "rdf", "rdfxml"                         then RdfXmlParser.new(options)
-        else
-          RdfXmlParser.new(options)
+        when "rdfa", "html", "xhtml"                              then RdfaParser.new(options)
+        when "xml", "rdf", "rdfxml"                               then RdfXmlParser.new(options)
+        else                                                           RdfXmlParser.new(options)
           # raise ParserException.new("type option must be one of :rdfxml, :html, or :n3")
         end
         @delegate.parse(stream, uri, options, &block)
@@ -98,8 +97,6 @@ module RdfContext
         @uri = URIRef.new(uri.to_s) unless uri.nil?
         @strict = options[:strict] if options.has_key?(:strict)
         @debug = options[:debug] if options.has_key?(:debug)
-        
-        @graph ||= Graph.new(:identifier => @uri)
       end
     end
     

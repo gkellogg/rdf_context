@@ -36,7 +36,6 @@ module RdfContext
 
       # @param [String] base Base URI for creating absolute URIs from relative URIs
       # @param [Nokogiri::XML::Element] element XML Element context
-      # @param [Graph] graph Graph for binding Namespaces
       # @return [RdfXmlParser::EvaluationContext]
       def initialize(base, element, graph)
         # Initialize the evaluation context, [5.1]
@@ -141,6 +140,7 @@ module RdfContext
     # 
     # @param  [Nokogiri::XML::Document, #read, #to_s] stream the HTML+RDFa IO stream, string, Nokogiri::HTML::Document or Nokogiri::XML::Document
     # @param [String] uri (nil) the URI of the document
+    # @option options [Graph] :graph (Graph.new) Graph to parse into, otherwise a new Graph
     # @option options [Array] :debug (nil) Array to place debug messages
     # @option options [Boolean] :strict (false) Raise Error if true, continue with lax parsing, otherwise
     # @return [Graph] Returns the graph containing parsed triples

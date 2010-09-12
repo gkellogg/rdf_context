@@ -33,6 +33,10 @@ module RdfContext
     # @return [:rdfa_1_0, :rdfa_1_1]
     attr_reader :version
     
+    # Graph instance containing parsed profiles
+    # @return [RdfContext::Graph]
+    attr_accessor :profile_graph
+    
     # The Recursive Baggage
     # @private
     class EvaluationContext # :nodoc:
@@ -136,11 +140,13 @@ module RdfContext
     #
     # @option options [Graph] :graph (nil) Graph to parse into, otherwise a new RdfContext::Graph instance is created
     # @option options [Graph] :processor_graph (nil) Graph to record information, warnings and errors.
+    # @option options [Graph] :profile_graph (nil) Graph to save profile graphs.
     # @option options [Array] :debug (nil) Array to place debug messages
     # @option options [:rdfxml, :html, :n3] :type (nil)
     # @option options [Boolean] :strict (false) Raise Error if true, continue with lax parsing, otherwise
     def initialize(options = {})
       super
+      @profile_graph = options[:profile_graph]
       @@vocabulary_cache ||= {}
     end
     
@@ -154,6 +160,9 @@ module RdfContext
     #
     # @param  [Nokogiri::HTML::Document, Nokogiri::XML::Document, #read, #to_s] stream the HTML+RDFa IO stream, string, Nokogiri::HTML::Document or Nokogiri::XML::Document
     # @param [String] uri (nil) the URI of the document
+    # @option options [Graph] :graph (Graph.new) Graph to parse into, otherwise a new Graph
+    # @option options [Graph] :processor_graph (nil) Graph to record information, warnings and errors.
+    # @option options [ConjunctiveGraph] :profile_graph (nil) Graph to save profile graphs.
     # @option options [Array] :debug (nil) Array to place debug messages
     # @option options [:rdfa_1_0, :rdfa_1_1] :version (:rdfa_1_1) Parser version information
     # @option options [:xhtml] :host_language (:xhtml) Host Language
@@ -167,8 +176,8 @@ module RdfContext
 
       @doc = case stream
       when Nokogiri::HTML::Document then stream
-      when Nokogiri::XML::Document then stream
-      else   Nokogiri::XML.parse(stream, uri.to_s)
+      when Nokogiri::XML::Document  then stream
+      else                               Nokogiri::XML.parse(stream, uri.to_s)
       end
       
       add_error(nil, "Empty document", RDFA_NS.HostLanguageMarkupError) if @doc.nil?
@@ -201,6 +210,7 @@ module RdfContext
       end
 
       @host_defaults.delete(:vocabulary) if @version == :rdfa_1_0
+      @profile_graph ||= options[:profile_graph] if options.has_key?(:profile_graph)
       
       add_debug(@doc.root, "version = #{@version.inspect},  host_language = #{@host_language}")
       # parse
@@ -242,6 +252,30 @@ module RdfContext
           add_debug(element, "process_profile: skip previously parsed profile <#{profile}>")
         else
           begin
+            p_graph = @profile_graph.contexts.detect {|g| g.identifier == profile} if @profile_graph
+            unless p_graph
+              add_debug(element, "process_profile: retrieve profile <#{profile}>")
+              # Fixme: Should using HTTP cache and conditional gets to make sure resource is up-to-date
+              prof_body = OpenURI.open_uri(profile)
+              raise ParserException, "Empty profile #{profile}" if prof_body.to_s.empty?
+      
+              # Parse profile, and extract mappings from graph
+              add_debug(element, "process_profile: parse profile <#{profile}>")
+              old_debug, old_verbose, = ::RdfContext::debug?, $verbose
+              parse_options = {}
+              if @profile_graph
+                parse_options[:profile_graph] = @profile_graph
+                parse_options[:graph] = Graph.new(:identifier => profile, :store => @profile_graph.store)
+              end
+              
+              ::RdfContext::debug, $verbose = false, false
+              p_graph = Parser.parse(prof_body, profile, parse_options)
+              ttl = p_graph.serialize(:format => :ttl) if @debug || ::RdfContext::debug?
+              ::RdfContext::debug, $verbose = old_debug, old_verbose
+              add_debug(element, ttl) if ttl
+            end
+
+            add_debug(element, "process_profile: extract mappings from <#{profile}>")
             @@vocabulary_cache[profile] = {
               :uri_mappings => {},
               :term_mappings => {},
@@ -249,17 +283,6 @@ module RdfContext
             }
             um = @@vocabulary_cache[profile][:uri_mappings]
             tm = @@vocabulary_cache[profile][:term_mappings]
-            add_debug(element, "process_profile: parse profile <#{profile}>")
-            prof_body = OpenURI.open_uri(profile)
-            raise ParserException, "Empty profile #{profile}" if prof_body.to_s.empty?
-      
-            # Parse profile, and extract mappings from graph
-            old_debug, old_verbose, = ::RdfContext::debug?, $verbose
-            ::RdfContext::debug, $verbose = false, false
-            p_graph = Parser.parse(prof_body, profile)
-            ttl = p_graph.serialize(:format => :ttl) if @debug || ::RdfContext::debug?
-            ::RdfContext::debug, $verbose = old_debug, old_verbose
-            add_debug(element, ttl) if ttl
             p_graph.subjects.each do |subject|
               props = p_graph.properties(subject)
               #puts props.inspect

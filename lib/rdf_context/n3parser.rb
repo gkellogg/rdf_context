@@ -15,6 +15,7 @@ module RdfContext
     #
     # @param [String] n3_str:: the Notation3/Turtle string
     # @param [String] uri:: the URI of the document
+    # @option options [Graph] :graph (Graph.new) Graph to parse into, otherwise a new Graph instance is created
     # @option options [Array] :debug (nil) Array to place debug messages
     # @option options [Boolean] :strict (false) Raise Error if true, continue with lax parsing, otherwise
     # @return [Graph]
