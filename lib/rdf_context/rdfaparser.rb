@@ -7,7 +7,7 @@ module RdfContext
   #
   # Based on processing rules described here:
   # @see http://www.w3.org/TR/rdfa-syntax/#s_model RDFa 1.0
-  # @see http://www.w3.org/2010/02/rdfa/drafts/2010/WD-rdfa-core-20100803/ RDFa 1.1
+  # @see http://www.w3.org/2010/02/rdfa/drafts/2010/WD-rdfa-core-20101026/ RDFa 1.1
   #
   # @author Ben Adida
   # @author Gregg Kellogg
@@ -67,6 +67,10 @@ module RdfContext
       #
       # @return URIRef
       attr :parent_object, true
+      # A list of current, in-scope profiles.
+      #
+      # @return [Array<URIRef>]
+      attr :profiles, true
       # A list of current, in-scope URI mappings.
       #
       # @return [Hash{String => Namespace}]
@@ -110,6 +114,7 @@ module RdfContext
         @base = base
         @parent_subject = @base
         @parent_object = nil
+        @profiles = []
         @uri_mappings = host_defaults.fetch(:uri_mappings, {})
         @incomplete_triples = []
         @language = nil
@@ -124,6 +129,7 @@ module RdfContext
           # clone the evaluation context correctly
           @uri_mappings = from.uri_mappings.clone
           @incomplete_triples = from.incomplete_triples.clone
+          @profiles = from.profiles.clone
       end
       
       def inspect
@@ -131,6 +137,7 @@ module RdfContext
         v << "uri_mappings[#{uri_mappings.keys.length}]"
         v << "incomplete_triples[#{incomplete_triples.length}]"
         v << "term_mappings[#{term_mappings.keys.length}]"
+        v << "profiles[#{profiles.length}]"
         v.join(",")
       end
     end
@@ -180,8 +187,8 @@ module RdfContext
       else                               Nokogiri::XML.parse(stream, uri.to_s)
       end
       
-      add_error(nil, "Empty document", RDFA_NS.HostLanguageMarkupError) if @doc.nil?
-      add_warning(nil, "Synax errors:\n#{@doc.errors}", RDFA_NS.HostLanguageMarkupError) unless @doc.errors.empty?
+      add_error(nil, "Empty document", RDFA_NS.DocumentError) if @doc.nil?
+      add_warning(nil, "Synax errors:\n#{@doc.errors}", RDFA_NS.DocumentError) unless @doc.errors.empty?
       
       @callback = block
 
@@ -243,7 +250,7 @@ module RdfContext
     # Parse and process URI mappings, Term mappings and a default vocabulary from @profile
     #
     # Yields each mapping
-    def process_profile(element)
+    def process_profile(element, profiles)
       element.attributes['profile'].to_s.split(/\s/).reverse.each do |profile|
         # Don't try to open ourselves!
         if @uri == profile
@@ -321,7 +328,7 @@ module RdfContext
               # triple that is the common subject of an rdfa:term and an rdfa:uri predicate, create a
               # mapping from the object literal of the rdfa:term predicate to the object literal of the
               # rdfa:uri predicate. Add or update this mapping in the local term mappings.
-              tm[term.to_s.downcase] = URIRef.intern(uri.to_s, :normalize => false) if term
+              tm[term.to_s] = URIRef.intern(uri.to_s, :normalize => false) if term
             end
           rescue Exception => e
             add_error(element, e.message, RDFA_NS.ProfileReferenceError)
@@ -363,7 +370,6 @@ module RdfContext
       # Set mappings from @prefix
       # prefix is a whitespace separated list of prefix-name URI pairs of the form
       #   NCName ':' ' '+ xs:anyURI
-      # SPEC Confusion: prefix is forced to lower-case in @profile, but not specified here.
       mappings = element.attributes["prefix"].to_s.split(/\s+/)
       while mappings.length > 0 do
         prefix, uri = mappings.shift.downcase, mappings.shift
@@ -399,6 +405,7 @@ module RdfContext
       language = evaluation_context.language
       term_mappings = evaluation_context.term_mappings.clone
       default_vocabulary = evaluation_context.default_vocabulary
+      profiles = evaluation_context.profiles.clone
 
       current_object_literal = nil  # XXX Not explicit
     
@@ -418,13 +425,14 @@ module RdfContext
       content = attrs['content'].to_s if attrs['content']
       rel = attrs['rel'].to_s.strip if attrs['rel']
       rev = attrs['rev'].to_s.strip if attrs['rev']
+      profiles = element.attributes['profile'].to_s.split(/\s/) + profiles  # In-scope profiles in order for passing to XMLLiteral
 
       # Local term mappings [7.5 Steps 2]
       # Next the current element is parsed for any updates to the local term mappings and local list of URI mappings via @profile.
       # If @profile is present, its value is processed as defined in RDFa Profiles.
       unless @version == :rdfa_1_0
         begin
-          process_profile(element) do |which, value|
+          process_profile(element, profiles) do |which, value|
             add_debug(element, "[Step 2] traverse, #{which}: #{value.inspect}")
             case which
             when :uri_mappings        then uri_mappings.merge!(value)
@@ -639,8 +647,20 @@ module RdfContext
           if datatype.to_s == XML_LITERAL.to_s
             # XML Literal
             add_debug(element, "[Step 11(1.1)] XML Literal: #{element.inner_html}")
-            recurse = false
-            Literal.typed(element.children, XML_LITERAL, :language => language, :namespaces => uri_mappings)
+            
+            # In order to maintain maximum portability of this literal, any children of the current node that are
+            # elements must have the current in scope profiles, default vocabulary, prefix mappings, and XML
+            # namespace declarations (if any) declared on the serialized element using their respective attributes.
+            # Since the child element node could also declare new prefix mappings or XML namespaces, the RDFa
+            # Processor must be careful to merge these together when generating the serialized element definition.
+            # For avoidance of doubt, any re-declarations on the child node must take precedence over declarations
+            # that were active on the current node.
+            Literal.typed(element.children, XML_LITERAL,
+                          :language => language,
+                          :namespaces => uri_mappings,
+                          :profiles => profiles,
+                          :prefixes => uri_mappings,
+                          :default_vocabulary => default_vocabulary)
           else
             # plain literal
             add_debug(element, "[Step 11(1.1)] plain literal")
@@ -663,8 +683,6 @@ module RdfContext
         properties.each do |p|
           add_triple(element, new_subject, p, current_object_literal)
         end
-        # SPEC CONFUSION: "the triple has been created" ==> there may be more than one
-        # set the recurse flag above in the IF about xmlliteral, as it is the only place that can happen
       end
     
       if not skip and new_subject && !evaluation_context.incomplete_triples.empty?
@@ -686,6 +704,7 @@ module RdfContext
               uri_mappings == evaluation_context.uri_mappings &&
               term_mappings == evaluation_context.term_mappings &&
               default_vocabulary == evaluation_context.default_vocabulary &&
+              profiles == evaluation_context.profiles
             new_ec = evaluation_context
             add_debug(element, "[Step 13] skip: reused ec")
           else
@@ -694,6 +713,7 @@ module RdfContext
             new_ec.uri_mappings = uri_mappings
             new_ec.term_mappings = term_mappings
             new_ec.default_vocabulary = default_vocabulary
+            new_ec.profiles = profiles
             add_debug(element, "[Step 13] skip: cloned ec")
           end
         else
@@ -706,6 +726,7 @@ module RdfContext
           new_ec.language = language
           new_ec.term_mappings = term_mappings
           new_ec.default_vocabulary = default_vocabulary
+          new_ec.profiles = profiles
           add_debug(element, "[Step 13] new ec")
         end
       
@@ -758,11 +779,11 @@ module RdfContext
             # AbsURI does not use xml:base
             uri = URIRef.intern(value, restrictions.include?(:absuri) ? nil : evaluation_context.base, :normalize => false)
           rescue Addressable::URI::InvalidURIError => e
-            add_warning(element, "Malformed prefix #{value}", RDFA_NS.UndefinedPrefixError)
+            add_warning(element, "Malformed prefix #{value}", RDFA_NS.UnresolvedCURIE)
           rescue ParserException => e
             add_debug(element, e.message)
             if value.to_s =~ /^\(^\w\):/
-              add_warning(element, "Undefined prefix #{$1}", RDFA_NS.UndefinedPrefixError)
+              add_warning(element, "Undefined prefix #{$1}", RDFA_NS.UnresolvedCURIE)
             else
               add_warning(element, "Relative URI #{value}")
             end
@@ -780,16 +801,22 @@ module RdfContext
     # <em>options[:term_mappings]</em>:: Term mappings
     # <em>options[:vocab]</em>:: Default vocabulary
     def process_term(element, value, options)
-      case
-      when options[:term_mappings].is_a?(Hash) && options[:term_mappings].has_key?(value.to_s.downcase)
-        # If the term is in the local term mappings, use the associated URI.
-        options[:term_mappings][value.to_s.downcase]
-      when options[:vocab]
+      if options[:term_mappings].is_a?(Hash)
+        # If the term is in the local term mappings, use the associated URI (case sensitive).
+        return options[:term_mappings][value.to_s] if options[:term_mappings].has_key?(value.to_s)
+        
+        # Otherwise, check for case-insensitive match
+        options[:term_mappings].each_pair do |term, uri|
+          return uri if term.downcase == value.to_s.downcase
+        end
+      end
+      
+      if options[:vocab]
         # Otherwise, if there is a local default vocabulary the URI is obtained by concatenating that value and the term.
         URIRef.intern(options[:vocab].to_s + value)
       else
         # Finally, if there is no local default vocabulary, the term has no associated URI and must be ignored.
-        add_warning(element, "Term #{value} is not defined", RDFA_NS.UndefinedTermError)
+        add_warning(element, "Term #{value} is not defined", RDFA_NS.UnresolvedTerm)
         nil
       end
     end
@@ -812,7 +839,7 @@ module RdfContext
         elsif @host_defaults[:prefix]
           @host_defaults[:prefix].send("#{reference}_")
         else
-          #add_warning(element, "Default namespace prefix is not defined", RDFA_NS.UndefinedPrefixError)
+          #add_warning(element, "Default namespace prefix is not defined", RDFA_NS.UnresolvedCURIE)
           nil
         end
       elsif !curie.to_s.match(/:/)

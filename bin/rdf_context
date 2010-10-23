@@ -8,10 +8,15 @@ class Parse
     puts "Parse: #{file.is_a?(StringIO) ? base_uri : file}" if $quiet
     graph_opts = {:identifier => base_uri}
     graph_opts[:store] = store if store
-    parser = Parser.new(:graph => Graph.new(graph_opts))
+    pg = RdfContext::Graph.new if $pg_format
+    parser = Parser.new(:graph => Graph.new(graph_opts), :processor_graph => pg)
     parser.parse(file.respond_to?(:read) ? file : File.open(file), base_uri, :strict => true)
     puts parser.graph.serialize(:format => $format.to_sym, :base => base_uri) unless $quiet
     puts parser.debug.to_a.join("\n\t") if $verbose
+    if pg
+      puts "\nProcessor Graph:\n"
+      puts pg.serialize(:format => $pg_format.to_sym) unless $quiet
+    end
   rescue RdfException => e
     puts "Parse failure: #{e.message}"
     puts parser.debug if $verbose && parser
@@ -29,12 +34,14 @@ raise "Mode must be one of 'parse'" unless mode == "parse"
 $verbose = false
 $quiet = false
 $format = "ttl"
+$pg_format = nil
 base_uri  = "http://example.com"
 store = :list_store
 opts = GetoptLong.new(
   ["--verbose", GetoptLong::NO_ARGUMENT],
   ["--quiet", GetoptLong::NO_ARGUMENT],
   ["--debug", GetoptLong::NO_ARGUMENT],
+  ["--pg-format", GetoptLong::REQUIRED_ARGUMENT],
   ["--format", GetoptLong::REQUIRED_ARGUMENT],
   ["--store", GetoptLong::REQUIRED_ARGUMENT],
   ["--uri", GetoptLong::REQUIRED_ARGUMENT]
@@ -45,6 +52,7 @@ opts.each do |opt, arg|
   when '--quiet' then $quiet = true
   when '--debug' then ::RdfContext::debug = true
   when '--format' then $format = arg
+  when '--pg-format' then $pg_format = arg
   when '--uri' then base_uri = arg
   when '--store'
     case arg

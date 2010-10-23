@@ -161,18 +161,18 @@ module RdfContext
     # @param [XML Node, any] node:: XML Node or string for showing context
     # @param [String] message::
     def add_debug(node, message)
-      add_processor_message(node, message, RDFA_NS.InformationalMessage)
+      add_processor_message(node, message, RDFA_NS.Info)
     end
 
-    def add_info(node, message, process_class = RDFA_NS.InformationalMessage)
+    def add_info(node, message, process_class = RDFA_NS.Info)
       add_processor_message(node, message, process_class)
     end
     
-    def add_warning(node, message, process_class = RDFA_NS.MiscellaneousWarning)
+    def add_warning(node, message, process_class = RDFA_NS.Warning)
       add_processor_message(node, message, process_class)
     end
     
-    def add_error(node, message, process_class = RDFA_NS.MiscellaneousError)
+    def add_error(node, message, process_class = RDFA_NS.Error)
       add_processor_message(node, message, process_class)
       raise ParserException, message if @strict
     end
@@ -185,9 +185,13 @@ module RdfContext
         n = BNode.new
         @processor_graph << Triple.new(n, RDF_TYPE, process_class)
         @processor_graph << Triple.new(n, DC_NS.description, message)
-        @processor_graph << Triple.new(n, DC_NS.date, Literal.build_from(DateTime.now.to_date))
+        @processor_graph << Triple.new(n, DC_NS.date, Literal.build_from(DateTime.now))
         @processor_graph << Triple.new(n, RDFA_NS.sequence, Literal.build_from(@processor_sequence += 1))
-        @processor_graph << Triple.new(n, RDFA_NS.source, node_path(node))
+        @processor_graph << Triple.new(n, RDFA_NS.context, uri)
+        nc = BNode.new
+        @processor_graph << Triple.new(nc, RDF_TYPE, PTR_NS.XPathPointer)
+        @processor_graph << Triple.new(nc, PTR_NS.expression, node.path)
+        @processor_graph << Triple.new(n, RDFA_NS.context, nc)
       end
     end
     
