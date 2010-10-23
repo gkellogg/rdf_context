@@ -1,3 +1,9 @@
+=== 0.5.9
+* Update to 2010-10-26 LC version of RDFa Core 1.1
+  * Deep processing of XMLLiterals
+  * Case sensitive Terms
+  * Updated processor graph vocabulary
+
 === 0.5.8.2
 * Don't create unnecessary namespaces when serializing RDF/XML.
 * Don't use regexp to substitute base URI in URI serialization.
