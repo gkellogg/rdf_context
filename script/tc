@@ -7,13 +7,21 @@ require 'getoptlong'
 
 def run_tc(tc)
   puts "run #{tc.name}"
-  graph = RdfContext::RdfaParser.parse(tc.input, tc.informationResourceInput, :strict => $strict, :version => tc.version)
+  puts tc.input if $verbose
+  pg = RdfContext::Graph.new if $pg_format
+  graph = RdfContext::RdfaParser.parse(tc.input, tc.informationResourceInput, :strict => $strict, :version => tc.version, :processor_graph => pg)
   puts graph.serialize(:format => $format.to_sym, :base => tc.informationResourceInput) unless $quiet
+  if pg
+    puts "\nProcessor Graph:\n"
+    puts pg.serialize(:format => $pg_format.to_sym) unless $quiet
+  end
 end
 
 $verbose = false
 $format = :ntriples
+$pg_format = nil
 $strict = false
+debug = false
 suite = "xhtml"
 opts = GetoptLong.new(
   ["--debug", GetoptLong::NO_ARGUMENT],
@@ -21,20 +29,24 @@ opts = GetoptLong.new(
   ["--quiet", GetoptLong::NO_ARGUMENT],
   ["--suite", GetoptLong::OPTIONAL_ARGUMENT],
   ["--strict", GetoptLong::NO_ARGUMENT],
-  ["--format", GetoptLong::REQUIRED_ARGUMENT]
+  ["--format", GetoptLong::REQUIRED_ARGUMENT],
+  ["--pg-format", GetoptLong::REQUIRED_ARGUMENT]
 )
 opts.each do |opt, arg|
   case opt
   when '--verbose' then $verbose = true
   when '--quiet' then $quiet = true
-  when '--debug' then ::RdfContext::debug = true
+  when '--debug' then debug = true
   when '--format' then $format = arg
+  when '--pg-format' then $pg_format = arg
   when '--suite' then suite = arg
   when '--strict' then $strict = true
   end
 end
 
 test_cases = RdfaHelper::TestCase.test_cases(suite)
+
+::RdfContext::debug = debug
 
 puts test_cases.length
 

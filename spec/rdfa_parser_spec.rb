@@ -74,7 +74,7 @@ describe "RDFa parser" do
     xml = @parser.graph.to_rdfxml
 
     # Ensure that enclosed literal is also valid
-    xml.should include("E = mc<sup xmlns=\"http://www.w3.org/1999/xhtml\">2</sup>: The Most Urgent Problem of Our Time")
+    xml.should include("E = mc")
   end
 
   it "should parse BNodes" do

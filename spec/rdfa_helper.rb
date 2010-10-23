@@ -237,7 +237,7 @@ module OpenURI
     when %r(http://rdfa.digitalbazaar.com/test-suite/test-cases/\w+)
       file = uri.to_s.sub(%r(http://rdfa.digitalbazaar.com/test-suite/test-cases/\w+),
         File.join(File.expand_path(File.dirname(__FILE__)), 'rdfa-test-suite', 'tests'))
-      puts "file: #{file}"
+      #puts "file: #{file}"
       File.open(file)
     when "http://www.w3.org/1999/xhtml/vocab"
       file = File.join(File.expand_path(File.dirname(__FILE__)), 'rdfa-test-suite', 'profile', "xhv")

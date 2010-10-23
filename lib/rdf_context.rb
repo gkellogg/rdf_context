@@ -64,6 +64,7 @@ module RdfContext
   DC_NS       = Namespace.new("http://purl.org/dc/terms/", "dc")
   OWL_NS      = Namespace.new("http://www.w3.org/2002/07/owl#", "owl")
   LOG_NS      = Namespace.new("http://www.w3.org/2000/10/swap/log#", "log")
+  PTR_NS      = Namespace.new("http://www.w3.org/2009/pointers#", "ptr")
   RDF_NS      = Namespace.new("http://www.w3.org/1999/02/22-rdf-syntax-ns#", "rdf")
   RDFA_NS     = Namespace.new("http://www.w3.org/ns/rdfa#", "rdfa")
   RDFS_NS     = Namespace.new("http://www.w3.org/2000/01/rdf-schema#", "rdfs")
