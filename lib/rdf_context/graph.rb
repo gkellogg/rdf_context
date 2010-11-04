@@ -271,7 +271,10 @@ module RdfContext
     # Nil matches all triples and thus empties the graph
     # @param [Triple] triple
     # @return [void]
-    def remove(triple); @store.remove(triple, self); end
+    def remove(triple)
+      @properties.delete(triple.subject.to_s) if @properties.is_a?(Hash)
+      @store.remove(triple, self)
+    end
     
     # Triples from graph, optionally matching subject, predicate, or object.
     # Delegates to Store#triples.
@@ -339,6 +342,8 @@ module RdfContext
         end
       end
       remove(Triple.new(subject, predicate, nil))
+
+      @properties.delete(subject.to_s) if @properties.is_a?(Hash)
       
       if objects.empty?
         add_triple(subject, predicate, RDF_NS.nil)

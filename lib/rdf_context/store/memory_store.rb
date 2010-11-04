@@ -109,6 +109,7 @@ module RdfContext
     def remove(triple, context = nil)
       context = nil if context == @identifier || (context.respond_to?(:identifier) && context.identifier == @identifier)
     
+      puts "remove: #{triple.subject}, #{triple.predicate}, #{triple.object}, #{context ? context.identifier : 'none'}" if ::RdfContext::debug?
       # Iterate over all matching triples and contexts
       triples(triple, context) do |t, cg|
         si, pi, oi = triple_to_int(t)

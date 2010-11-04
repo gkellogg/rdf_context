@@ -1,3 +1,6 @@
+=== 0.5.9.1
+* Fix minor graph property caching bug relating to manipulation of sequences.
+
 === 0.5.9
 * Update to 2010-10-26 LC version of RDFa Core 1.1
   * Deep processing of XMLLiterals
