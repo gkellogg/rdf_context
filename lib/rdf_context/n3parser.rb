@@ -270,7 +270,7 @@ module RdfContext
     
     def process_uri(uri)
       uri = uri.text_value if uri.respond_to?(:text_value)
-      URIRef.intern(uri, @uri, :normalize => false)
+      URIRef.intern(uri.to_s.rdf_unescape, @uri, :normalize => false)
     end
     
     def process_properties(properties)
@@ -338,15 +338,18 @@ module RdfContext
       end
 
       uri = if @graph.nsbinding[prefix]
-        @graph.nsbinding[prefix] + localname.to_s.rdf_unescape.rdf_escape
+        @graph.nsbinding[prefix] + localname.to_s
       elsif prefix == '_'
         BNode.new(localname, @named_bnodes)
       elsif prefix == "rdf"
         # A special case
-        RDF_NS + localname.to_s.rdf_unescape.rdf_escape
+        RDF_NS + localname.to_s
+      elsif prefix == "xsd"
+        # A special case
+        XSD_NS + localname.to_s
       else
         @default_ns ||= Namespace.new("#{@uri}#", "")
-        @default_ns + localname.to_s.rdf_unescape.rdf_escape
+        @default_ns + localname.to_s
       end
       add_debug(*expression.info("build_uri: #{uri.inspect}")) if expression.respond_to?(:info)
       uri
