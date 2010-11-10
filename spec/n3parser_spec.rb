@@ -170,6 +170,12 @@ describe "N3 parser" do
       end
     end
 
+    it "should allow mixed-case language" do
+      n3doc = %(@prefix : <http://example/> . :a :p "xyz"@EN .)
+      statement = @parser.parse(n3doc).triples.first
+      statement.object.to_ntriples.should == %("xyz"@en)
+    end
+
     it "should create typed literals" do
       n3doc = "<http://example.org/joe> <http://xmlns.com/foaf/0.1/name> \"Joe\"^^<http://www.w3.org/2001/XMLSchema#string> ."
       @parser.parse(n3doc)
@@ -372,9 +378,13 @@ describe "N3 parser" do
         @parser.parse(n3, "http://a/b").should be_equivalent_graph(nt, :about => "http://a/b", :trace => @parser.debug, :compare => :array)
       end
       
-      it "should do something for @forAll"
+      it "should do something for @forAll" do
+        pending
+      end
 
-      it "should do something for @forSome"
+      it "should do something for @forSome" do
+        pending
+      end
     end
     
     describe "namespaces" do
@@ -706,9 +716,13 @@ describe "N3 parser" do
     end
     
     describe "formulae" do
-      it "should require that graph be formula_aware when encountering a formlua"
+      it "should require that graph be formula_aware when encountering a formlua" do
+        pending
+      end
       
-      it "should separate triples between specified and quoted graphs"
+      it "should separate triples between specified and quoted graphs" do
+        pending
+      end
     end
     
     describe "object lists" do
