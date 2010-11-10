@@ -69,6 +69,11 @@ task :spec => :check_dependencies
 
 task :default => :spec
 
+desc "Update N3 grammar"
+task :grammar do
+  sh "tt -o lib/rdf_context/n3_grammar.rb lib/rdf_context/n3_grammar.treetop"
+end
+
 namespace :doc do
   require 'rake/rdoctask'
   Rake::RDocTask.new("rdoc") do |rdoc|
