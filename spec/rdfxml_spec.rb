@@ -5,7 +5,7 @@ include RdfContext
 
 # w3c test suite: http://www.w3.org/TR/rdf-testcases/
 
-describe "RDF/XML Parser" do
+describe RdfXmlParser do
   before(:each) { @parser = RdfXmlParser.new }
 
   it "should recognise and create single triple for empty non-RDF root" do

@@ -2,7 +2,7 @@
 $:.unshift "."
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
-describe "Literals: " do
+describe Literal do
   describe "an untyped string" do
     subject {Literal.untyped("tom")}
     it "should be equal if they have the same contents" do should == Literal.untyped("tom") end

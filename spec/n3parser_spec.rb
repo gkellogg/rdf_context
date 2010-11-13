@@ -3,7 +3,7 @@ $:.unshift "."
 require File.join(File.dirname(__FILE__), 'spec_helper')
 include RdfContext
 
-describe "N3 parser" do
+describe N3Parser do
   before(:each) { @parser = N3Parser.new(:strict => true) }
   
   describe "with simple ntriples" do

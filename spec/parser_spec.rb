@@ -4,7 +4,7 @@ include RdfContext
 
 # w3c test suite: http://www.w3.org/TR/rdf-testcases/
 
-describe "RDF Parser" do
+describe Parser do
   it "should return N3 parser" do
     Parser.n3_parser.should be_a(N3Parser)
   end

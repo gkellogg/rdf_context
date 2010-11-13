@@ -26,7 +26,7 @@ begin
     gemspec.add_dependency('treetop',  '>= 1.4.0')
     gemspec.add_dependency('nokogiri', '>= 1.4.3')
     gemspec.add_dependency('builder', '>= 2.1.2')
-    gemspec.add_development_dependency('rspec')
+    gemspec.add_development_dependency('rspec', '>= 2.1.0')
     gemspec.add_development_dependency('activesupport', '>= 2.3.0')
     gemspec.add_development_dependency('yard')
     gemspec.extra_rdoc_files     = %w(README.rdoc History.txt)
@@ -45,24 +45,18 @@ task :push do
   sh "growlnotify -m \"Updates pushed\" \"Git\""
 end
 
-require 'spec/rake/spectask'
-Spec::Rake::SpecTask.new(:spec) do |spec|
-  spec.libs << 'lib' << 'spec'
-  spec.spec_files = FileList['spec/*_spec.rb']
-end
+require 'rspec/core/rake_task'
+RSpec::Core::RakeTask.new(:spec)
 
 desc "Run specs through RCov"
-Spec::Rake::SpecTask.new("spec:rcov") do |spec|
-  spec.libs << 'lib' << 'spec'
-  spec.pattern = 'spec/*_spec.rb'
+RSpec::Core::RakeTask.new("spec:rcov") do |spec|
   spec.rcov = true
+  spec.rcov_opts =  %q[--exclude "spec"]
 end
 
 desc "Generate HTML report specs"
-Spec::Rake::SpecTask.new("doc:spec") do |spec|
-  spec.libs << 'lib' << 'spec'
-  spec.spec_files = FileList['spec/*_spec.rb']
-  spec.spec_opts = ["--format", "html:doc/spec.html"]
+RSpec::Core::RakeTask.new("spec") do |spec|
+  spec.rspec_opts = ["--format", "html:doc/spec.html"]
 end
 
 task :spec => :check_dependencies

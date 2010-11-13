@@ -1,7 +1,7 @@
 $:.unshift "."
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
-describe "Graphs" do
+describe Graph do
   before(:all) do
     @ex = Namespace.new("http://example.org/", "ex")
     @foaf = Namespace.new("http://xmlns.com/foaf/0.1/", "foaf")

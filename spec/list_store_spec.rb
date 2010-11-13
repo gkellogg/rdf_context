@@ -2,7 +2,7 @@ $:.unshift "."
 require File.join(File.dirname(__FILE__), 'spec_helper')
 require File.join(File.dirname(__FILE__), 'store_helper')
 
-describe "List Store" do
+describe ListStore do
   before(:all) do
     @identifier = URIRef.new("http://identifier")
   end

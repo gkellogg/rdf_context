@@ -1,7 +1,7 @@
 $:.unshift "."
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
-describe "ConjunctiveGraph" do
+describe ConjunctiveGraph do
   before(:each) do
     @ex = Namespace.new("http://example.org/", "ex")
     @identifier = URIRef.new("http://store.identifier")

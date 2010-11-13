@@ -1,7 +1,7 @@
 require File.join(File.dirname(__FILE__), 'spec_helper')
 include RdfContext
 
-describe "N3 parser" do
+describe N3Parser do
   # W3C N3 Test suite from http://www.w3.org/2000/10/swap/test/n3parser.tests
   describe "w3c swap tests" do
     require 'rdf_helper'

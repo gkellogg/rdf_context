@@ -5,7 +5,7 @@ require 'webrick'
 include WEBrick
 #require 'lib/uriref'
 
-describe "URI References" do
+describe URIRef do
   it "should output NTriples" do
     f = URIRef.new("http://tommorris.org/foaf/")
     f.to_ntriples.should == "<http://tommorris.org/foaf/>"

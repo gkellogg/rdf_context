@@ -2,7 +2,7 @@ $:.unshift "."
 require File.join(File.dirname(__FILE__), 'spec_helper')
 include RdfContext
 
-describe "Turtle Serializer" do
+describe TurtleSerializer do
   describe "simple tests" do
     it "should use full URIs without base" do
       input = %(<http://a/b> <http://a/c> <http://a/d> .)

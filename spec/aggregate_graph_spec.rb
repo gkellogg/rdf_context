@@ -1,7 +1,7 @@
 $:.unshift "."
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
-describe "AggregateGraph" do
+describe AggregateGraph do
   before(:all) do
     @store = MemoryStore.new(@identifier)
     @graph1 = Graph.new(:store => @store)

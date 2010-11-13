@@ -1,6 +1,6 @@
 #encoding: utf-8
 grammar N3Grammer
-  # Entry point to grammer
+  # Entry point to grammar
   rule document
     statements
   end

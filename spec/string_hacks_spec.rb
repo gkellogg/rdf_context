@@ -2,7 +2,7 @@
 $:.unshift "."
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
-describe "String RDF encoding" do
+describe String do
   {
     "Gregg" => 'Gregg',
     "Dürst" => 'D\u00FCrst',

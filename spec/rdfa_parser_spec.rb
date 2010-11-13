@@ -5,7 +5,7 @@ require 'rdfa_helper'
 
 # Time to add your specs!
 # http://rspec.info/
-describe "RDFa parser" do
+describe RdfaParser do
   before(:each) do
      @parser = RdfaParser.new
    end

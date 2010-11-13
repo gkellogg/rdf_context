@@ -1,6 +1,6 @@
 $:.unshift "."
 require File.join(File.dirname(__FILE__), 'spec_helper')
-describe "Blank nodes" do
+describe BNode do
   before(:all) { @context = {} }
   
   describe "which have custom identifiers" do

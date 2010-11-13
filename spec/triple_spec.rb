@@ -1,7 +1,7 @@
 $:.unshift "."
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
-describe "Triples" do
+describe Triple do
   before(:all) { @graph = Graph.new(:store => ListStore.new) }
   
   describe "with subjects" do

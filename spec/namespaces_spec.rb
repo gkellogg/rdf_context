@@ -1,7 +1,7 @@
 $:.unshift "."
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
-describe "Namespace" do
+describe Namespace do
   subject { Namespace.new("http://xmlns.com/foaf/0.1/", "foaf") }
 
   describe "method_missing" do

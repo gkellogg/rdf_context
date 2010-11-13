@@ -2,7 +2,7 @@ $:.unshift "."
 require File.join(File.dirname(__FILE__), 'spec_helper')
 include RdfContext
 
-describe "N3 parser" do
+describe N3Parser do
   describe "w3c cwm tests" do
     require 'rdf_helper'
 

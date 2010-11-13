@@ -2,7 +2,7 @@ $:.unshift "."
 require File.join(File.dirname(__FILE__), 'spec_helper')
 require File.join(File.dirname(__FILE__), 'store_helper')
 
-describe "SQLite3 Store" do
+describe SQLite3Store do
   before(:all) do
     FileUtils.rm_rf(TMP_DIR)
     Dir.mkdir(TMP_DIR)
