@@ -92,9 +92,10 @@ desc "Generate RDF Core Manifest.yml"
 namespace :spec do
   task :prepare do
     $:.unshift(File.join(File.dirname(__FILE__), 'lib'))
+    $:.unshift(File.join(File.dirname(__FILE__), 'spec'))
     require 'rdf_context'
-    require 'spec/rdfa_helper'
-    require 'spec/rdf_helper'
+    require 'rdfa_helper'
+    require 'rdf_helper'
     require 'fileutils'
 
     %w(xhtml xhtml11 html4 html5).each do |suite|
@@ -121,7 +122,7 @@ namespace :spec do
     
     yaml = File.join(TURTLE_DIR, "manifest-bad.yml")
     FileUtils.rm_f(yaml)
-    RdfHelper::TestCase.to_yaml(TURTLE_TEST, TURTLE_DIR, yaml)
+    RdfHelper::TestCase.to_yaml(TURTLE_BAD_TEST, TURTLE_DIR, yaml)
   end
 end
 
