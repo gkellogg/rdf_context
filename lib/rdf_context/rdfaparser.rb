@@ -193,7 +193,11 @@ module RdfContext
       @callback = block
 
       @version = options[:version] ? options[:version].to_sym : :rdfa_1_1
-      @host_language = options[:host_language] || :xhtml
+      @host_language = options[:host_language] || case @doc.root.name.downcase.to_sym
+      when :html  then :xhtml
+      when :svg   then :svg
+      else             :xhtml
+      end
 
       # Section 4.2 RDFa Host Language Conformance
       #
@@ -231,14 +235,19 @@ module RdfContext
     # Parsing an RDFa document (this is *not* the recursive method)
     def parse_whole_document(doc, base)
       # find if the document has a base element
-      # XXX - HTML specific
-      base_el = doc.css('html>head>base').first
-      if (base_el)
-        base = base_el.attributes['href']
+      base = case @host_language
+      when :xhtml
+        base_el = doc.at_css("html>head>base")
+        base_el.attribute("href").to_s.split("#").first if base_el
+      else
+        doc.at_xpath("/css/@xml:base", "xml" => XML_NS.uri.to_s)
+      end
+      
+      if (base)
         # Strip any fragment from base
         base = base.to_s.split("#").first
         @uri = URIRef.intern(base, :normalize => false, :normalize => false)
-        add_debug(base_el, "parse_whole_doc: base='#{base}'")
+        add_debug("", "parse_whole_doc: base='#{base}'")
       end
 
       # initialize the evaluation context with the appropriate base
