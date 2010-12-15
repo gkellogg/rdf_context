@@ -328,7 +328,7 @@ EOF
         #puts t.inspect
         specify "test #{t.name}: " + (t.description || "#{t.inputDocument} against #{t.outputDocument}") do
           t.run_test do |rdf_string, parser|
-            parser.parse(rdf_string, t.about.uri.to_s, :strict => true, :debug => [])
+            parser.parse(rdf_string, t.about, :strict => true, :debug => [])
           end
         end
       end
@@ -342,7 +342,7 @@ EOF
         specify "test #{t.name}: " + (t.description || t.inputDocument) do
           t.run_test do |rdf_string, parser|
             lambda do
-              parser.parse(rdf_string, t.about.uri.to_s, :strict => true, :debug => [])
+              parser.parse(rdf_string, t.about, :strict => true, :debug => [])
               parser.graph.should be_equivalent_graph("", t)
             end.should raise_error(RdfException)
           end

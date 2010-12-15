@@ -20,11 +20,11 @@ describe N3Parser do
         #next unless t.about.uri.to_s =~ /rdfms-rdf-names-use/
         #next unless t.name =~ /11/
         #puts t.inspect
-        specify "#{t.name}: #{t.about.uri.to_s} against #{t.outputDocument}" do
+        specify "#{t.name}: #{t.about} against #{t.outputDocument}" do
           begin
             t.run_test do |rdf_string, parser|
               t.name.should_not == "n3_10012"  # Too many bnodes makes graph compare unfeasable
-              parser.parse(rdf_string, t.about.uri.to_s, :strict => true, :debug => [])
+              parser.parse(rdf_string, t.about, :strict => true, :debug => [])
             end
           rescue #RSpec::Expectations::ExpectationNotMetError => e
             if %w(n3_10003 n3_10004).include?(t.name)
@@ -48,7 +48,7 @@ describe N3Parser do
         #next unless t.about.uri.to_s =~ /rdfms-empty-property-elements/
         #next unless t.name =~ /1/
         #puts t.inspect
-        specify "#{t.name}: #{t.about.uri.to_s}" do
+        specify "#{t.name}: #{t.about}" do
           t.run_test do |rdf_string, parser|
             if !defined?(::Encoding) && %w(n3_10019 n3_10020).include?(t.name)
               pending("Not supported in Ruby 1.8")
@@ -56,7 +56,7 @@ describe N3Parser do
             end
             begin
               lambda do
-                parser.parse(rdf_string, t.about.uri.to_s, :strict => true, :debug => [])
+                parser.parse(rdf_string, t.about, :strict => true, :debug => [])
               end.should raise_error(RdfException)
             rescue RSpec::Expectations::ExpectationNotMetError => e
               if %w().include?(t.name)

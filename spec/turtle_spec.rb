@@ -33,7 +33,7 @@ describe N3Parser do
           else
             begin
               t.run_test do |rdf_string, parser|
-                parser.parse(rdf_string, t.about.uri.to_s, :strict => true, :debug => [])
+                parser.parse(rdf_string, t.about, :strict => true, :debug => [])
                 t.compare = :array if parser.graph.bnodes.empty?
               end
             #rescue #Spec::Expectations::ExpectationNotMetError => e
@@ -51,7 +51,7 @@ describe N3Parser do
           begin
             t.run_test do |rdf_string, parser|
               lambda do
-                parser.parse(rdf_string, t.about.uri.to_s, :strict => true, :debug => [])
+                parser.parse(rdf_string, t.about, :strict => true, :debug => [])
               end.should raise_error(RdfException)
             end
           rescue #Spec::Expectations::ExpectationNotMetError => e

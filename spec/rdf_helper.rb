@@ -51,37 +51,40 @@ module RdfHelper
     def parse_w3c(triples, uri_prefix, test_dir)
       triples.each do |statement|
         next if statement.subject.is_a?(BNode)
-        
+        pred = statement.predicate.to_s.split(/[\#\/]/).last
+        obj  = statement.object.to_s
+
+        puts "#{pred.inspect}: #{obj}" if ::RdfContext::debug?
+        pred = "outputDocument" if pred == "referenceOutput"
         if statement.is_type?
           self.rdf_type = statement.object.short_name
-        elsif statement.predicate.short_name =~ /Document\Z/i
-          puts "#{statement.predicate.short_name}: #{statement.object.inspect}" if ::RdfContext::debug?
-          self.send("#{statement.predicate.short_name}=", statement.object.to_s.sub(uri_prefix, test_dir))
-          puts "#{statement.predicate.short_name}: " + self.send("#{statement.predicate.short_name}") if ::RdfContext::debug?
-          if statement.predicate.short_name == "inputDocument"
-            self.about ||= statement.object
-            self.name ||= statement.subject.short_name
+        elsif pred =~ /Document\Z/i
+          puts "sub #{uri_prefix} in #{obj} for #{test_dir}" if ::RdfContext::debug?
+          about = obj
+          obj = obj.sub(uri_prefix, test_dir)
+          puts " => #{obj}" if ::RdfContext::debug?
+          self.send("#{pred}=", obj)
+          if pred == "inputDocument"
+            self.about ||= about
+            self.name ||= statement.subject.to_s.split(/[\#\/]/).last
           end
-        elsif statement.predicate.short_name == "referenceOutput"
-          puts "referenceOutput: #{statement.object.inspect}" if ::RdfContext::debug?
-          outputDocument = statement.object.to_s.sub(uri_prefix, test_dir)
-          puts "referenceOutput: " + self.send("#{statement.predicate.short_name}") if ::RdfContext::debug?
         elsif self.respond_to?("#{statement.predicate.short_name}=")
-          self.send("#{statement.predicate.short_name}=", statement.object.to_s)
+          self.send("#{pred}=", obj)
         end
       end
     end
 
     def parse_mf(subject, uri_prefix, test_dir, graph)
       props = graph.properties(subject)
+      puts "MF #{subject}: #{props.inspect}" if ::RdfContext::debug?
       @name = (props[MF_NS.name.to_s] || []).first.to_s
       @description =  (props[RDFS_NS.comment.to_s] || []).first.to_s
       @outputDocument = (props[MF_NS.result.to_s] || []).first
       @outputDocument = @outputDocument.to_s.sub(uri_prefix, test_dir) if @outputDocument
       action = (props[MF_NS.action.to_s] || []).first
       a_props = graph.properties(action)
-      @about = (a_props[QT_NS.data.to_s] || []).first
-      @inputDocument = @about.to_s.sub(uri_prefix, test_dir)
+      @about = (a_props[QT_NS.data.to_s] || []).first.to_s
+      @inputDocument = @about.sub(uri_prefix, test_dir)
     end
     
     def inspect
