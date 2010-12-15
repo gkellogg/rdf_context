@@ -98,7 +98,7 @@ namespace :spec do
     require 'rdf_helper'
     require 'fileutils'
 
-    %w(xhtml xhtml11 html4 html5).each do |suite|
+    %w(xhtml html4 html5 svgtiny).each do |suite|
       yaml = manifest_file = File.join(File.dirname(__FILE__), "spec", "#{suite}-manifest.yml")
       FileUtils.rm_f(yaml)
       RdfaHelper::TestCase.to_yaml(suite, yaml)

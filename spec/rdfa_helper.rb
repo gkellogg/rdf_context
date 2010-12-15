@@ -22,6 +22,7 @@ module RdfaHelper
     attr_accessor :informationResourceResults
     attr_accessor :purpose
     attr_accessor :reviewStatus
+    attr_accessor :classification
     attr_accessor :suite
     attr_accessor :specificationReference
     attr_accessor :expectedResults
@@ -36,7 +37,7 @@ module RdfaHelper
         next if statement.subject.is_a?(BNode)
         #next unless statement.subject.uri.to_s.match(/0001/)
         unless self.about
-          self.about = Addressable::URI.parse(statement.subject.uri.to_s)
+          self.about = statement.subject.uri.to_s
           self.name = statement.subject.short_name || self.about
         end
         
@@ -60,6 +61,7 @@ module RdfaHelper
         informationResourceResults
         purpose
         reviewStatus
+        classification
         specificationReference
         expectedResults
       ).map {|a| v = self.send(a); "#{a}='#{v}'" if v}.compact.join(", ") +
@@ -90,6 +92,7 @@ module RdfaHelper
         if found_head
           line.chop
         else
+          found_head ||= line.match(%r(http://www.w3.org/2000/svg))
           namespaces << line
           nil
         end
@@ -101,24 +104,23 @@ module RdfaHelper
       when "xhtml"
         head = "" +
         %(<?xml version="1.0" encoding="UTF-8"?>\n) +
-        %(<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN" "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd">\n) +
-        %(<html xmlns="http://www.w3.org/1999/xhtml" version="XHTML+RDFa 1.0"\n)
-        head + "#{namespaces}>\n#{body.gsub(TCPATHRE, tcpath)}\n</html>"
-      when "xhtml11"
-        head = "" +
-        %(<?xml version="1.0" encoding="UTF-8"?>\n) +
         %(<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.1//EN" "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-2.dtd">\n) +
-        %(<html xmlns="http://www.w3.org/1999/xhtml" version="XHTML+RDFa 1.1"\n)
+        %(<html xmlns="http://www.w3.org/1999/xhtml"\n)
         head + "#{namespaces}>\n#{body.gsub(TCPATHRE, tcpath)}\n</html>"
       when "html4"
         head ="" +
-        %(<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">\n) +
-        %(<html version="XHTML+RDFa 1.0"\n)
+        %(<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/MarkUp/DTD/html401-rdfa11-1.dtd">\n) +
+        %(<html\n)
         head + "#{namespaces}>\n#{body.gsub(TCPATHRE, tcpath).gsub(HTMLRE, '\1.html')}\n</html>"
       when "html5"
         head = "<!DOCTYPE html>\n"
-        head += namespaces.empty? ? %(<html version="HTML+RDFa 1.0">) : "<html\n#{namespaces}>"
+        head += namespaces.empty? ? %(<html>) : "<html\n#{namespaces}>"
         head + "\n#{body.gsub(TCPATHRE, tcpath).gsub(HTMLRE, '\1.html')}\n</html>"
+      when "svgtiny"
+        head = "" +
+        %(<?xml version="1.0" encoding="UTF-8"?>\n)
+        head += namespaces.empty? ? %(<svg>) : "<svg\n#{namespaces}>"
+        head + "\n#{body.gsub(TCPATHRE, tcpath).gsub(HTMLRE, '\1.svg')}\n</svg>"
       else
         nil
       end
@@ -129,20 +131,28 @@ module RdfaHelper
       f = self.name + ".sparql"
       body = File.read(File.join(RDFA_DIR, "tests", f)).gsub(TCPATHRE, tcpath)
       
-      suite =~ /xhtml/ ? body : body.gsub(HTMLRE, '\1.html')
+      case suite
+      when /xhtml/  then body
+      when /svg/    then body.gsub(HTMLRE, '\1.svg')
+      else               body.gsub(HTMLRE, '\1.html')
+      end
     end
     
     def triples
       f = self.name + ".nt"
       body = File.read(File.join(RDFA_NT_DIR, f)).gsub(TCPATHRE, tcpath)
-      suite =~ /xhtml/ ? body : body.gsub(HTMLRE, '\1.html')
+      case suite
+      when /xhtml/  then body
+      when /svg/    then body.gsub(HTMLRE, '\1.svg')
+      else               body.gsub(HTMLRE, '\1.html')
+      end
     end
     
     def inputDocument; self.name + ".txt"; end
     def outputDocument; self.name + ".sparql"; end
 
     def version
-      suite == "xhtml11" ? :rdfa_1_1 : :rdfa_1_0
+      :rdfa_1_1
     end
     
     # Run test case, yields input for parser to create triples
@@ -185,6 +195,7 @@ module RdfaHelper
       yaml_file = File.join(File.dirname(__FILE__), "#{suite}-manifest.yml")
 
       @test_cases = unless File.file?(yaml_file)
+        t = Time.now
         puts "parse #{manifest_file} @#{Time.now}"
         parser = RdfXmlParser.new
 
@@ -194,6 +205,8 @@ module RdfaHelper
           raise "Parse error: #{$!}\n\t#{parser.debug.to_a.join("\t\n")}\n\n"
         end
         graph = parser.graph
+        diff = Time.now - t
+        puts "parsed #{graph.size} statements in #{diff} seconds (#{(graph.size / diff).to_i} statements/sec) @#{Time.now}"
 
         # Group by subject
         test_hash = graph.triples.inject({}) do |hash, st|
