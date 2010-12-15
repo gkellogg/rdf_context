@@ -540,6 +540,9 @@ module RdfContext
           # if no URI is provided, then first check to see if the element is the head or body element.
           # If it is, then act as if there is an empty @about present, and process it according to the rule for @about.
           evaluation_context.base
+        elsif @host_language == :svg && element == @doc.root && evaluation_context.base
+          # XXX Spec confusion, assume that this is true
+          evaluation_context.base
         elsif element.attributes['typeof']
           BNode.new
         else
