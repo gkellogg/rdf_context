@@ -1,5 +1,13 @@
 === 0.5.10
-* Allow mixed case literal languages.
+* N3 Parser
+  * Allow mixed case literal languages.
+  * Unescape literals
+* Rspec 2.1.0
+* Added Resource class, a common super-class of BNode, Graph, Literal and URIRef.
+* Implemented Resource.parse and variations for sub-classes to parse N3-coded resources.
+* RDFa Parser
+  * Upgrade for changes to RDFa 1.1 test suite
+  * For SVG, allow use of xml:base for non-HTML languages
 
 === 0.5.9.1
 * Fix minor graph property caching bug relating to manipulation of sequences.
