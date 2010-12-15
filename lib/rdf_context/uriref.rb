@@ -1,7 +1,8 @@
 require 'net/http'
+require File.join(File.dirname(__FILE__), "resource")
 
 module RdfContext
-  class URIRef
+  class URIRef < Resource
     attr_accessor :uri
     attr_reader   :namespace
     
@@ -38,6 +39,19 @@ module RdfContext
         #@normalize ? uri.normalize : uri
         uri
       end.freeze
+    end
+    
+    ##
+    # Returns `true`
+    #
+    # @return [Boolean]
+    def uri?
+      true
+    end
+
+    # Parse a URIRef
+    def self.parse(str)
+      URIRef.new($1) if str =~ /^<?([^>]*)>?$/ rescue nil
     end
     
     # Internalized version of URIRef

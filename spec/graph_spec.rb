@@ -83,6 +83,21 @@ describe Graph do
     subject.frozen?.should be_true
   end
 
+  describe "descriminators" do
+    it "returns false for bnode?" do
+      subject.should_not be_bnode
+    end
+    it "returns true for graph?" do
+      subject.should be_graph
+    end
+    it "returns false for literal?" do
+      subject.should_not be_literal
+    end
+    it "returns false for uri?" do
+      subject.should_not be_uri
+    end
+  end
+  
   describe "with identifier" do
     before(:all) { @identifier = URIRef.new("http://foo.bar") }
     subject { Graph.new(:identifier => @identifier) }

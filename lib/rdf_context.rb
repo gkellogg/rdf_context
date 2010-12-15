@@ -58,6 +58,10 @@ module RdfContext
     $},
     Regexp::EXTENDED)
 
+  LITERAL_PLAIN         = /^"((?:\\"|[^"])*)"/.freeze
+  LITERAL_WITH_LANGUAGE = /^"((?:\\"|[^"])*)"@([a-z]+[\-A-Za-z0-9]*)/.freeze
+  LITERAL_WITH_DATATYPE = /^"((?:\\"|[^"])*)"\^\^<([^>]+)>/.freeze
+
   RDF_TYPE    = URIRef.new("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
   XML_LITERAL = Literal::Encoding.xmlliteral
 

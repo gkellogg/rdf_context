@@ -1,6 +1,8 @@
+require File.join(File.dirname(__FILE__), "resource")
+
 module RdfContext
   # The BNode class creates RDF blank nodes.
-  class BNode
+  class BNode < Resource
     attr_accessor :identifier
     
     # Create a new BNode, optionally accept a identifier for the BNode.
@@ -25,6 +27,19 @@ module RdfContext
       else
         @identifier = generate_bn_identifier
       end
+    end
+
+    # Parse a BNode
+    def self.parse(str)
+      BNode.new($1) if str =~ /^_:(.*)$/
+    end
+    
+    ##
+    # Returns `true`
+    #
+    # @return [Boolean]
+    def bnode?
+      true
     end
 
     # Return BNode identifier

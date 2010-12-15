@@ -5,10 +5,11 @@ rescue LoadError
 end
 
 require File.join(File.dirname(__FILE__), 'duration')
+require File.join(File.dirname(__FILE__), "resource")
 
 module RdfContext
   # An RDF Literal, with value, encoding and language elements.
-  class Literal
+  class Literal < Resource
     class Encoding
       attr_reader :value
 
@@ -400,6 +401,18 @@ module RdfContext
       new(contents, encoding, options)
     end
     
+    # Parse a Literal in NTriples format
+    def self.parse(str)
+      case str
+        when LITERAL_WITH_LANGUAGE
+          Literal.n3_encoded($1, $2)
+        when LITERAL_WITH_DATATYPE
+          Literal.n3_encoded($1, nil, $2)
+        when LITERAL_PLAIN
+          Literal.n3_encoded($1, nil)
+      end
+    end
+    
     # Create an un-typed literal with a language
     # @param [Object] contents
     # @param [String] language (nil)
@@ -512,6 +525,14 @@ module RdfContext
     #  Encoding.the_null_encoding.xml_args("foo", "en-US") => ["foo", {"xml:lang" => "en-US"}]
     def xml_args
       encoding.xml_args(@contents, @lang)
+    end
+
+    ##
+    # Returns `true`
+    #
+    # @return [Boolean]
+    def literal?
+      true
     end
 
     def untyped?; encoding == Encoding.the_null_encoding; end

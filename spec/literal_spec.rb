@@ -3,6 +3,39 @@ $:.unshift "."
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
 describe Literal do
+  describe "descriminators" do
+    subject { Literal.untyped("gregg") }
+
+    it "returns false for bnode?" do
+      subject.should_not be_bnode
+    end
+    it "returns false for graph?" do
+      subject.should_not be_graph
+    end
+    it "returns true for literal?" do
+      subject.should be_literal
+    end
+    it "returns false for uri?" do
+      subject.should_not be_uri
+    end
+  end
+  
+  describe ".parse" do
+    it "returns nil for unencoded string" do
+      Literal.parse("gregg").should be_nil
+    end
+    
+    {
+      %q("gregg") => Literal.untyped("gregg"),
+      %q("gregg"@en) => Literal.untyped("gregg", "en"),
+      %q("gregg"^^<http://www.w3.org/2001/XMLSchema#string>) => Literal.typed("gregg", XSD_NS.string),
+    }.each_pair do |str, lit|
+      it "parses '#{str}'" do
+        Literal.parse(str).should == lit
+      end
+    end
+  end
+  
   describe "an untyped string" do
     subject {Literal.untyped("tom")}
     it "should be equal if they have the same contents" do should == Literal.untyped("tom") end

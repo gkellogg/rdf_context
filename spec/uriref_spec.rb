@@ -47,6 +47,36 @@ describe URIRef do
     uri2.to_s.should == "http://example.org/foo#bar"
   end
 
+  describe "descriminators" do
+    subject { URIRef.new("http://example.org/") }
+
+    it "returns false for bnode?" do
+      subject.should_not be_bnode
+    end
+    it "returns false for graph?" do
+      subject.should_not be_graph
+    end
+    it "returns false for literal?" do
+      subject.should_not be_literal
+    end
+    it "returns true for uri?" do
+      subject.should be_uri
+    end
+  end
+  
+  describe ".parse" do
+    it "returns nil if invalid" do
+      URIRef.parse("foo").should be_nil
+    end
+
+    it "returns URIRef for 'http://example.com/'" do
+      URIRef.parse('http://example.com/').to_n3.should == '<http://example.com/>'
+    end
+    it "returns URIRef for '<http://example.com/>'" do
+      URIRef.parse('<http://example.com/>').to_n3.should == '<http://example.com/>'
+    end
+  end
+  
   describe "short_name" do
     specify { URIRef.new("http://foo/bar").short_name.should == "bar"}
     specify { URIRef.new("http://foo").short_name.should == false}

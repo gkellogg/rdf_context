@@ -1,3 +1,4 @@
+require File.join(File.dirname(__FILE__), "resource")
 require File.join(File.dirname(__FILE__), 'namespace')
 require File.join(File.dirname(__FILE__), 'triple')
 require File.join(File.dirname(__FILE__), 'array_hacks')
@@ -11,7 +12,7 @@ module RdfContext
   # A simple graph to hold triples.
   #
   # Graphs store triples, and the namespaces associated with those triples, where defined
-  class Graph
+  class Graph < Resource
     attr_reader :triples
     attr_reader :identifier
     attr_reader :store
@@ -48,6 +49,14 @@ module RdfContext
       @identifier = Triple.coerce_node(options[:identifier]) || BNode.new
     end
 
+    ##
+    # Returns `false`, overridden in BNode
+    #
+    # @return [Boolean]
+    def graph?
+      true
+    end
+    
     def inspect
       "#{self.class}[id=#{identifier},store=#{store.inspect}]"
     end

@@ -3,6 +3,42 @@ require File.join(File.dirname(__FILE__), 'spec_helper')
 describe BNode do
   before(:all) { @context = {} }
   
+  describe "descriminators" do
+    subject { BNode.new }
+
+    it "returns true for bnode?" do
+      subject.should be_bnode
+    end
+    it "returns false for graph?" do
+      subject.should_not be_graph
+    end
+    it "returns false for literal?" do
+      subject.should_not be_literal
+    end
+    it "returns false for uri?" do
+      subject.should_not be_uri
+    end
+  end
+  
+  describe ".parse" do
+    subject {BNode.parse("_:bn1292025322717a")}
+    it "returns nil if unrecognized pattern" do
+      BNode.parse("foo").should be_nil
+    end
+    
+    it "returns a BNode" do
+      subject.should be_a(BNode)
+    end
+    
+    it "returns node with same identifier" do
+      subject.identifier.should == "bn1292025322717a"
+    end
+
+    it "returns node with different identifier if not native" do
+      BNode.parse("_:a").identifier.should_not == "a"
+    end
+  end
+  
   describe "which have custom identifiers" do
     subject { BNode.new("foo", @context) }
   
