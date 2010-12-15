@@ -67,14 +67,15 @@ module RdfContext
       #
       # @return URIRef
       attr :parent_object, true
-      # A list of current, in-scope profiles.
-      #
-      # @return [Array<URIRef>]
-      attr :profiles, true
       # A list of current, in-scope URI mappings.
       #
       # @return [Hash{String => Namespace}]
       attr :uri_mappings, true
+      # A list of current, in-scope Namespaces. This is the subset of uri_mappings
+      # which are defined using xmlns.
+      #
+      # @return [Hash{String => Namespace}]
+      attr :namespaces, true
       # A list of incomplete triples.
       #
       # A triple can be incomplete when no object resource
@@ -114,8 +115,8 @@ module RdfContext
         @base = base
         @parent_subject = @base
         @parent_object = nil
-        @profiles = []
         @uri_mappings = host_defaults.fetch(:uri_mappings, {})
+        @namespaces = {}
         @incomplete_triples = []
         @language = nil
         @term_mappings = host_defaults.fetch(:term_mappings, {})
@@ -129,7 +130,7 @@ module RdfContext
           # clone the evaluation context correctly
           @uri_mappings = from.uri_mappings.clone
           @incomplete_triples = from.incomplete_triples.clone
-          @profiles = from.profiles.clone
+          @namespaces = from.namespaces.clone
       end
       
       def inspect
@@ -137,7 +138,6 @@ module RdfContext
         v << "uri_mappings[#{uri_mappings.keys.length}]"
         v << "incomplete_triples[#{incomplete_triples.length}]"
         v << "term_mappings[#{term_mappings.keys.length}]"
-        v << "profiles[#{profiles.length}]"
         v.join(",")
       end
     end
@@ -352,7 +352,7 @@ module RdfContext
     end
 
     # Extract the XMLNS mappings from an element
-    def extract_mappings(element, uri_mappings)
+    def extract_mappings(element, uri_mappings, namespaces)
       # look for xmlns
       # (note, this may be dependent on @host_language)
       # Regardless of how the mapping is declared, the value to be mapped must be converted to lower case,
@@ -367,8 +367,12 @@ module RdfContext
           # Downcase prefix for RDFa 1.1
           pfx_lc = (@version == :rdfa_1_0 || ns.prefix.nil?) ? ns.prefix : ns.prefix.to_s.downcase
           if ns.prefix
-            uri_mappings[pfx_lc] = @graph.bind(Namespace.new(ns.href, ns.prefix.to_s))
+            namespace = Namespace.new(ns.href, ns.prefix.to_s)
+            uri_mappings[pfx_lc] = @graph.bind(namespace)
+            namespaces[pfx_lc] ||= ns.href.to_s
             add_debug(element, "extract_mappings: xmlns:#{ns.prefix} => <#{ns.href}>")
+          else
+            namespaces[""] ||= ns.href.to_s
           end
           
         rescue RdfException => e
@@ -410,6 +414,7 @@ module RdfContext
       new_subject = nil
       current_object_resource = nil
       uri_mappings = evaluation_context.uri_mappings.clone
+      namespaces = evaluation_context.namespaces.clone
       incomplete_triples = []
       language = evaluation_context.language
       term_mappings = evaluation_context.term_mappings.clone
@@ -456,10 +461,7 @@ module RdfContext
           return
         end
       end
-
-      # Add on proviles from parent contexts to update new context
-      profiles += evaluation_context.profiles.clone
-
+    
       # Default vocabulary [7.5 Step 3]
       # Next the current element is examined for any change to the default vocabulary via @vocab.
       # If @vocab is present and contains a value, its value updates the local default vocabulary.
@@ -478,7 +480,7 @@ module RdfContext
       # Local term mappings [7.5 Steps 4]
       # Next, the current element is then examined for URI mapping s and these are added to the local list of URI mappings.
       # Note that a URI mapping will simply overwrite any current mapping in the list that has the same name
-      extract_mappings(element, uri_mappings)
+      extract_mappings(element, uri_mappings, namespaces)
     
       # Language information [7.5 Step 5]
       # From HTML5 [3.2.3.3]
@@ -663,18 +665,12 @@ module RdfContext
             add_debug(element, "[Step 11(1.1)] XML Literal: #{element.inner_html}")
             
             # In order to maintain maximum portability of this literal, any children of the current node that are
-            # elements must have the current in scope profiles, default vocabulary, prefix mappings, and XML
-            # namespace declarations (if any) declared on the serialized element using their respective attributes.
-            # Since the child element node could also declare new prefix mappings or XML namespaces, the RDFa
-            # Processor must be careful to merge these together when generating the serialized element definition.
-            # For avoidance of doubt, any re-declarations on the child node must take precedence over declarations
-            # that were active on the current node.
-            Literal.typed(element.children, XML_LITERAL,
-                          :language => language,
-                          :namespaces => uri_mappings,
-                          :profiles => profiles,
-                          :prefixes => uri_mappings,
-                          :default_vocabulary => default_vocabulary)
+            # elements must have the current in scope XML namespace declarations (if any) declared on the
+            # serialized element using their respective attributes. Since the child element node could also
+            # declare new XML namespaces, the RDFa Processor must be careful to merge these together when
+            # generating the serialized element definition. For avoidance of doubt, any re-declarations on the
+            # child node must take precedence over declarations that were active on the current node.
+            Literal.typed(element.children, XML_LITERAL, :language => language, :namespaces => namespaces)
           else
             # plain literal
             add_debug(element, "[Step 11(1.1)] plain literal")
@@ -689,7 +685,7 @@ module RdfContext
             # XML Literal
             add_debug(element, "[Step 11 (1.0)] XML Literal: #{element.inner_html}")
             recurse = false
-            Literal.typed(element.children, XML_LITERAL, :language => language, :namespaces => uri_mappings)
+            Literal.typed(element.children, XML_LITERAL, :language => language, :namespaces => namespaces)
           end
         end
       
@@ -718,16 +714,15 @@ module RdfContext
               uri_mappings == evaluation_context.uri_mappings &&
               term_mappings == evaluation_context.term_mappings &&
               default_vocabulary == evaluation_context.default_vocabulary &&
-              profiles == evaluation_context.profiles
             new_ec = evaluation_context
             add_debug(element, "[Step 13] skip: reused ec")
           else
             new_ec = evaluation_context.clone
             new_ec.language = language
             new_ec.uri_mappings = uri_mappings
+            new_ec.namespaces = namespaces
             new_ec.term_mappings = term_mappings
             new_ec.default_vocabulary = default_vocabulary
-            new_ec.profiles = profiles
             add_debug(element, "[Step 13] skip: cloned ec")
           end
         else
@@ -736,11 +731,11 @@ module RdfContext
           new_ec.parent_subject = new_subject || evaluation_context.parent_subject
           new_ec.parent_object = current_object_resource || new_subject || evaluation_context.parent_subject
           new_ec.uri_mappings = uri_mappings
+          new_ec.namespaces = namespaces
           new_ec.incomplete_triples = incomplete_triples
           new_ec.language = language
           new_ec.term_mappings = term_mappings
           new_ec.default_vocabulary = default_vocabulary
-          new_ec.profiles = profiles
           add_debug(element, "[Step 13] new ec")
         end
       

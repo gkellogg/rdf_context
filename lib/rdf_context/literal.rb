@@ -245,14 +245,15 @@ module RdfContext
       # @param  [Object] contents
       # @option options [Hash] :namespaces ({}) Use :__default__ or "" to declare default namespace
       # @option options [String] :language (nil)
-      # @option options [Array<URIRef>] :profiles ([]) Profiles to add to elements
-      # @option options [Hash] :prefixes (nil) Prefixes to add to elements
-      # @option options [String] :default_vocabulary (nil) Default vocabulary to add to elements
       def encode_contents(contents, options)
         #puts "encode_contents: '#{contents}'"
+        ns_hash = {}
+        (options[:namespaces] || {}).each_pair do |pfx, href|
+          href = href.uri.to_s if href.is_a?(Namespace)
+          ns_hash[pfx.to_s.empty? ? "xmlns" : "xmlns:#{pfx}"] = href.to_s
+        end
         
         if contents.is_a?(String)
-          ns_hash = options[:namespaces].values.inject({}) {|h, ns| h.merge(ns.xmlns_hash)}
           ns_strs = []
           ns_hash.each_pair {|a, u| ns_strs << "#{a}=\"#{u}\""}
 
@@ -266,59 +267,20 @@ module RdfContext
             c = Nokogiri::XML.parse(c.copy(true).to_s) if c.is_a?(LibXML::XML::Node)
           end
           if c.is_a?(Nokogiri::XML::Element)
+            # For real XML C14N recursive processing is required. However, as a first step,
+            # we can just be sure that top-level attributes and namespace declarations are properly
+            # and relatively ordered
+            # From http://www.w3.org/TR/2000/WD-xml-c14n-20001011#Example-SETags
+            #   * Relative order of namespace and attribute axes
+            #   * Lexicographic ordering of namespace and attribute axes
             c = Nokogiri::XML.parse(c.dup.to_xml(:save_with => Nokogiri::XML::Node::SaveOptions::NO_EMPTY_TAGS)).root
-            # Gather namespaces from self and decendant nodes
-            #
-            # prefix mappings
-            # Look for @xmlns and @prefix mappings. Add any other mappings from options[:prefixes]
-            # that aren't already defined on this node
-            defined_mappings = {}
-            prefix_mappings = {}
-            
-            c.traverse do |n|
-              ns = n.namespace
-              next unless ns
-              prefix = ns.prefix ? "xmlns:#{ns.prefix}" : "xmlns"
-              defined_mappings[ns.prefix.to_s] = ns.href.to_s
-              c[prefix] = ns.href unless c.namespaces[prefix]
-            end
-            
-            mappings = c["prefix"].to_s.split(/\s+/)
-            while mappings.length > 0 do
-              prefix, uri = mappings.shift.downcase, mappings.shift
-              #puts "uri_mappings prefix #{prefix} <#{uri}>"
-              next unless prefix.match(/:$/)
-              prefix.chop!
 
-              # A Conforming RDFa Processor must ignore any definition of a mapping for the '_' prefix.
-              next if prefix == "_"
-
-              defined_mappings[prefix] = uri
-              prefix_mappings[prefix] = uri
-            end
-
-            # Add prefixes, being careful to honor mappings defined on the element
-            if options[:prefixes]
-              options[:prefixes].each_pair do |p, ns|
-                prefix_mappings[p] = ns.uri unless defined_mappings.has_key?(p)
-              end
-              if prefix_mappings.length
-                c["prefix"] = prefix_mappings.keys.sort.map {|p| "#{p}: #{prefix_mappings[p]}"}.join(" ")
-              end
+            # Apply defined namespaces
+            ns_hash.each_pair do |prefix, href|
+              c[prefix] = href unless c.namespaces[prefix]
             end
             
-            # Add profiles, being careful to honor profiles defined on the element
-            if options[:profiles].is_a?(Array) && options[:profiles].length > 0
-              profiles = c["profile"].to_s.split(" ")
-              profiles += options[:profiles]
-              c["profile"] = profiles.join(" ")
-            end
-            
-            # Add default vocabulary, being careful to honor any defined on the element
-            if options[:default_vocabulary] && !c["vocab"]
-              c["vocab"] = options[:default_vocabulary].to_s
-            end
-            
+            # Add language
             if options[:language] && c["lang"].to_s.empty?
               c["xml:lang"] = options[:language]
             end
@@ -460,7 +422,7 @@ module RdfContext
       end
     end
 
-   class << self
+    class << self
       protected :new
     end
 
