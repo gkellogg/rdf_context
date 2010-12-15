@@ -26,7 +26,7 @@ describe N3Parser do
               t.name.should_not == "n3_10012"  # Too many bnodes makes graph compare unfeasable
               parser.parse(rdf_string, t.about.uri.to_s, :strict => true, :debug => [])
             end
-          rescue #Spec::Expectations::ExpectationNotMetError => e
+          rescue #RSpec::Expectations::ExpectationNotMetError => e
             if %w(n3_10003 n3_10004).include?(t.name)
               pending("@forAll/@forEach not yet implemented")
             elsif %w(n3_10007 n3_10014 n3_10015 n3_10017).include?(t.name)
@@ -58,7 +58,7 @@ describe N3Parser do
               lambda do
                 parser.parse(rdf_string, t.about.uri.to_s, :strict => true, :debug => [])
               end.should raise_error(RdfException)
-            rescue Spec::Expectations::ExpectationNotMetError => e
+            rescue RSpec::Expectations::ExpectationNotMetError => e
               if %w().include?(t.name)
                 pending("@forAll/@forEach not yet implemented")
               elsif %w(n3_10019 n3_10020 n3_20005).include?(t.name.to_s)
