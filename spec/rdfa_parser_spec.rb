@@ -232,12 +232,6 @@ describe RdfaParser do
               t.run_test do |rdfa_string, rdfa_parser|
                 rdfa_parser.parse(rdfa_string, t.informationResourceInput, :debug => [], :version => t.version)
               end
-            rescue RSpec::Expectations::ExpectationNotMetError => e
-              if t.input =~ /XMLLiteral/
-                pending("XMLLiteral canonicalization not implemented yet")
-              else
-                raise
-              end
             rescue SparqlException => e
               pending(e.message) { raise }
             end
@@ -281,11 +275,7 @@ describe RdfaParser do
             rescue SparqlException => e
               pending(e.message) { raise }
             rescue RSpec::Expectations::ExpectationNotMetError => e
-              if t.name =~ /01[789]\d/
-                raise
-              else
-                pending() {  raise }
-              end
+              pending() {  raise }
             end
           end
         end
