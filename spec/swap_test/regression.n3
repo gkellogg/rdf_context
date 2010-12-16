@@ -83,11 +83,11 @@
   test:description	"djb noticed a:b was parsed as rdf:type token";
   test:arguments		"syntax/djb1a.n3".
 
-:t1006 a test:CwmTest, test:CwmProofTest;
-  test:referenceOutput <ref/contexts-1.n3>;
-  n3test:inputDocument <contexts.n3> ;
-  test:description   	"Parse and generate simple contexts";
-  test:arguments     	"""contexts.n3""".
+#:t1006 a test:CwmTest, test:CwmProofTest;
+#  test:referenceOutput <ref/contexts-1.n3>;
+#  n3test:inputDocument <contexts.n3> ;
+#  test:description   	"Parse and generate simple contexts";
+#  test:arguments     	"""contexts.n3""".
 
 :t1007 a test:CwmTest, test:CwmProofTest;
   n3test:status "pending";
@@ -144,12 +144,12 @@
   test:description   "N3 string quoting with utf-8 literals";
   test:arguments     """-n3 strquot.n3""".
 
-:t1009ab a test:CwmTest, test:CwmProofTest;
-  n3test:status "pending";
-  test:referenceOutput <ref/n3string.n3>;
-  n3test:inputDocument <i18n/n3string.n3> ;
-  test:description   "log:n3string genertating utf-8 literals was double encoding";
-  test:arguments     """-n3 i18n/n3string.n3""".
+#:t1009ab a test:CwmTest, test:CwmProofTest;
+#  n3test:status "pending";
+#  test:referenceOutput <ref/n3string.n3>;
+#  n3test:inputDocument <i18n/n3string.n3> ;
+#  test:description   "log:n3string genertating utf-8 literals was double encoding";
+#  test:arguments     """-n3 i18n/n3string.n3""".
 
 :t1009b a test:CwmTest, test:CwmProofTest;
   test:referenceOutput <xml-syntax/non-ascii-pred.rdf>;
