@@ -303,28 +303,28 @@ describe Literal do
     describe "with a namespace" do
       subject {
         Literal.typed("foo <sup>bar</sup> baz!", "http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral",
-                      :namespaces => {"dc" => Namespace.new("http://purl.org/dc/terms/", "dc")})
+                      :namespaces => {"dc" => "http://purl.org/dc/terms/"})
       }
     
       describe "encodings" do
-        it "should return n3" do subject.to_n3.should == "\"foo <sup>bar</sup> baz!\"^^<http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral>" end
+        it "should return n3" do subject.to_n3.should == "\"foo <sup xmlns:dc=\\\"http://purl.org/dc/terms/\\\">bar</sup> baz!\"^^<http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral>" end
         it "should return ntriples" do subject.to_ntriples.should == subject.to_n3 end
-        it "should return xml_args" do subject.xml_args.should == ["foo <sup>bar</sup> baz!", {"rdf:parseType" => "Literal"}] end
-        it "should return TriX" do subject.to_trix.should == "<typedLiteral datatype=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral\">foo <sup>bar</sup> baz!</typedLiteral>" end
+        it "should return xml_args" do subject.xml_args.should == ["foo <sup xmlns:dc=\"http://purl.org/dc/terms/\">bar</sup> baz!", {"rdf:parseType" => "Literal"}] end
+        it "should return TriX" do subject.to_trix.should == "<typedLiteral datatype=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral\">foo <sup xmlns:dc=\"http://purl.org/dc/terms/\">bar</sup> baz!</typedLiteral>" end
       end
       
       describe "and language" do
         subject {
           Literal.typed("foo <sup>bar</sup> baz!", "http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral",
-                        :namespaces => {"dc" => Namespace.new("http://purl.org/dc/terms/", "dc")},
+                        :namespaces => {"dc" => "http://purl.org/dc/terms/"},
                         :language => "fr")
         }
 
         describe "encodings" do
-          it "should return n3" do subject.to_n3.should == "\"foo <sup xml:lang=\\\"fr\\\">bar</sup> baz!\"\^^<http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral>" end
+          it "should return n3" do subject.to_n3.should == "\"foo <sup xmlns:dc=\\\"http://purl.org/dc/terms/\\\" xml:lang=\\\"fr\\\">bar</sup> baz!\"\^^<http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral>" end
           it "should return ntriples" do subject.to_ntriples.should == subject.to_n3 end
-          it "should return xml_args" do subject.xml_args.should == ["foo <sup xml:lang=\"fr\">bar</sup> baz!", {"rdf:parseType" => "Literal"}] end
-          it "should return TriX" do subject.to_trix.should == "<typedLiteral datatype=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral\">foo <sup xml:lang=\"fr\">bar</sup> baz!</typedLiteral>" end
+          it "should return xml_args" do subject.xml_args.should == ["foo <sup xmlns:dc=\"http://purl.org/dc/terms/\" xml:lang=\"fr\">bar</sup> baz!", {"rdf:parseType" => "Literal"}] end
+          it "should return TriX" do subject.to_trix.should == "<typedLiteral datatype=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral\">foo <sup xmlns:dc=\"http://purl.org/dc/terms/\" xml:lang=\"fr\">bar</sup> baz!</typedLiteral>" end
         end
       end
       
@@ -367,18 +367,18 @@ describe Literal do
           Literal.typed(content,
                         "http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral",
                         :namespaces => {
-                          "svg" => Namespace.new("http://www.w3.org/2000/svg", "svg"),
-                          "dc" => Namespace.new("http://purl.org/dc/terms/", "dc")
+                          "svg" => "http://www.w3.org/2000/svg",
+                          "dc" => "http://purl.org/dc/terms/"
                         })
         }
-        it "should return xml_args" do subject.xml_args.should == ["<svg:svg xmlns:svg=\"http://www.w3.org/2000/svg\"></svg:svg>", {"rdf:parseType" => "Literal"}] end
+        it "should return xml_args" do subject.xml_args.should == ["<svg:svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns:dc=\"http://purl.org/dc/terms/\"></svg:svg>", {"rdf:parseType" => "Literal"}] end
       end
       
       describe "and existing namespace definition" do
         subject {
           Literal.typed("<svg:svg xmlns:svg=\"http://www.w3.org/2000/svg\"/>",
                         "http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral",
-                        :namespaces => {"svg" => Namespace.new("http://www.w3.org/2000/svg", "svg")})
+                        :namespaces => {"svg" => "http://www.w3.org/2000/svg"})
         }
         it "should return xml_args" do subject.xml_args.should == ["<svg:svg xmlns:svg=\"http://www.w3.org/2000/svg\"></svg:svg>", {"rdf:parseType" => "Literal"}] end
       end
@@ -387,7 +387,7 @@ describe Literal do
     describe "with a default namespace" do
       subject {
         Literal.typed("foo <sup>bar</sup> baz!", "http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral",
-                      :namespaces => {"" => Namespace.new("http://purl.org/dc/terms/", "")})
+                      :namespaces => {"" => "http://purl.org/dc/terms/"})
       }
     
       describe "encodings" do
