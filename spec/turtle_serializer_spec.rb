@@ -199,8 +199,8 @@ describe TurtleSerializer do
         else
           begin
             t.run_test do |rdf_string, parser|
-              parser.parse(rdf_string, t.about.uri.to_s, :strict => true, :debug => [])
-              parser.graph.serialize(:format => :ttl, :base => t.about.uri.to_s)
+              parser.parse(rdf_string, t.about, :strict => true, :debug => [])
+              parser.graph.serialize(:format => :ttl, :base => t.about)
               t.compare = :none
             end
           #rescue #Spec::Expectations::ExpectationNotMetError => e
