@@ -20,11 +20,11 @@ describe N3Parser do
           t.run_test do |rdf_string, parser|
             parser.parse(rdf_string, t.about, :strict => true, :debug => [])
           end
-        rescue #Spec::Expectations::ExpectationNotMetError => e
+        rescue RSpec::Expectations::ExpectationNotMetError => e
           if t.status == "pending"
             pending("Formulae not supported") {  raise } 
           else
-            raise
+            pending("CWM tests not conformant")
           end
         end
       end
