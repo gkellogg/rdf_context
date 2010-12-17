@@ -10,7 +10,8 @@
   * Add all in-scope namespaces, not just those that seem to be used.
 * RDFa Parser
   * Upgrade for changes to RDFa 1.1 test suite
-  * For SVG, allow use of xml:base for non-HTML languages
+  * For non-XHTML, allow use of xml:base for non-HTML languages
+  * XHTML has no default vocabulary.
   * No longer pass vocabularies, prefixes or terms when creating XMLLiterals. Only namespaces derived via xmlns are passed to Literal#typed.
 * SQLite3Store
   * Basic support for using with ActiveRecord: #initialize _configuration_ can take a _connection_ option, using ActiveRecord::Base.connection.raw_connection

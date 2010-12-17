@@ -208,7 +208,7 @@ module RdfContext
       when :xhtml
         @graph.bind(XHV_NS)
         {
-          :vocabulary => XHV_NS.uri,
+          :vocabulary => nil,
           :prefix     => XHV_NS,
           :uri_mappings => {"xhv" => XHV_NS}, # RDF::XHTML is wrong
           :term_mappings => %w(
@@ -220,7 +220,6 @@ module RdfContext
         {}
       end
 
-      @host_defaults.delete(:vocabulary) if @version == :rdfa_1_0
       @profile_graph ||= options[:profile_graph] if options.has_key?(:profile_graph)
       
       add_debug(@doc.root, "version = #{@version.inspect},  host_language = #{@host_language}")
@@ -235,23 +234,21 @@ module RdfContext
     # Parsing an RDFa document (this is *not* the recursive method)
     def parse_whole_document(doc, base)
       # find if the document has a base element
-      base = case @host_language
+      case @host_language
       when :xhtml
         base_el = doc.at_css("html>head>base")
-        base_el.attribute("href").to_s.split("#").first if base_el
-      else
-        doc.at_xpath("/css/@xml:base", "xml" => XML_NS.uri.to_s)
+        base = base_el.attribute("href").to_s.split("#").first if base_el
       end
       
       if (base)
         # Strip any fragment from base
         base = base.to_s.split("#").first
-        @uri = URIRef.intern(base, :normalize => false, :normalize => false)
+        base = URIRef.intern(base, :normalize => false, :normalize => false)
         add_debug("", "parse_whole_doc: base='#{base}'")
       end
 
       # initialize the evaluation context with the appropriate base
-      evaluation_context = EvaluationContext.new(@uri, @host_defaults)
+      evaluation_context = EvaluationContext.new(base, @host_defaults)
 
       traverse(doc.root, evaluation_context)
     end
@@ -430,6 +427,9 @@ module RdfContext
       resource = attrs['resource']
       href = attrs['href']
       vocab = attrs['vocab']
+      xml_base = element.attribute_with_ns("base", XML_NS.uri.to_s)
+      base = xml_base.to_s if xml_base && @host_language != :xhtml
+      base ||= evaluation_context.base
 
       # Pull out the attributes needed for the skip test.
       property = attrs['property'].to_s.strip if attrs['property']
@@ -439,6 +439,23 @@ module RdfContext
       rel = attrs['rel'].to_s.strip if attrs['rel']
       rev = attrs['rev'].to_s.strip if attrs['rev']
       profiles = attrs['profile'].to_s.split(/\s/)  # In-scope profiles in order for passing to XMLLiteral
+
+      attrs = {
+        :about => about,
+        :src => src,
+        :resource => resource,
+        :href => href,
+        :vocab => vocab,
+        :base => xml_base,
+        :property => property,
+        :typeof => typeof,
+        :daetatype => datatype,
+        :rel => rel,
+        :rev => rev,
+        :profiles => (profiles.empty? ? nil : profiles),
+      }.select{|k,v| v}
+      
+      add_debug(element, "traverse " + attrs.map{|a| "#{a.first}: #{a.last}"}.join(", ")) unless attrs.empty?
 
       # Local term mappings [7.5 Steps 2]
       # Next the current element is parsed for any updates to the local term mappings and local list of URI mappings via @profile.
@@ -496,39 +513,37 @@ module RdfContext
       else
         language
       end
-      add_debug(element, "HTML5 [3.2.3.3] traverse, lang: #{language}") if attrs['lang']
+      add_debug(element, "HTML5 [3.2.3.3] traverse, lang: #{language}") if language
     
       # rels and revs
-      rels = process_uris(element, rel, evaluation_context,
+      rels = process_uris(element, rel, evaluation_context, base,
                           :uri_mappings => uri_mappings,
                           :term_mappings => term_mappings,
                           :vocab => default_vocabulary,
                           :restrictions => TERMorCURIEorAbsURI[@version])
-      revs = process_uris(element, rev, evaluation_context,
+      revs = process_uris(element, rev, evaluation_context, base,
                           :uri_mappings => uri_mappings,
                           :term_mappings => term_mappings,
                           :vocab => default_vocabulary,
                           :restrictions => TERMorCURIEorAbsURI[@version])
     
-      add_debug(element, "traverse, about: #{about.nil? ? 'nil' : about}, src: #{src.nil? ? 'nil' : src}, resource: #{resource.nil? ? 'nil' : resource}, href: #{href.nil? ? 'nil' : href}")
-      add_debug(element, "traverse, property: #{property.nil? ? 'nil' : property}, typeof: #{typeof.nil? ? 'nil' : typeof}, datatype: #{datatype.nil? ? 'nil' : datatype}, content: #{content.nil? ? 'nil' : content}")
-      add_debug(element, "traverse, rels: #{rels.join(" ")}, revs: #{revs.join(" ")}")
+      add_debug(element, "traverse, rels: #{rels.join(" ")}, revs: #{revs.join(" ")}") unless (rels + revs).empty?
 
       if !(rel || rev)
         # Establishing a new subject if no rel/rev [7.5 Step 6]
         # May not be valid, but can exist
         new_subject = if about
-          process_uri(element, about, evaluation_context,
+          process_uri(element, about, evaluation_context, base,
                       :uri_mappings => uri_mappings,
                       :restrictions => SafeCURIEorCURIEorURI[@version])
         elsif src
-          process_uri(element, src, evaluation_context, :restrictions => [:uri])
+          process_uri(element, src, evaluation_context, base, :restrictions => [:uri])
         elsif resource
-          process_uri(element, resource, evaluation_context,
+          process_uri(element, resource, evaluation_context, base,
                       :uri_mappings => uri_mappings,
                       :restrictions => SafeCURIEorCURIEorURI[@version])
         elsif href
-          process_uri(element, href, evaluation_context, :restrictions => [:uri])
+          process_uri(element, href, evaluation_context, base, :restrictions => [:uri])
         end
 
         # If no URI is provided by a resource attribute, then the first match from the following rules
@@ -537,14 +552,14 @@ module RdfContext
         # otherwise,
         #   if parent object is present, new subject is set to the value of parent object.
         # Additionally, if @property is not present then the skip element flag is set to 'true';
-        new_subject ||= if @host_language == :xhtml && element.name =~ /^(head|body)$/ && evaluation_context.base
+        new_subject ||= if @host_language == :xhtml && element.name =~ /^(head|body)$/ && base
           # From XHTML+RDFa 1.1:
           # if no URI is provided, then first check to see if the element is the head or body element.
           # If it is, then act as if there is an empty @about present, and process it according to the rule for @about.
-          evaluation_context.base
-        elsif @host_language == :svg && element == @doc.root && evaluation_context.base
+          base
+        elsif @host_language != :xhtml && base
           # XXX Spec confusion, assume that this is true
-          evaluation_context.base
+          base
         elsif element.attributes['typeof']
           BNode.new
         else
@@ -557,10 +572,10 @@ module RdfContext
         # [7.5 Step 7]
         # If the current element does contain a @rel or @rev attribute, then the next step is to
         # establish both a value for new subject and a value for current object resource:
-        new_subject = process_uri(element, about, evaluation_context,
+        new_subject = process_uri(element, about, evaluation_context, base,
                                   :uri_mappings => uri_mappings,
                                   :restrictions => SafeCURIEorCURIEorURI[@version]) ||
-                      process_uri(element, src, evaluation_context,
+                      process_uri(element, src, evaluation_context, base,
                                   :uri_mappings => uri_mappings,
                                   :restrictions => [:uri])
 
@@ -569,7 +584,7 @@ module RdfContext
           # From XHTML+RDFa 1.1:
           # if no URI is provided, then first check to see if the element is the head or body element.
           # If it is, then act as if there is an empty @about present, and process it according to the rule for @about.
-          evaluation_context.base
+          base
         elsif element.attributes['typeof']
           BNode.new
         else
@@ -580,11 +595,11 @@ module RdfContext
       
         # Then the current object resource is set to the URI obtained from the first match from the following rules:
         current_object_resource = if resource
-          process_uri(element, resource, evaluation_context,
+          process_uri(element, resource, evaluation_context, base,
                       :uri_mappings => uri_mappings,
                       :restrictions => SafeCURIEorCURIEorURI[@version])
         elsif href
-          process_uri(element, href, evaluation_context,
+          process_uri(element, href, evaluation_context, base,
                       :restrictions => [:uri])
         end
 
@@ -594,7 +609,7 @@ module RdfContext
       # Process @typeof if there is a subject [Step 8]
       if new_subject and typeof
         # Typeof is TERMorCURIEorAbsURIs
-        types = process_uris(element, typeof, evaluation_context,
+        types = process_uris(element, typeof, evaluation_context, base,
                             :uri_mappings => uri_mappings,
                             :term_mappings => term_mappings,
                             :vocab => default_vocabulary,
@@ -630,7 +645,7 @@ module RdfContext
     
       # Establish current object literal [Step 11]
       if property
-        properties = process_uris(element, property, evaluation_context,
+        properties = process_uris(element, property, evaluation_context, base,
                                   :uri_mappings => uri_mappings,
                                   :term_mappings => term_mappings,
                                   :vocab => default_vocabulary,
@@ -650,7 +665,7 @@ module RdfContext
         children_node_types = element.children.collect{|c| c.class}.uniq
       
         # the following 3 IF clauses should be mutually exclusive. Written as is to prevent extensive indentation.
-        datatype = process_uri(element, datatype, evaluation_context,
+        datatype = process_uri(element, datatype, evaluation_context, base,
                               :uri_mappings => uri_mappings,
                               :term_mappings => term_mappings,
                               :vocab => default_vocabulary,
@@ -714,10 +729,12 @@ module RdfContext
               uri_mappings == evaluation_context.uri_mappings &&
               term_mappings == evaluation_context.term_mappings &&
               default_vocabulary == evaluation_context.default_vocabulary &&
+              base == evaluation_context.base
             new_ec = evaluation_context
             add_debug(element, "[Step 13] skip: reused ec")
           else
             new_ec = evaluation_context.clone
+            new_ec.base = base
             new_ec.language = language
             new_ec.uri_mappings = uri_mappings
             new_ec.namespaces = namespaces
@@ -727,7 +744,7 @@ module RdfContext
           end
         else
           # create a new evaluation context
-          new_ec = EvaluationContext.new(evaluation_context.base, @host_defaults)
+          new_ec = EvaluationContext.new(base, @host_defaults)
           new_ec.parent_subject = new_subject || evaluation_context.parent_subject
           new_ec.parent_object = current_object_resource || new_subject || evaluation_context.parent_subject
           new_ec.uri_mappings = uri_mappings
@@ -747,13 +764,13 @@ module RdfContext
     end
 
     # space-separated TERMorCURIEorAbsURI or SafeCURIEorCURIEorURI
-    def process_uris(element, value, evaluation_context, options)
+    def process_uris(element, value, evaluation_context, base, options)
       return [] if value.to_s.empty?
       add_debug(element, "process_uris: #{value}")
-      value.to_s.split(/\s+/).map {|v| process_uri(element, v, evaluation_context, options)}.compact
+      value.to_s.split(/\s+/).map {|v| process_uri(element, v, evaluation_context, base, options)}.compact
     end
 
-    def process_uri(element, value, evaluation_context, options = {})
+    def process_uri(element, value, evaluation_context, base, options = {})
       return if value.nil?
       restrictions = options[:restrictions]
       add_debug(element, "process_uri: #{value}, restrictions = #{restrictions.inspect}")
@@ -786,7 +803,7 @@ module RdfContext
         elsif restrictions.include?(:absuri) || restrictions.include?(:uri)
           begin
             # AbsURI does not use xml:base
-            uri = URIRef.intern(value, restrictions.include?(:absuri) ? nil : evaluation_context.base, :normalize => false)
+            uri = URIRef.intern(value, restrictions.include?(:absuri) ? nil : base, :normalize => false)
           rescue Addressable::URI::InvalidURIError => e
             add_warning(element, "Malformed prefix #{value}", RDFA_NS.UnresolvedCURIE)
           rescue ParserException => e
