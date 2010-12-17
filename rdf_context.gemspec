@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{rdf_context}
-  s.version = "0.5.9.1"
+  s.version = "0.5.10"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Gregg Kellogg"]
-  s.date = %q{2010-12-14}
+  s.date = %q{2010-12-16}
   s.default_executable = %q{rdf_context}
   s.description = %q{    RdfContext parses RDF/XML, RDFa and N3-rdf into a Graph object. It also serializes RDF/XML and N-Triples from the Graph.
 
@@ -69,6 +69,7 @@ Gem::Specification.new do |s|
      "lib/rdf_context/term_utils.rb",
      "lib/rdf_context/triple.rb",
      "lib/rdf_context/uriref.rb",
+     "rdf_context.gemspec",
      "script/console",
      "script/tc",
      "spec/.gitignore",
@@ -605,6 +606,7 @@ Gem::Specification.new do |s|
      "spec/swap_test/ref/bnode.n3",
      "spec/swap_test/ref/bnode.rdf",
      "spec/swap_test/ref/colon-in-uri.n3",
+     "spec/swap_test/ref/contexts-1.n3",
      "spec/swap_test/ref/daml-ex.n3",
      "spec/swap_test/ref/daml-ont.n3",
      "spec/swap_test/ref/djb1a-out.n3",
@@ -622,6 +624,7 @@ Gem::Specification.new do |s|
      "spec/swap_test/ref/path1.n3",
      "spec/swap_test/ref/path2.n3",
      "spec/swap_test/ref/prefix1.rdf",
+     "spec/swap_test/ref/prefix2.rdf",
      "spec/swap_test/ref/prefix3.rdf",
      "spec/swap_test/ref/rdf-redefine.rdf",
      "spec/swap_test/ref/reluri-1.rdf",

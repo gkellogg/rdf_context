@@ -904,6 +904,7 @@ module RdfContext
     # Takes a term value, and term type
     # and Creates a term object.  QuotedGraphs are instantiated differently
     def createTerm(termString,termType,objLanguage=nil,objDatatype=nil)
+      #puts "createTerm(#{termString}, #{termType}, ...)" if ::RdfContext::debug?
       case termType
       when "L"
         @literalCache[[termString, objLanguage, objDatatype]] ||= Literal.n3_encoded(termString, objLanguage, objDatatype)

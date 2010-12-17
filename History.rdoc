@@ -5,9 +5,16 @@
 * Rspec 2.1.0
 * Added Resource class, a common super-class of BNode, Graph, Literal and URIRef.
 * Implemented Resource.parse and variations for sub-classes to parse N3-coded resources.
+* Literal#typed
+  * Namespaces option now is {prefix => href} rather than {prefix => Namespace}.
+  * Add all in-scope namespaces, not just those that seem to be used.
 * RDFa Parser
   * Upgrade for changes to RDFa 1.1 test suite
   * For SVG, allow use of xml:base for non-HTML languages
+  * No longer pass vocabularies, prefixes or terms when creating XMLLiterals. Only namespaces derived via xmlns are passed to Literal#typed.
+* SQLite3Store
+  * Basic support for using with ActiveRecord: #initialize _configuration_ can take a _connection_ option, using ActiveRecord::Base.connection.raw_connection
+  * If result set is returned as a hash, change back to an array (needed, as rails sets results_as_hash attribute on DB)
 
 === 0.5.9.1
 * Fix minor graph property caching bug relating to manipulation of sequences.
@@ -21,7 +28,7 @@
 === 0.5.8.2
 * Don't create unnecessary namespaces when serializing RDF/XML.
 * Don't use regexp to substitute base URI in URI serialization.
-* Added :profile_graph option to RdfaParser#parse. This MUST be a ConjunctiveGraph and will be used to save profiles that are encountered.
+* Added profile_graph option to RdfaParser#parse. This MUST be a ConjunctiveGraph and will be used to save profiles that are encountered.
   * Fixme, for now, retrieval should include HTTP headers and perform appropriate HTTP cache control and check for potential updates.
 * Added ConjunctiveGraph#add_quad. Adds a quad from the intended subject, predicate, object, and context.
     @example

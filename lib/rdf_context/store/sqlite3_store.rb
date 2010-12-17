@@ -13,16 +13,18 @@ module RdfContext
   #
   # Based on Python RdfLib SQLite
   class SQLite3Store < AbstractSQLStore
-    # Create a new SQLite3Store Store, should be subclassed
+    # Create a new SQLite3Store Store
     # @param [URIRef] identifier
     # @param[Hash] configuration Specific to type of storage
+    # @option configuration [String] :db Path to database file
+    # @option configuration [String] :connection ActiveRecord::Base.connection.raw_connection
     # @return [SQLite3Store]
     def initialize(identifier = nil, configuration = {})
+      configuration[:path] ||= File.join(Dir.getwd, "#{@internedId}.db")
+
       super(identifier, configuration)
 
       @autocommit_default = false
-      @path = configuration[:path] || File.join(Dir.getwd, "#{@internedId}.db")
-      @db = open(:path => @path) unless @db
     end
     
     # Opens the store specified by the configuration hash. If
@@ -34,57 +36,113 @@ module RdfContext
     #
     # @option options[String] :path Path to database file defaults to a file in the current directory based on a hash of the store identifier
     def open(options)
-      unless File.exist?(options[:path])
+      @db ||= options[:connection]
+      return @db if @db
+
+      if options[:path] && !File.exist?(options[:path])
         @db = SQLite3::Database.new(options[:path])
-        executeSQL(CREATE_ASSERTED_STATEMENTS_TABLE % @internedId)
-        executeSQL(CREATE_ASSERTED_TYPE_STATEMENTS_TABLE % @internedId)
-        executeSQL(CREATE_QUOTED_STATEMENTS_TABLE % @internedId)
-        executeSQL(CREATE_NS_BINDS_TABLE % @internedId)
-        executeSQL(CREATE_LITERAL_STATEMENTS_TABLE % @internedId)
-        
-        # Create indicies
-        {
-          asserted_table => {
-            "#{@internedId}_A_termComb_index" => %w(termComb),
-            "#{@internedId}_A_s_index" => %w(subject),
-            "#{@internedId}_A_p_index" => %w(predicate),
-            "#{@internedId}_A_o_index" => %w(object),
-            "#{@internedId}_A_c_index" => %w(context),
-          },
-          asserted_type_table => {
-            "#{@internedId}_T_termComb_index" => %w(termComb),
-            "#{@internedId}_T_member_index" => %w(member),
-            "#{@internedId}_T_klass_index" => %w(klass),
-            "#{@internedId}_T_c_index" => %w(context),
-          },
-          literal_table => {
-            "#{@internedId}_L_termComb_index" => %w(termComb),
-            "#{@internedId}_L_s_index" => %w(subject),
-            "#{@internedId}_L_p_index" => %w(predicate),
-            "#{@internedId}_L_c_index" => %w(context),
-          },
-          quoted_table => {
-            "#{@internedId}_Q_termComb_index" => %w(termComb),
-            "#{@internedId}_Q_s_index" => %w(subject),
-            "#{@internedId}_Q_p_index" => %w(predicate),
-            "#{@internedId}_Q_o_index" => %w(object),
-            "#{@internedId}_Q_c_index" => %w(context),
-          },
-          namespace_binds => {
-            "#{@internedId}_uri_index" => %w(uri),
-          }
-        }.each_pair do |tablename, indicies|
-          indicies.each_pair do |index, columns|
-            executeSQL("CREATE INDEX #{index} on #{tablename} ('#{columns.join(', ')}')")
-          end
-        end
+        setup
       end
 
       raise StoreException.new("Attempt to open missing database file #{options[:path]}") unless File.exist?(options[:path])
       @db = SQLite3::Database.new(options[:path])
     end
 
-    # Destroy databse
+    # Create necessary tables and indecies for this database
+    def setup
+      executeSQL(CREATE_ASSERTED_STATEMENTS_TABLE % @internedId)
+      executeSQL(CREATE_ASSERTED_TYPE_STATEMENTS_TABLE % @internedId)
+      executeSQL(CREATE_QUOTED_STATEMENTS_TABLE % @internedId)
+      executeSQL(CREATE_NS_BINDS_TABLE % @internedId)
+      executeSQL(CREATE_LITERAL_STATEMENTS_TABLE % @internedId)
+      
+      # Create indicies
+      {
+        asserted_table => {
+          "#{@internedId}_A_termComb_index" => %w(termComb),
+          "#{@internedId}_A_s_index" => %w(subject),
+          "#{@internedId}_A_p_index" => %w(predicate),
+          "#{@internedId}_A_o_index" => %w(object),
+          "#{@internedId}_A_c_index" => %w(context),
+        },
+        asserted_type_table => {
+          "#{@internedId}_T_termComb_index" => %w(termComb),
+          "#{@internedId}_T_member_index" => %w(member),
+          "#{@internedId}_T_klass_index" => %w(klass),
+          "#{@internedId}_T_c_index" => %w(context),
+        },
+        literal_table => {
+          "#{@internedId}_L_termComb_index" => %w(termComb),
+          "#{@internedId}_L_s_index" => %w(subject),
+          "#{@internedId}_L_p_index" => %w(predicate),
+          "#{@internedId}_L_c_index" => %w(context),
+        },
+        quoted_table => {
+          "#{@internedId}_Q_termComb_index" => %w(termComb),
+          "#{@internedId}_Q_s_index" => %w(subject),
+          "#{@internedId}_Q_p_index" => %w(predicate),
+          "#{@internedId}_Q_o_index" => %w(object),
+          "#{@internedId}_Q_c_index" => %w(context),
+        },
+        namespace_binds => {
+          "#{@internedId}_uri_index" => %w(uri),
+        }
+      }.each_pair do |tablename, indicies|
+        indicies.each_pair do |index, columns|
+          executeSQL("CREATE INDEX #{index} on #{tablename} ('#{columns.join(', ')}')")
+        end
+      end
+    end
+    
+    # Teardown DB files
+    def teardown
+      # Drop indicies
+      {
+        asserted_table => {
+          "#{@internedId}_A_termComb_index" => %w(termComb),
+          "#{@internedId}_A_s_index" => %w(subject),
+          "#{@internedId}_A_p_index" => %w(predicate),
+          "#{@internedId}_A_o_index" => %w(object),
+          "#{@internedId}_A_c_index" => %w(context),
+        },
+        asserted_type_table => {
+          "#{@internedId}_T_termComb_index" => %w(termComb),
+          "#{@internedId}_T_member_index" => %w(member),
+          "#{@internedId}_T_klass_index" => %w(klass),
+          "#{@internedId}_T_c_index" => %w(context),
+        },
+        literal_table => {
+          "#{@internedId}_L_termComb_index" => %w(termComb),
+          "#{@internedId}_L_s_index" => %w(subject),
+          "#{@internedId}_L_p_index" => %w(predicate),
+          "#{@internedId}_L_c_index" => %w(context),
+        },
+        quoted_table => {
+          "#{@internedId}_Q_termComb_index" => %w(termComb),
+          "#{@internedId}_Q_s_index" => %w(subject),
+          "#{@internedId}_Q_p_index" => %w(predicate),
+          "#{@internedId}_Q_o_index" => %w(object),
+          "#{@internedId}_Q_c_index" => %w(context),
+        },
+        namespace_binds => {
+          "#{@internedId}_uri_index" => %w(uri),
+        }
+      }.each_pair do |tablename, indicies|
+        tn = "#{@internedId}_#{tablename}"
+        indicies.each_pair do |index, columns|
+          executeSQL("DROP INDEX #{index} ON #{tn}")
+        end
+      end
+      
+      # Drop tables
+      executeSQL("DROP TABLE #{namespace_binds}")
+      executeSQL("DROP TABLE #{quoted_table}")
+      executeSQL("DROP TABLE #{literal_table}")
+      executeSQL("DROP TABLE #{asserted_type_table}")
+      executeSQL("DROP TABLE #{asserted_table}")
+    end
+    
+    # Destroy database
     #
     # @option options[String] :path Path to database file defaults to a file in the current directory based on a hash of the store identifier
     def destroy(options = {})
@@ -171,6 +229,7 @@ module RdfContext
       if block_given?
         @db.execute(@statement_cache[qStr], *params) do |row|
           puts "executeSQL res: #{row.inspect}" if ::RdfContext::debug?
+          row = row.keys.select{|k| k.is_a?(Integer)}.sort.map{|k| row[k]} if row.is_a?(Hash)
           yield(row)
         end
       else
@@ -222,5 +281,10 @@ module RdfContext
         uri           text,
         PRIMARY KEY (prefix)))
 
+    DROP_ASSERTED_STATEMENTS_TABLE = %(DROP TABLE %s_asserted_statements)
+    DROP_ASSERTED_TYPE_STATEMENTS_TABLE = %(DROP TABLE %s_type_statements)
+    DROP_LITERAL_STATEMENTS_TABLE = %(DROP TABLE %s_literal_statements)
+    DROP_QUOTED_STATEMENTS_TABLE = %(DROP TABLE %s_quoted_statements)
+    DROP_NS_BINDS_TABLE = %(DROP TABLE %s_namespace_binds)
   end
 end
