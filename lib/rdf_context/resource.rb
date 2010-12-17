@@ -46,7 +46,7 @@ module RdfContext
     def self.parse(str)
       case str
       when /^_:/    then BNode.parse(str)
-      when /^<"/    then URIRef.parse(str)
+      when /^</     then URIRef.parse(str)
       when /^http:/ then URIRef.parse(str)
       when /^\"/    then Literal.parse(str)
       else               Literal.parse(str)
