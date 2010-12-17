@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby -s
+#!/usr/bin/env ruby
 require 'rubygems'
 require File.expand_path(File.dirname(__FILE__) + "/../lib/rdf_context")
 require 'getoptlong'
@@ -27,9 +27,6 @@ class Parse
     raise
   end
 end
-
-mode = ARGV.shift
-raise "Mode must be one of 'parse'" unless mode == "parse"
 
 $verbose = false
 $quiet = false
