@@ -1,5 +1,4 @@
 require 'net/http'
-require File.join(File.dirname(__FILE__), "string_hacks")
 
 module RdfContext
   class URIRef < Resource

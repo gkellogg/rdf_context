@@ -16,6 +16,7 @@ rescue LoadError
   require 'treetop'
 end
 
+require 'rdf_context/array_hacks'
 require 'rdf_context/string_hacks'
 
 module RdfContext

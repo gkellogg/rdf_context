@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Gregg Kellogg"]
-  s.date = %q{2010-12-16}
+  s.date = %q{2010-12-17}
   s.default_executable = %q{rdf_context}
   s.description = %q{    RdfContext parses RDF/XML, RDFa and N3-rdf into a Graph object. It also serializes RDF/XML and N-Triples from the Graph.
 
@@ -62,6 +62,7 @@ Gem::Specification.new do |s|
      "lib/rdf_context/serializer/xml_serializer.rb",
      "lib/rdf_context/store/abstract_sql_store.rb",
      "lib/rdf_context/store/abstract_store.rb",
+     "lib/rdf_context/store/active_record_store.rb",
      "lib/rdf_context/store/list_store.rb",
      "lib/rdf_context/store/memory_store.rb",
      "lib/rdf_context/store/sqlite3_store.rb",
@@ -73,6 +74,7 @@ Gem::Specification.new do |s|
      "script/console",
      "script/tc",
      "spec/.gitignore",
+     "spec/active_record_store_spec.rb",
      "spec/aggregate_graph_spec.rb",
      "spec/bnode_spec.rb",
      "spec/conjunctive_graph_spec.rb",
@@ -804,7 +806,8 @@ Gem::Specification.new do |s|
   s.rubygems_version = %q{1.3.7}
   s.summary = %q{RdfContext is an RDF library for Ruby supporting contextual graphs, multiple datastores and compliant RDF/XML, RDFa and N3 parsers.}
   s.test_files = [
-    "spec/aggregate_graph_spec.rb",
+    "spec/active_record_store_spec.rb",
+     "spec/aggregate_graph_spec.rb",
      "spec/bnode_spec.rb",
      "spec/conjunctive_graph_spec.rb",
      "spec/cwm_spec.rb",

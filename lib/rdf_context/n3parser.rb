@@ -1,5 +1,4 @@
 require 'treetop'
-require File.join(File.dirname(__FILE__), 'array_hacks')
 
 Treetop.load(File.join(File.dirname(__FILE__), "n3_grammar"))
 

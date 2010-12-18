@@ -1,5 +1,3 @@
-require File.join(File.dirname(__FILE__), 'array_hacks')
-
 module RdfContext
   # A simple graph to hold triples.
   #

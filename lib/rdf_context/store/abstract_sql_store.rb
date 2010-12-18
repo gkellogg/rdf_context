@@ -1,4 +1,3 @@
-require File.join(File.dirname(__FILE__), "..", "string_hacks")
 require 'digest/sha1'
 
 module RdfContext

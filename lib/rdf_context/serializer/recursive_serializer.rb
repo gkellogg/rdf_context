@@ -1,6 +1,3 @@
-require File.join(File.dirname(__FILE__), 'abstract_serializer')
-require File.join(File.dirname(__FILE__), '..', 'array_hacks')
-
 module RdfContext
   # Recursive serializer
   class RecursiveSerializer < AbstractSerializer

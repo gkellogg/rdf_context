@@ -7,8 +7,6 @@ end
 require 'date'
 require 'time'
 
-require File.join(File.dirname(__FILE__), "string_hacks")
-
 module RdfContext
   # An RDF Literal, with value, encoding and language elements.
   class Literal < Resource

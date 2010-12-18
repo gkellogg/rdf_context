@@ -1,5 +1,3 @@
-require File.join(File.dirname(__FILE__), 'abstract_serializer')
-
 module RdfContext
   # Serialize RDF graphs in NTriples format
   class NTSerializer < AbstractSerializer

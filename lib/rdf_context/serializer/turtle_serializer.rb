@@ -1,5 +1,3 @@
-require File.join(File.dirname(__FILE__), 'recursive_serializer')
-
 module RdfContext
   # Abstract serializer
   class TurtleSerializer < RecursiveSerializer

@@ -1,5 +1,3 @@
-require File.join(File.dirname(__FILE__), '..', 'uriref')
-
 module RdfContext
   # Abstract serializer
   class AbstractSerializer
