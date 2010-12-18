@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), 'abstract_serializer')
+require File.join(File.dirname(__FILE__), 'recursive_serializer')
 
 module RdfContext
   # Serialize RDF graphs in NTriples format

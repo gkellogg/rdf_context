@@ -1,6 +1,6 @@
-require File.join(File.dirname(__FILE__), 'abstract_store')
-
 module RdfContext
+  autoload :AbstractStore, File.join(File.dirname(__FILE__), 'abstract_store')
+
   # List storage, most efficient, but slow storage model. Works well for basic parse and serialize.
   class ListStore < AbstractStore
     def initialize(identifier = nil, configuration = {})

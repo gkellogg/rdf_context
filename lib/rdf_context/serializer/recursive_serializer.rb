@@ -1,6 +1,5 @@
 require File.join(File.dirname(__FILE__), 'abstract_serializer')
-require File.join(File.dirname(__FILE__), '..', 'bnode')
-require File.join(File.dirname(__FILE__), '..', 'literal')
+require File.join(File.dirname(__FILE__), '..', 'array_hacks')
 
 module RdfContext
   # Recursive serializer

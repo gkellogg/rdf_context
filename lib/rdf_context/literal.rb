@@ -4,8 +4,10 @@ begin
 rescue LoadError
 end
 
-require File.join(File.dirname(__FILE__), 'duration')
-require File.join(File.dirname(__FILE__), "resource")
+require 'date'
+require 'time'
+
+require File.join(File.dirname(__FILE__), "string_hacks")
 
 module RdfContext
   # An RDF Literal, with value, encoding and language elements.

@@ -1,5 +1,3 @@
-require File.join(File.dirname(__FILE__), 'graph')
-
 module RdfContext
   # Generic RdfContext Parser class
   class Parser

@@ -1,6 +1,6 @@
-require File.join(File.dirname(__FILE__), 'abstract_store')
-
 module RdfContext
+  autoload :AbstractStore, File.join(File.dirname(__FILE__), 'abstract_store')
+
   # An integer-key-optimized-context-aware-in-memory store.
   #
   # Uses nested dictionaries to store triples and context. Each triple

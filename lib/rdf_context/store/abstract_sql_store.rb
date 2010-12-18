@@ -1,7 +1,9 @@
-require File.join(File.dirname(__FILE__), 'abstract_store')
+require File.join(File.dirname(__FILE__), "..", "string_hacks")
 require 'digest/sha1'
 
 module RdfContext
+  autoload :AbstractStore, File.join(File.dirname(__FILE__), 'abstract_store')
+
   # SQL-92 formula-aware implementation of an RDF Store.
   # It stores it's triples in the following partitions:
   # - Asserted non rdf:type statements

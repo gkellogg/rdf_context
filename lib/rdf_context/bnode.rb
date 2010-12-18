@@ -1,5 +1,3 @@
-require File.join(File.dirname(__FILE__), "resource")
-
 module RdfContext
   # The BNode class creates RDF blank nodes.
   class BNode < Resource

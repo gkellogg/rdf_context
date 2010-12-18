@@ -1,6 +1,7 @@
 # coding: utf-8
 $:.unshift "."
 require File.join(File.dirname(__FILE__), 'spec_helper')
+require 'rdf_context/string_hacks'
 
 describe String do
   {

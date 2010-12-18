@@ -16,27 +16,57 @@ rescue LoadError
   require 'treetop'
 end
 
-Dir.glob(File.join(File.dirname(__FILE__), 'rdf_context/*.rb')).sort.each { |f| require f }
-
-# Include Storage types, but be tollerant of failure to load as dependencies might not be available
-Dir.glob(File.join(File.dirname(__FILE__), "rdf_context/store/*.rb")).each do |f|
-  begin
-    require f
-  rescue LoadError
-    puts "Error loading #{f}: #{$!}"
-  end
-end
-
-# Include Serializer types, but be tollerant of failure to load as dependencies might not be available
-Dir.glob(File.join(File.dirname(__FILE__), "rdf_context/serializer/*.rb")).each do |f|
-  begin
-    require f
-  rescue LoadError
-    puts "Error loading #{f}: #{$!}"
-  end
-end
+require 'rdf_context/string_hacks'
 
 module RdfContext
+  # Primary model classes
+  autoload :BNode,                  "rdf_context/bnode"
+  autoload :Duration,               "rdf_context/duration"
+  autoload :Literal,                "rdf_context/literal"
+  autoload :Namespace,              "rdf_context/namespace"
+  autoload :Resource,               "rdf_context/resource"
+  autoload :Triple,                 "rdf_context/triple"
+  autoload :URIRef,                 "rdf_context/uriref"
+  autoload :TermUtils,              "rdf_context/term_utils"
+  
+  # Graphs
+  autoload :Graph,                  "rdf_context/graph"
+  autoload :ConjunctiveGraph,       "rdf_context/conjunctive_graph"
+  autoload :AggregateGraph,         "rdf_context/aggregate_graph"
+  autoload :QuotedGraph,            "rdf_context/quoted_graph"
+  
+  # Stores
+  autoload :AbstractStore,          "rdf_context/store/abstract_store"
+  autoload :ActiveRecordStore,      "rdf_context/store/active_record_store"
+  autoload :ListStore,              "rdf_context/store/list_store"
+  autoload :MemoryStore,            "rdf_context/store/memory_store"
+  autoload :SQLite3Store,           "rdf_context/store/sqlite3_store"
+  
+  # Parsers
+  autoload :Parser,                 "rdf_context/parser"
+  autoload :N3Parser,               "rdf_context/n3parser"
+  autoload :RdfaParser,             "rdf_context/rdfaparser"
+  autoload :RdfXmlParser,           "rdf_context/rdfxmlparser"
+  
+  # Serializers
+  autoload :AbstractSerializer,     "rdf_context/serializer/abstract_serializer"
+  autoload :NTSerializer,           "rdf_context/serializer/nt_serializer"
+  autoload :RecursiveSerializer,    "rdf_context/serializer/recursive_serializer"
+  autoload :TurtleSerializer,       "rdf_context/serializer/turtle_serializer"
+  autoload :XmlSerializer,          "rdf_context/serializer/xml_serializer"
+  
+  # Exceptions
+  autoload :BNodeException,         "rdf_context/exceptions"
+  autoload :GraphException,         "rdf_context/exceptions"
+  autoload :InvalidNode,            "rdf_context/exceptions"
+  autoload :InvalidPredicate,       "rdf_context/exceptions"
+  autoload :ParserException,        "rdf_context/exceptions"
+  autoload :RdfException,           "rdf_context/exceptions"
+  autoload :ReadOnlyGraphException, "rdf_context/exceptions"
+  autoload :SparqlException,        "rdf_context/exceptions"
+  autoload :StoreException,         "rdf_context/exceptions"
+  autoload :TypeError,              "rdf_context/exceptions"
+  
   VERSION = File.read(File.join(File.dirname(__FILE__), "..", "VERSION")).chop  # Version in parent directory
   
   LINK_TYPES = %w(

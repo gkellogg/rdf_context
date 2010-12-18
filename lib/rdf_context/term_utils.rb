@@ -1,7 +1,3 @@
-require File.join(File.dirname(__FILE__), 'bnode')
-require File.join(File.dirname(__FILE__), 'literal')
-require File.join(File.dirname(__FILE__), 'uriref')
-
 module RdfContext
   module TermUtils
     TERM_INSTANTIATION_DICT = {

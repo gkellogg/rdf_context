@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), 'parser')
+require File.join(File.dirname(__FILE__), "nokogiri_hacks")
 require 'open-uri'
 
 module RdfContext

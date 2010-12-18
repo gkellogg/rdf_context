@@ -1,5 +1,3 @@
-require File.join(File.dirname(__FILE__), "graph")
-
 module RdfContext
   # AggregateGraph - A read-only graph composed of multiple other graphs.
   #

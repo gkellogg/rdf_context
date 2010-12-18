@@ -1,5 +1,3 @@
-require File.join(File.dirname(__FILE__), "graph")
-
 module RdfContext
   # QuotedGraph - Supports N3 Formulae.
   #

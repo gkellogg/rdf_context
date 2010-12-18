@@ -1,8 +1,8 @@
 gem 'sqlite3-ruby', "=1.2.5"  # XXX version 1.3.0 & 1.3.1 break executes with multiple arguments: http://groups.google.com/group/sqlite3-ruby/browse_frm/thread/93494ce04bc07fd5
 require 'sqlite3'
-require File.join(File.dirname(__FILE__), 'abstract_sql_store')
 
 module RdfContext
+  autoload :AbstractSQLStore, File.join(File.dirname(__FILE__), 'abstract_sql_store')
   # SQLite3 store context-ware and formula-aware implementation.
   # It stores it's triples in the following partitions:
   # - Asserted non rdf:type statements
@@ -20,7 +20,7 @@ module RdfContext
     # @option configuration [String] :connection ActiveRecord::Base.connection.raw_connection
     # @return [SQLite3Store]
     def initialize(identifier = nil, configuration = {})
-      configuration[:path] ||= File.join(Dir.getwd, "#{@internedId}.db")
+      @path = configuration[:path] ||= File.join(Dir.getwd, "#{@internedId}.db")
 
       super(identifier, configuration)
 

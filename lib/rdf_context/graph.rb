@@ -1,12 +1,4 @@
-require File.join(File.dirname(__FILE__), "resource")
-require File.join(File.dirname(__FILE__), 'namespace')
-require File.join(File.dirname(__FILE__), 'triple')
 require File.join(File.dirname(__FILE__), 'array_hacks')
-require File.join(File.dirname(__FILE__), 'store', 'list_store')
-require File.join(File.dirname(__FILE__), 'store', 'memory_store')
-require File.join(File.dirname(__FILE__), 'serializer', 'nt_serializer')
-require File.join(File.dirname(__FILE__), 'serializer', 'turtle_serializer')
-require File.join(File.dirname(__FILE__), 'serializer', 'xml_serializer')
 
 module RdfContext
   # A simple graph to hold triples.

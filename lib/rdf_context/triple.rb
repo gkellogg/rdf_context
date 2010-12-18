@@ -1,6 +1,4 @@
-require File.join(File.dirname(__FILE__), 'bnode')
-require File.join(File.dirname(__FILE__), 'literal')
-require File.join(File.dirname(__FILE__), 'uriref')
+require 'time'
 
 module RdfContext
   # An RDF Triple, or statement.
