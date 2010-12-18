@@ -37,6 +37,7 @@ module RdfContext
   
   # Stores
   autoload :AbstractStore,          "rdf_context/store/abstract_store"
+  autoload :AbstractSQLStore,       "rdf_context/store/abstract_sql_store"
   autoload :ActiveRecordStore,      "rdf_context/store/active_record_store"
   autoload :ListStore,              "rdf_context/store/list_store"
   autoload :MemoryStore,            "rdf_context/store/memory_store"

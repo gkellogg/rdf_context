@@ -16,6 +16,8 @@
 * SQLite3Store
   * Basic support for using with ActiveRecord: #initialize _configuration_ can take a _connection_ option, using ActiveRecord::Base.connection.raw_connection
   * If result set is returned as a hash, change back to an array (needed, as rails sets results_as_hash attribute on DB)
+* Added ActiveRecordStore
+  * Uses ActiveRecord connection to store graph information, not an ActiveRecord::Base model
 
 === 0.5.9.1
 * Fix minor graph property caching bug relating to manipulation of sequences.
@@ -156,7 +158,7 @@
 * Add Graph#contents as alias to store
 * Add ConjunctiveGraph#triples to return all triples from store, not just default context
 * Add Graph#nsbinding to retreive Store#nsbinding
-* Fix numerious SQLite3Store and AbstractSQLStore bugs. Add round-trip tests to Graph spec.
+* Fix numerous SQLite3Store and AbstractSQLStore bugs. Add round-trip tests to Graph spec.
 
 === 0.4.4
 * Namespace usage cleanup
