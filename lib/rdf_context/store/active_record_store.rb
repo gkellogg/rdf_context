@@ -218,7 +218,7 @@ module RdfContext
         puts "executeSQL no block given" if ::RdfContext::debug?
         conn.select_rows(qStr)
       end
-    rescue SQLite3::SQLException => e
+    rescue StandardError => e
       puts "SQL Exception (ignored): #{e.message}" if ::RdfContext::debug?
     end
 
