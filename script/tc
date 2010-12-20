@@ -2,7 +2,7 @@
 require 'rubygems'
 $:.unshift(File.join(File.expand_path(File.dirname(__FILE__)), "..", 'lib'))
 require 'rdf_context'
-require 'spec/rdfa_helper'
+require File.join(File.expand_path(File.dirname(__FILE__)), "..", "spec", "rdfa_helper")
 require 'getoptlong'
 
 def run_tc(tc)
@@ -48,7 +48,7 @@ test_cases = RdfaHelper::TestCase.test_cases(suite)
 
 ::RdfContext::debug = debug
 
-puts test_cases.length
+puts "#{suite}: #{test_cases.length} test cases"
 
 test_cases.each do |tc|
   next unless ARGV.empty? || ARGV.any? {|n| tc.name.match(/#{n}/)}
