@@ -283,9 +283,10 @@ module RdfContext
               
               ::RdfContext::debug, $verbose = false, false
               p_graph = Parser.parse(prof_body, profile, parse_options)
-              ttl = p_graph.serialize(:format => :ttl) if @debug || ::RdfContext::debug?
               ::RdfContext::debug, $verbose = old_debug, old_verbose
-              add_debug(element, ttl) if ttl
+              add_debug(element, "process_profile: extracted #{p_graph.size} statements")
+              #ttl = p_graph.serialize(:format => :ttl) if @debug || ::RdfContext::debug?
+              #add_debug(element, ttl) if ttl
             end
 
             add_debug(element, "process_profile: extract mappings from <#{profile}>")
