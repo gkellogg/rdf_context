@@ -129,7 +129,7 @@ module RdfContext
       when /\.(nt|n3|txt)$/    then :n3
       else
         # Got to look into the file to see
-        if stream.is_a?(IO) || stream.is_a?(StringIO)
+        if stream.respond_to?(:read)
           stream.rewind
           string = stream.read(1000)
           stream.rewind
@@ -143,6 +143,7 @@ module RdfContext
         else                 :n3
         end
       end
+      format
     end
 
     protected
