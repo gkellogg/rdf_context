@@ -9,11 +9,11 @@ A set of compliant RDF parsers:
 
 Multiple data-stores may be attached to a Graph, including Memory, List, ActiveRecord and SQLite3
 
-== DESCRIPTION:
+== DESCRIPTION
 
 RdfContext is an RDF library for Ruby.
 
-== FEATURES:
+== FEATURES
 RdfContext parses RDF/XML, RDFa and N3-rdf into a Graph object. It also serializes RDF/XML and N-Triples from the Graph.
 
 * Fully compliant RDF/XML parser.
@@ -28,7 +28,7 @@ RdfContext is based, in part, on Tom Morris' Reddy gem.
 
 Install with 'gem install rdf_context'
 
-== Usage:
+== Usage
 === Graphs
 Instantiate a graph using Graph.new. A Graph may take an :identifier (defaults to a BNode) and
 a :store (defaults to :list_store)
@@ -168,7 +168,7 @@ An RDF store could provide a standard set of interfaces for the manipulation, ma
 These interfaces work on contexts and formulae (for stores that are formula-aware) interchangeably.
 *contexts*:: Closure or list over all contexts in the graph. If triple is specified, it returns all contexts the triple is in.
 
-== Dependencies:
+== Dependencies
 
 * Addressable
 * Treetop
@@ -180,11 +180,11 @@ These interfaces work on contexts and formulae (for stores that are formula-awar
 * Redland/Rasqal
 * ActiveSupport
 
-== INSTALL:
+== INSTALL
 
 * sudo gem install rdf_context
 
-== TODO:
+== TODO
 * Testing
   * RDFa updates for new tests and non XHTML representations.
 * Graphs
@@ -200,7 +200,7 @@ These interfaces work on contexts and formulae (for stores that are formula-awar
 * RDoc[http://rdoc.info/projects/gkellogg/rdf_context]
 * History[http://github.com/gkellogg/rdf_context/blob/master/History.txt]
 
-== LICENSE:
+== LICENSE
 
 (The MIT License)
 
