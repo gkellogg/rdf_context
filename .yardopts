@@ -1,4 +1,4 @@
---title "RDF::RDFa - XHTML+RDFa Support for RDF.rb"
+--title "RdfContext is an RDF library for Ruby"
 --output-dir doc/yard
 --protected
 --no-private
@@ -6,5 +6,6 @@
 --markup rdoc
 --readme README.rdoc
 -
+README.rdoc
 History.rdoc
 VERSION

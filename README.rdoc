@@ -3,11 +3,11 @@
 Context-sensitive RDF Graphs, including a ConjunctiveGraph.
 
 A set of compliant RDF parsers:
-* N3-rdf
+* Notation3
 * RDF/XML
 * RDFa
 
-Multiple data-stores may be attached to a Graph, including Memory, List and SQLite3
+Multiple data-stores may be attached to a Graph, including Memory, List, ActiveRecord and SQLite3
 
 == DESCRIPTION:
 
@@ -18,10 +18,10 @@ RdfContext parses RDF/XML, RDFa and N3-rdf into a Graph object. It also serializ
 
 * Fully compliant RDF/XML parser.
 * Fully compliant XHTML/RDFa 1.0 parser.
-* Fully compliant N3-rdf parser (N3-rdf level)
+* Fully compliant Notation3 parser (N3-rdf level)
 * Turtle, N-Triples and RDF/XML serializer
 * RDFa tests use SPARQL for most tests due to Rasqal limitations. Other tests compare directly against N-triples.
-* Graph serializes into RDF/XML and N-Triples.
+* Graph serializes into RDF/XML, Turtle and N-Triples.
 * ConjunctiveGraph, named Graphs and contextual storage modules.
 
 RdfContext is based, in part, on Tom Morris' Reddy gem.
@@ -230,7 +230,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 == FEEDBACK
 
 * gregg@kellogg-assoc.com
-* gemcutter.org/rdf_context
-* github.com/gkellogg/rdf_context
-* gkellogg.lighthouseapp.com for bug reports
+* http://rubygems.org/rdf_context
+* http://github.com/gkellogg/rdf_context
+* http://rdoc.info/github/gkellogg/rdf_context
 * public-rdf-ruby mailing list on w3.org

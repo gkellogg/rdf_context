@@ -8,13 +8,12 @@ begin
     gemspec.name = "rdf_context"
     gemspec.summary = "RdfContext is an RDF library for Ruby supporting contextual graphs, multiple datastores and compliant RDF/XML, RDFa and N3 parsers."
     gemspec.description = <<-DESCRIPTION
-    RdfContext parses RDF/XML, RDFa and N3-rdf into a Graph object. It also serializes RDF/XML and N-Triples from the Graph.
+    RdfContext parses RDF/XML, RDFa and N3 into a Graph object. It also serializes RDF/XML, Turtle and N-Triples from the Graph.
 
       * Fully compliant RDF/XML parser.
       * Fully compliant XHTML/RDFa 1.0 parser.
-      * N3-rdf parser
-      * N-Triples and RDF/XML serializer
-      * Graph serializes into RDF/XML and N-Triples.
+      * Notation3 parser (N3-rdf level)
+      * N-Triples, Turtle and RDF/XML serializer
       * ConjunctiveGraph, named Graphs and contextual storage modules.
     
     Install with 'gem install rdf_context'
@@ -27,7 +26,7 @@ begin
     gemspec.add_dependency('nokogiri', '>= 1.4.3')
     gemspec.add_dependency('builder', '>= 2.1.2')
     gemspec.add_development_dependency('rspec', '>= 2.1.0')
-    gemspec.add_development_dependency('activesupport', '>= 2.3.0')
+    gemspec.add_development_dependency('activesupport', '~> 2.3.8')
     gemspec.add_development_dependency('yard')
     gemspec.extra_rdoc_files     = %w(README.rdoc History.txt)
   end
@@ -55,8 +54,8 @@ RSpec::Core::RakeTask.new("spec:rcov") do |spec|
 end
 
 desc "Generate HTML report specs"
-RSpec::Core::RakeTask.new("spec") do |spec|
-  spec.rspec_opts = ["--format", "html:doc/spec.html"]
+RSpec::Core::RakeTask.new("doc:spec") do |spec|
+  spec.rspec_opts = ["--format", "html", "-o", "doc/spec.html"]
 end
 
 task :spec => :check_dependencies
