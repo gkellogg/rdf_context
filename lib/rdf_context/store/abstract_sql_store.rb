@@ -691,8 +691,8 @@ module RdfContext
         normalizeTerm(triple.object),
         normalizeTerm(context),
         triplePattern,
-        (triple.object.is_a?(Literal) ? triple.object.lang : NULL),
-        (triple.object.is_a?(Literal) ? triple.object.encoding.value.to_s : NULL),
+        (triple.object.is_a?(Literal) && triple.object.lang ? triple.object.lang.to_s : nil),
+        (triple.object.is_a?(Literal) && triple.object.encoding ? triple.object.encoding.value.to_s : nil),
       ]
     end
     
@@ -709,8 +709,8 @@ module RdfContext
           normalizeTerm(triple.object),
           normalizeTerm(context),
           triplePattern,
-          (triple.object.is_a?(Literal) ? triple.object.lang : NULL),
-          (triple.object.is_a?(Literal) ? triple.object.encoding.value.to_s : NULL),
+          (triple.object.is_a?(Literal) && triple.object.lang ? triple.object.lang.to_s : nil),
+          (triple.object.is_a?(Literal) && triple.object.encoding ? triple.object.encoding.value.to_s : nil),
         ]
       else
         [
