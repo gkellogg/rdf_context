@@ -1,13 +1,8 @@
 # coding: utf-8
-begin
-  require 'rspec'
-  require 'active_support'
-rescue LoadError
-  require 'rubygems' unless ENV['NO_RUBYGEMS']
-  require 'rspec'
-  gem 'activesupport'
-  require 'active_support'
-end
+require 'rubygems' unless ENV['NO_RUBYGEMS']
+require 'rspec'
+gem 'activesupport', "~> 2.3.8"
+require 'active_support'
 
 begin
   require 'rdf/redland'

@@ -1,6 +1,10 @@
 $:.unshift "."
+gem "activerecord", "~> 2.3.8"
+require 'active_record'
+
 require File.join(File.dirname(__FILE__), 'spec_helper')
 require File.join(File.dirname(__FILE__), 'store_helper')
+
 
 describe ActiveRecordStore do
   before(:all) do

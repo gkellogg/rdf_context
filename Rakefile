@@ -27,6 +27,7 @@ begin
     gemspec.add_dependency('builder', '>= 2.1.2')
     gemspec.add_development_dependency('rspec', '>= 2.1.0')
     gemspec.add_development_dependency('activesupport', '~> 2.3.8')
+    gemspec.add_development_dependency('activerecord', '~> 2.3.8')
     gemspec.add_development_dependency('yard')
     gemspec.extra_rdoc_files     = %w(README.rdoc History.txt)
   end

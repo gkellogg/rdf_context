@@ -1,3 +1,7 @@
+=== 0.5.10.1
+* AbstractSQLStore was incorrectly putting Literal::Language representation rather than value in database.
+* Don't include ActiveRecordStore unless ActiveRecord::VERSION::MAJOR == 2
+
 === 0.5.10
 * N3 Parser
   * Allow mixed case literal languages.
