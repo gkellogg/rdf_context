@@ -450,7 +450,7 @@ module RdfContext
         :base => xml_base,
         :property => property,
         :typeof => typeof,
-        :daetatype => datatype,
+        :datatype => datatype,
         :rel => rel,
         :rev => rev,
         :profiles => (profiles.empty? ? nil : profiles),
