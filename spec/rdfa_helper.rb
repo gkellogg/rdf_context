@@ -230,7 +230,12 @@ end
 module OpenURI
   #alias_method :open_uri_orig, :open_uri
   def self.open_uri(uri)
+    uri = Addressable::URI.parse(uri).normalize.to_s
     case uri
+    when %r(http://rdfa.digitalbazaar.com/test-suite/profiles/(.*)$)
+      file = File.join(File.expand_path(File.dirname(__FILE__)), 'rdfa-test-suite', 'profiles', $1)
+      #puts "file: #{file}"
+      File.open(file)
     when %r(http://rdfa.digitalbazaar.com/test-suite/test-cases/\w+)
       file = uri.to_s.sub(%r(http://rdfa.digitalbazaar.com/test-suite/test-cases/\w+),
         File.join(File.expand_path(File.dirname(__FILE__)), 'rdfa-test-suite', 'tests'))

@@ -1,6 +1,5 @@
 === 0.5.11
 * AbstractSQLStore was incorrectly putting Literal::Language representation rather than value in database.
-* Don't include ActiveRecordStore unless ActiveRecord::VERSION::MAJOR == 2
 * Changed Graph#eql? and Graph#== to do simple equality check.
 * Added Graph#isomorphic? which does more exhaustive equivalence check.
 * Fixed bug in MemoryStore where a frozen resource could be returned.
