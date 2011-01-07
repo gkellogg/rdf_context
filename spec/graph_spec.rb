@@ -8,7 +8,7 @@ describe Graph do
     @bn_ctx = {}
   end
   
-  subject { Graph.new(:store => MemoryStore.new) }
+  subject { Graph.new(:store => ListStore.new) }
   it "should allow you to add one or more triples" do
     lambda do
       subject.add_triple(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new)
@@ -111,7 +111,7 @@ describe Graph do
   describe "with named store" do
     before(:all) do
       @identifier = URIRef.new("http://foo.bar")
-      @store = MemoryStore.new(:identifier => @identifier)
+      @store = ListStore.new(:identifier => @identifier)
     end
     
     subject {
@@ -138,7 +138,7 @@ describe Graph do
     subject {
       dc = Namespace.new("http://purl.org/dc/terms/", "dc")
       xhtml = Namespace.new("http://www.w3.org/1999/xhtml", "")
-      g = Graph.new(:store => MemoryStore.new)
+      g = Graph.new(:store => ListStore.new)
       g << Triple.new(
         URIRef.new("http://www.w3.org/2006/07/SWD/RDFa/testsuite/xhtml1-testcases/0011.xhtml"),
         URIRef.new("http://purl.org/dc/terms/title"),
@@ -171,7 +171,7 @@ HERE
   
   describe "with bnodes" do
     subject {
-      g = Graph.new(:store => MemoryStore.new)
+      g = Graph.new(:store => ListStore.new)
       a = BNode.new("a")
       b = BNode.new("b")
       
@@ -219,7 +219,7 @@ HERE
   end
   
   describe "with namespaces" do
-    subject { Graph.new(:store => MemoryStore.new) }
+    subject { Graph.new(:store => ListStore.new) }
     
     it "should use namespace with trailing slash" do
       ns = Namespace.new("http://www.example.com/ontologies/test/", "test")
@@ -245,7 +245,7 @@ HERE
   
   describe "with triples" do
     subject {
-      g = Graph.new(:store => MemoryStore.new)
+      g = Graph.new(:store => ListStore.new)
       g.add_triple(@ex.john, @foaf.knows, @ex.jane)
       g.add_triple(@ex.john, @foaf.knows, @ex.rick)
       g.add_triple(@ex.jane, @foaf.knows, @ex.rick)
@@ -262,7 +262,9 @@ HERE
     end
   
     it "should return unique subjects" do
-      subject.subjects.should == [@ex.john.uri.to_s, @ex.jane.uri.to_s]
+      subject.subjects.length.should == 2
+      subject.subjects.should include(@ex.john.uri.to_s)
+      subject.subjects.should include(@ex.jane.uri.to_s)
     end
     
     it "should return unique predicates" do
@@ -270,7 +272,9 @@ HERE
     end
     
     it "should return unique objects" do
-      subject.objects.should == [@ex.jane.uri.to_s, @ex.rick.uri.to_s]
+      subject.objects.length.should == 2
+      subject.objects.should include(@ex.jane.uri.to_s)
+      subject.objects.should include(@ex.rick.uri.to_s)
     end
     
     it "should allow you to select resources" do
@@ -429,7 +433,7 @@ HERE
 
     describe "rdf:_n sequences" do
       subject {
-        g = Graph.new(:store => MemoryStore.new)
+        g = Graph.new(:store => ListStore.new)
         g.add_triple(@ex.Seq, RDF_TYPE, RDF_NS.Seq)
         g.add_triple(@ex.Seq, RDF_NS._1, @ex.john)
         g.add_triple(@ex.Seq, RDF_NS._2, @ex.jane)
@@ -446,7 +450,7 @@ HERE
     describe "rdf:first/rdf:rest sequences" do
       it "should return object list" do
         a, b = BNode.new("a"), BNode.new("b"), BNode.new("c")
-        g = Graph.new(:store => MemoryStore.new)
+        g = Graph.new(:store => ListStore.new)
         g.add_triple(@ex.List, RDF_NS.first, @ex.john)
         g.add_triple(@ex.List, RDF_NS.rest, a)
         g.add_triple(a, RDF_NS.first, @ex.jane)
@@ -460,25 +464,25 @@ HERE
       end
       
       it "should generate a list of resources" do
-        g = Graph.new(:store => MemoryStore.new)
+        g = Graph.new(:store => ListStore.new)
         g.add_seq(@ex.List, RDF_NS.first, [@ex.john, @ex.jane, @ex.rick])
         g.seq(@ex.List).should == [@ex.john, @ex.jane, @ex.rick]
       end
       
       it "should generate an empty list" do
-        g = Graph.new(:store => MemoryStore.new)
+        g = Graph.new(:store => ListStore.new)
         g.add_seq(@ex.List, RDF_NS.first, [])
         g.seq(@ex.List).should == []
       end
       
       it "should return a list with a predicate" do
-        g = Graph.new(:store => MemoryStore.new)
+        g = Graph.new(:store => ListStore.new)
         g.add_seq(@ex.List, @ex.includes, [@ex.john, @ex.jane, @ex.rick])
         g.seq(@ex.List, @ex.includes).should == [@ex.john, @ex.jane, @ex.rick]
       end
 
       it "should add a list with a predicate" do
-        g = Graph.new(:store => MemoryStore.new)
+        g = Graph.new(:store => ListStore.new)
         g.add_seq(@ex.List, @ex.includes, [@ex.john, @ex.jane, @ex.rick])
         l = g.properties(@ex.List)[@ex.includes.to_s].first
         l.should be_a(BNode)
@@ -486,7 +490,7 @@ HERE
       end
       
       it "should remove existing sequence when adding entry to sequence" do
-        g = Graph.new(:store => MemoryStore.new)
+        g = Graph.new(:store => ListStore.new)
         g.add_seq(@ex.List, @ex.includes, [@ex.john, @ex.jane, @ex.rick])
         g.add_seq(@ex.List, @ex.includes, [@ex.john, @ex.jane, @ex.rick, @ex.julie])
         l = g.properties(@ex.List)[@ex.includes.to_s].first
@@ -501,7 +505,7 @@ HERE
   describe "which are merged" do
     it "should be able to integrate another graph" do
       subject.add_triple(BNode.new, URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new)
-      g = Graph.new(:store => MemoryStore.new)
+      g = Graph.new(:store => ListStore.new)
       g.merge!(subject)
       g.size.should == 1
     end
@@ -520,7 +524,7 @@ HERE
     # of them, before merging the documents.
     it "should remap bnodes to avoid duplicate bnode identifiers" do
       subject.add_triple(BNode.new("a1", @bn_ctx), URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new("a2", @bn_ctx))
-      g = Graph.new(:store => MemoryStore.new)
+      g = Graph.new(:store => ListStore.new)
       g.add_triple(BNode.new("a1", @bn_ctx), URIRef.new("http://xmlns.com/foaf/0.1/knows"), BNode.new("a2", @bn_ctx))
       g.merge!(subject)
       g.size.should == 2
@@ -534,7 +538,7 @@ HERE
 
     it "should remove duplicate triples" do
       subject.add_triple(@ex.a, URIRef.new("http://xmlns.com/foaf/0.1/knows"), @ex.b)
-      g = Graph.new(:store => MemoryStore.new)
+      g = Graph.new(:store => ListStore.new)
       g.add_triple(@ex.a, URIRef.new("http://xmlns.com/foaf/0.1/knows"), @ex.b)
       g.merge!(subject)
       g.size.should == 1
