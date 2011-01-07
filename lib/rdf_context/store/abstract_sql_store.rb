@@ -72,6 +72,14 @@ module RdfContext
       @db.close
     end
     
+    # Destroy store or context
+    # If context is specified remove that context, otherwise, remove all triples
+    #
+    # @option configuration [Graph] :context  Remove the specified context
+    def destroy(configuration = {})
+      remove(Triple.new(nil, nil, nil), configuration[:context])
+    end
+
     # Add a triple to the store
     # Add to default context, if context is nil
     #

@@ -142,13 +142,6 @@ module RdfContext
       executeSQL("DROP TABLE #{asserted_table}")
     end
     
-    # Destroy database
-    #
-    # @option options[String] :path Path to database file defaults to a file in the current directory based on a hash of the store identifier
-    def destroy(options = {})
-      File.delete(@path)
-    end
-
     protected
 
     # Where clase utility functions

@@ -62,6 +62,12 @@ module RdfContext
     # @raise [StoreException] Not Implemented
     # @return [Boolean]
     def contains?(triple, context = nil); raise StoreException, "not implemented"; end
+    
+    # Return contexts in the store (optionally matching triple), or empty if not context aware
+    # @return [Array<Graph>]
+    def contexts(triple = nil)
+      return []
+    end
 
     # Default (sub-optimal) implemenations of interfaces
     def inspect

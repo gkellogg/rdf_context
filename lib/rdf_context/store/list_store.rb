@@ -16,6 +16,11 @@ module RdfContext
       "ListStore[id=#{identifier}, size=#{@triples.length}]"
     end
     
+    # Destroy the store, as it can contain only one context
+    def destroy(configuration = {})
+      @triples = []
+    end
+    
     # Add triple to store
     # @param [Triple] triple
     # @param [Graph] context (nil) ignored

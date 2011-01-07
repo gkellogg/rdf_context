@@ -9,24 +9,21 @@ shared_examples_for "Store" do
     subject.should be_a(AbstractStore)
   end
 
-  it "should allow you to add a triple" do
-    subject.add(Triple.new(@ex.a, @ex.b, @ex.c), nil)
-    subject.add(Triple.new(@ex.a, @ex.b, @ex.d), nil)
-    subject.size.should == 2
+  describe "#add" do
+    it "adds URIRefs" do
+      subject.add(Triple.new(@ex.a, @ex.b, @ex.c), nil)
+      subject.add(Triple.new(@ex.a, @ex.b, @ex.d), nil)
+      subject.size.should == 2
+    end
+  
+    it "adds BNodes" do
+      subject.add(Triple.new(BNode.new, @ex.b, @ex.c), nil)
+      subject.add(Triple.new(@ex.a, BNode.new, @ex.c), nil)
+      subject.add(Triple.new(@ex.a, @ex.b, BNode.new), nil)
+      subject.size.should == 3
+    end
   end
   
-  it "should allow you to add triples with bnodes" do
-    subject.add(Triple.new(BNode.new, @ex.b, @ex.c), nil)
-    subject.add(Triple.new(@ex.a, BNode.new, @ex.c), nil)
-    subject.add(Triple.new(@ex.a, @ex.b, BNode.new), nil)
-    subject.size.should == 3
-  end
-  
-  it "should allow you to create and bind Namespace objects" do
-    foaf = Namespace.new("http://xmlns.com/foaf/0.1/", "foaf")
-    subject.bind(foaf).should == foaf
-  end
-
   it "should retrieve identifier" do
     subject.identifier.should == @identifier
   end
@@ -36,6 +33,11 @@ shared_examples_for "Store" do
       subject.bind(@ex)
     end
     
+    it "should allow you to create and bind Namespace objects" do
+      foaf = Namespace.new("http://xmlns.com/foaf/0.1/", "foaf")
+      subject.bind(foaf).should == foaf
+    end
+
     it "should return namespace by prefix" do
       subject.namespace(@ex.prefix).should == @ex
     end
@@ -138,6 +140,11 @@ shared_examples_for "Store" do
     it "should detect included triple" do
       t = subject.item(0)
       subject.contains?(t).should be_true
+    end
+    
+    it "destroys triples" do
+      subject.destroy
+      subject.size.should == 0
     end
   end
 
@@ -266,8 +273,40 @@ shared_examples_for "Context Aware Store" do
         found += 1
       end
       found.should == 1
+      subject.contexts.length.should == 1
+      subject.contexts.should include(@ctx2)
     end
     
+    it "should destroy from specific context" do
+      subject.add(@triple, @ctx1)
+      subject.add(@triple, @ctx2)
+      subject.destroy(:context => @ctx1)
+      subject.triples(@triple, @ctx1).length.should == 0
+      subject.triples(@triple, @ctx2).length.should == 1
+      found = 0
+      subject.triples(@triple, nil) do |triple, context|
+        found += 1
+      end
+      found.should == 1
+      subject.contexts.length.should == 1
+      subject.contexts.should include(@ctx2)
+    end
+
+    it "should remove context when graph destroyed" do
+      subject.add(@triple, @ctx1)
+      subject.add(@triple, @ctx2)
+      @ctx1.destroy
+      subject.triples(@triple, @ctx1).length.should == 0
+      subject.triples(@triple, @ctx2).length.should == 1
+      found = 0
+      subject.triples(@triple, nil) do |triple, context|
+        found += 1
+      end
+      found.should == 1
+      subject.contexts.length.should == 1
+      subject.contexts.should include(@ctx2)
+    end
+
     it "should remove from multiple contexts" do
       subject.add(@triple, @ctx1)
       subject.add(@triple, @ctx2)
@@ -279,6 +318,7 @@ shared_examples_for "Context Aware Store" do
         found += 1
       end
       found.should == 0
+      subject.contexts.length.should == 0
     end
 
     it "should remove context" do
@@ -293,5 +333,19 @@ shared_examples_for "Context Aware Store" do
       subject.triples(@triple, @ctx2).length.should == 0
     end
 
+    it "should return new context after equivalent context destroyed" do
+      ctx1 = Graph.new(:identifier => URIRef.new("http://new1.ctx"), :store => subject)
+      subject.add(@triple, ctx1)
+      subject.contexts.length.should == 1
+      subject.contexts.should include(ctx1)
+      
+      ctx1.destroy
+      subject.contexts.should be_empty
+
+      ctx1 = Graph.new(:identifier => URIRef.new("http://new1.ctx"), :store => subject)
+      subject.add(@triple, ctx1)
+      subject.contexts.length.should == 1
+      subject.contexts.should include(ctx1)
+    end
   end
 end

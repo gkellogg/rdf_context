@@ -26,9 +26,9 @@ describe SQLite3Store do
   it_should_behave_like "Store"
   it_should_behave_like "Context Aware Store"
 
-  it "should destroy DB file" do
+  it "should not destroy DB file" do
     subject.destroy
-    File.exists?(@dbfile).should be_false
+    File.exists?(@dbfile).should be_true
   end
 
   it "should close db" do
