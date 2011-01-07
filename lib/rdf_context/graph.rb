@@ -64,12 +64,7 @@ module RdfContext
     # If configuration is nil, remove the graph context
     # @return [void]
     def destroy(configuration = nil)
-      if configuration
-        @store.destroy(configuration)
-      else
-        @store.remove(Triple.new(nil, nil, nil), self)
-      end
-      
+      @store.destroy(configuration ? configuration : {:context => self})
       self.freeze
     end
 
@@ -488,7 +483,19 @@ module RdfContext
       end
     end
     
-    # Two graphs are equal if each is an instance of the other, considering BNode equivalence.
+    # Two graphs are equal (==) if each other if they are both graphs have the same identifiers and the same size.
+    #
+    # If each graph has a BNode identifier, they are considered to be equal if the have the same size
+    #
+    # @param [Graph] graph
+    # @return [Boolean]
+    def ==(other)
+      #puts "== size #{self.size} vs #{other.size}" if ::RdfContext::debug?
+      other.is_a?(Graph) && self.size == other.size &&
+        ((other.identifier.is_a?(BNode) && identifier.is_a?(BNode)) || (other.identifier.to_s == identifier.to_s))
+    end
+
+    # Two graphs are isomorphic if each is an instance of the other, considering BNode equivalence.
     # This may be done by creating a new graph an substituting each permutation of BNode identifiers
     # from self to other until every permutation is exhausted, or a textual equivalence is found
     # after sorting each graph.
@@ -496,20 +503,18 @@ module RdfContext
     # We just follow Python RDFlib's lead and do a simple comparison
     # @param [Graph] graph
     # @return [Boolean]
-    def eql?(other)
-      #puts "eql? size #{self.size} vs #{other.size}" if ::RdfContext::debug?
-      return false if !other.is_a?(Graph) || self.size != other.size
-      return false unless other.identifier.to_s == identifier.to_s unless other.identifier.is_a?(BNode) && identifier.is_a?(BNode)
+    def isomorphic?(other)
+      return false unless self == other
       
       bn_self = bnodes.values.sort
       bn_other = other.bnodes.values.sort
-      puts "eql? bnodes '#{bn_self.to_sentence}' vs '#{bn_other.to_sentence}'" if ::RdfContext::debug?
+      puts "isomorphic? bnodes '#{bn_self.to_sentence}' vs '#{bn_other.to_sentence}'" if ::RdfContext::debug?
       return false unless bn_self == bn_other
       
       # Check each triple to see if it's contained in the other graph
       triples do |t, ctx|
         next if t.subject.is_a?(BNode) || t.predicate.is_a?(BNode) || t.object.is_a?(BNode)
-        puts "eql? contains '#{t.to_ntriples}: #{other.contains?(t)}'" if ::RdfContext::debug?
+        puts "isomorphic? contains '#{t.to_ntriples}: #{other.contains?(t)}'" if ::RdfContext::debug?
         return false unless other.contains?(t)
       end
       
@@ -525,7 +530,7 @@ module RdfContext
             predicate = bn_map[predicate] if bn_map.has_key?(predicate)
             object = bn_map[object] if bn_map.has_key?(object)
             tn = Triple.new(subject, predicate, object)
-            puts "  eql? contains '#{tn.inspect}': #{other.contains?(tn)}" if ::RdfContext::debug?
+            puts "  isomorphic? contains '#{tn.inspect}': #{other.contains?(tn)}" if ::RdfContext::debug?
             next if other.contains?(tn)
           
             puts "  no, next permutation" if ::RdfContext::debug?
@@ -541,8 +546,6 @@ module RdfContext
       # Exhausted all permutations, unless there were no bnodes
       bn_self.length == 0
     end
-
-    alias_method :==, :eql?
     
     # Parse source into Graph.
     #

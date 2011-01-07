@@ -64,7 +64,7 @@ module Matchers
 
     def matches?(actual)
       @actual = normalize(actual)
-      @actual == @expected
+      @actual.is_a?(Graph) ? @actual.isomorphic?(@expected) : @actual == @expected
     end
 
     def failure_message_for_should
