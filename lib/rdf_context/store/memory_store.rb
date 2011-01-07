@@ -36,22 +36,7 @@ module RdfContext
     # @return [MemoryStore]
     def initialize(identifier = nil, configuration = {})
       super
-      # indexed by [context][subject][predicate][object] = 1
-      @cspo = {}
-      # indexed by [context][predicate][object][subject] = 1
-      @cpos = {}
-      # indexed by [context][object][subject][predicate] = 1
-      @cosp = {}
-      # indexed by [subject][predicate][object] = [context]
-      @spo = {}
-      # indexed by [predicate][object][subject] = [context]
-      @pos = {}
-      # indexed by [object][subject][predicate] = [context]
-      @osp = {}
-      # indexes integer keys to identifiers
-      @forward = {}
-      # reverse index of forward
-      @reverse = {}
+      destroy({})
     end
   
     def inspect
@@ -70,6 +55,39 @@ module RdfContext
         "  reverse: #{@reverse.inspect}\n"
     end
   
+    # Destroy store or context
+    # If context is specified remove that context, otherwise, re-initialize the store
+    #
+    # @option configuration [Graph] :context  Remove the specified context
+    def destroy(configuration = {})
+      if ctx = configuration[:context]
+        remove(Triple.new(nil, nil, nil), ctx)
+        
+        ci = resource_to_int(ctx)
+        if ci
+          @reverse.delete(ctx.hash)
+          @forward.delete(ci)
+        end
+      else
+        # indexed by [context][subject][predicate][object] = 1
+        @cspo = {}
+        # indexed by [context][predicate][object][subject] = 1
+        @cpos = {}
+        # indexed by [context][object][subject][predicate] = 1
+        @cosp = {}
+        # indexed by [subject][predicate][object] = [context]
+        @spo = {}
+        # indexed by [predicate][object][subject] = [context]
+        @pos = {}
+        # indexed by [object][subject][predicate] = [context]
+        @osp = {}
+        # indexes integer keys to identifiers
+        @forward = {}
+        # reverse index of forward
+        @reverse = {}
+      end
+    end
+    
     # Add a triple to the store
     # Add to default context, if context is nil
     #
@@ -145,7 +163,7 @@ module RdfContext
         osp = @osp
       else
         ci = resource_to_int(context)
-        return [] unless ci
+        return [] if context.frozen? || !ci
         spo = @cspo[ci]
         pos = @cpos[ci]
         osp = @cosp[ci]
@@ -354,6 +372,8 @@ module RdfContext
     def triple_to_int(triple)
       [@reverse[triple.subject.hash], @reverse[triple.predicate.hash], @reverse[triple.object.hash]]
     end
-    def resource_to_int(resource); @reverse[resource.hash]; end
+    def resource_to_int(resource);
+      @reverse[resource.hash]
+    end
   end
 end
